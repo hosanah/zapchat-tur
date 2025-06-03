@@ -9,6 +9,7 @@ const Customer = require('./Customer');
 const Trip = require('./Trip');
 const Booking = require('./Booking');
 const Event = require('./Event');
+const Sale = require('./Sale');
 
 // Inicializar modelos
 const CompanyModel = Company(sequelize);
@@ -19,6 +20,7 @@ const CustomerModel = Customer(sequelize);
 const TripModel = Trip(sequelize);
 const BookingModel = Booking(sequelize);
 const EventModel = Event(sequelize);
+const SaleModel = Sale(sequelize);
 
 // Definir associações
 // Company associations
@@ -52,6 +54,11 @@ CompanyModel.hasMany(EventModel, {
   as: 'events'
 });
 
+CompanyModel.hasMany(SaleModel, {
+  foreignKey: 'company_id',
+  as: 'sales'
+});
+
 // User associations
 UserModel.belongsTo(CompanyModel, {
   foreignKey: 'company_id',
@@ -61,6 +68,11 @@ UserModel.belongsTo(CompanyModel, {
 UserModel.hasMany(EventModel, {
   foreignKey: 'created_by',
   as: 'created_events'
+});
+
+UserModel.hasMany(SaleModel, {
+  foreignKey: 'created_by',
+  as: 'created_sales'
 });
 
 // Vehicle associations
@@ -94,6 +106,11 @@ CustomerModel.belongsTo(CompanyModel, {
 CustomerModel.hasMany(BookingModel, {
   foreignKey: 'customer_id',
   as: 'bookings'
+});
+
+CustomerModel.hasMany(SaleModel, {
+  foreignKey: 'customer_id',
+  as: 'sales'
 });
 
 // Trip associations
@@ -149,6 +166,32 @@ EventModel.belongsTo(UserModel, {
   as: 'creator'
 });
 
+EventModel.hasMany(SaleModel, {
+  foreignKey: 'event_id',
+  as: 'sales'
+});
+
+// Sale associations
+SaleModel.belongsTo(CompanyModel, {
+  foreignKey: 'company_id',
+  as: 'company'
+});
+
+SaleModel.belongsTo(CustomerModel, {
+  foreignKey: 'customer_id',
+  as: 'customer'
+});
+
+SaleModel.belongsTo(EventModel, {
+  foreignKey: 'event_id',
+  as: 'event'
+});
+
+SaleModel.belongsTo(UserModel, {
+  foreignKey: 'created_by',
+  as: 'creator'
+});
+
 module.exports = {
   sequelize,
   Company: CompanyModel,
@@ -158,6 +201,7 @@ module.exports = {
   Customer: CustomerModel,
   Trip: TripModel,
   Booking: BookingModel,
-  Event: EventModel
+  Event: EventModel,
+  Sale: SaleModel
 };
 

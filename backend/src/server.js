@@ -19,6 +19,7 @@ const customerRoutes = require('./routes/customers');
 const tripRoutes = require('./routes/trips');
 const bookingRoutes = require('./routes/bookings');
 const eventRoutes = require('./routes/events');
+const saleRoutes = require('./routes/sales');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -71,6 +72,7 @@ app.use('/api/customers', customerRoutes);
 app.use('/api/trips', tripRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/events', eventRoutes);
+app.use('/api/sales', saleRoutes);
 
 // Middleware de tratamento de erros
 app.use(notFound);
