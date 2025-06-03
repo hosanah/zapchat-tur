@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const EventController = require('../controllers/EventController');
 const eventValidations = require('../middleware/eventValidations');
-const auth = require('../middleware/auth');
+const { authenticate } = require('../middleware/auth');
 const { validationResult } = require('express-validator');
 
 // Middleware para verificar erros de validação
@@ -19,7 +19,7 @@ const checkValidation = (req, res, next) => {
 };
 
 // Todas as rotas requerem autenticação
-router.use(auth);
+router.use(authenticate);
 
 // Rotas específicas (devem vir antes das rotas genéricas)
 router.get('/date-range', 

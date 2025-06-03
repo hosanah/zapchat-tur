@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const SaleController = require('../controllers/SaleController');
-const auth = require('../middleware/auth');
+const { authenticate } = require('../middleware/auth');
 const { validationResult } = require('express-validator');
 const {
   createSaleValidation,
@@ -27,7 +27,7 @@ const checkValidationErrors = (req, res, next) => {
 };
 
 // Rotas protegidas por autenticação
-router.use(auth);
+router.use(authenticate);
 
 // GET /api/sales - Listar vendas com filtros e paginação
 router.get('/', 

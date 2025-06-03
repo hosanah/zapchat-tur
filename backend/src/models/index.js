@@ -1,6 +1,6 @@
 const { sequelize } = require('../config/database');
 
-// Importar modelos
+// Importar modelos (já inicializados)
 const Company = require('./Company');
 const User = require('./User');
 const Vehicle = require('./Vehicle');
@@ -11,197 +11,186 @@ const Booking = require('./Booking');
 const Event = require('./Event');
 const Sale = require('./Sale');
 
-// Inicializar modelos
-const CompanyModel = Company(sequelize);
-const UserModel = User(sequelize);
-const VehicleModel = Vehicle(sequelize);
-const DriverModel = Driver(sequelize);
-const CustomerModel = Customer(sequelize);
-const TripModel = Trip(sequelize);
-const BookingModel = Booking(sequelize);
-const EventModel = Event(sequelize);
-const SaleModel = Sale(sequelize);
-
 // Definir associações
 // Company associations
-CompanyModel.hasMany(UserModel, {
+Company.hasMany(User, {
   foreignKey: 'company_id',
   as: 'users'
 });
 
-CompanyModel.hasMany(VehicleModel, {
+Company.hasMany(Vehicle, {
   foreignKey: 'company_id',
   as: 'vehicles'
 });
 
-CompanyModel.hasMany(DriverModel, {
+Company.hasMany(Driver, {
   foreignKey: 'company_id',
   as: 'drivers'
 });
 
-CompanyModel.hasMany(CustomerModel, {
+Company.hasMany(Customer, {
   foreignKey: 'company_id',
   as: 'customers'
 });
 
-CompanyModel.hasMany(TripModel, {
+Company.hasMany(Trip, {
   foreignKey: 'company_id',
   as: 'trips'
 });
 
-CompanyModel.hasMany(EventModel, {
+Company.hasMany(Event, {
   foreignKey: 'company_id',
   as: 'events'
 });
 
-CompanyModel.hasMany(SaleModel, {
+Company.hasMany(Sale, {
   foreignKey: 'company_id',
   as: 'sales'
 });
 
 // User associations
-UserModel.belongsTo(CompanyModel, {
+User.belongsTo(Company, {
   foreignKey: 'company_id',
   as: 'company'
 });
 
-UserModel.hasMany(EventModel, {
+User.hasMany(Event, {
   foreignKey: 'created_by',
   as: 'created_events'
 });
 
-UserModel.hasMany(SaleModel, {
+User.hasMany(Sale, {
   foreignKey: 'created_by',
   as: 'created_sales'
 });
 
 // Vehicle associations
-VehicleModel.belongsTo(CompanyModel, {
+Vehicle.belongsTo(Company, {
   foreignKey: 'company_id',
   as: 'company'
 });
 
-VehicleModel.hasMany(TripModel, {
+Vehicle.hasMany(Trip, {
   foreignKey: 'vehicle_id',
   as: 'trips'
 });
 
 // Driver associations
-DriverModel.belongsTo(CompanyModel, {
+Driver.belongsTo(Company, {
   foreignKey: 'company_id',
   as: 'company'
 });
 
-DriverModel.hasMany(TripModel, {
+Driver.hasMany(Trip, {
   foreignKey: 'driver_id',
   as: 'trips'
 });
 
 // Customer associations
-CustomerModel.belongsTo(CompanyModel, {
+Customer.belongsTo(Company, {
   foreignKey: 'company_id',
   as: 'company'
 });
 
-CustomerModel.hasMany(BookingModel, {
+Customer.hasMany(Booking, {
   foreignKey: 'customer_id',
   as: 'bookings'
 });
 
-CustomerModel.hasMany(SaleModel, {
+Customer.hasMany(Sale, {
   foreignKey: 'customer_id',
   as: 'sales'
 });
 
 // Trip associations
-TripModel.belongsTo(CompanyModel, {
+Trip.belongsTo(Company, {
   foreignKey: 'company_id',
   as: 'company'
 });
 
-TripModel.belongsTo(VehicleModel, {
+Trip.belongsTo(Vehicle, {
   foreignKey: 'vehicle_id',
   as: 'vehicle'
 });
 
-TripModel.belongsTo(DriverModel, {
+Trip.belongsTo(Driver, {
   foreignKey: 'driver_id',
   as: 'driver'
 });
 
-TripModel.hasMany(BookingModel, {
+Trip.hasMany(Booking, {
   foreignKey: 'trip_id',
   as: 'bookings'
 });
 
-TripModel.hasMany(EventModel, {
+Trip.hasMany(Event, {
   foreignKey: 'trip_id',
   as: 'events'
 });
 
 // Booking associations
-BookingModel.belongsTo(CustomerModel, {
+Booking.belongsTo(Customer, {
   foreignKey: 'customer_id',
   as: 'customer'
 });
 
-BookingModel.belongsTo(TripModel, {
+Booking.belongsTo(Trip, {
   foreignKey: 'trip_id',
   as: 'trip'
 });
 
 // Event associations
-EventModel.belongsTo(CompanyModel, {
+Event.belongsTo(Company, {
   foreignKey: 'company_id',
   as: 'company'
 });
 
-EventModel.belongsTo(TripModel, {
+Event.belongsTo(Trip, {
   foreignKey: 'trip_id',
   as: 'trip'
 });
 
-EventModel.belongsTo(UserModel, {
+Event.belongsTo(User, {
   foreignKey: 'created_by',
   as: 'creator'
 });
 
-EventModel.hasMany(SaleModel, {
+Event.hasMany(Sale, {
   foreignKey: 'event_id',
   as: 'sales'
 });
 
 // Sale associations
-SaleModel.belongsTo(CompanyModel, {
+Sale.belongsTo(Company, {
   foreignKey: 'company_id',
   as: 'company'
 });
 
-SaleModel.belongsTo(CustomerModel, {
+Sale.belongsTo(Customer, {
   foreignKey: 'customer_id',
   as: 'customer'
 });
 
-SaleModel.belongsTo(EventModel, {
+Sale.belongsTo(Event, {
   foreignKey: 'event_id',
   as: 'event'
 });
 
-SaleModel.belongsTo(UserModel, {
+Sale.belongsTo(User, {
   foreignKey: 'created_by',
   as: 'creator'
 });
 
 module.exports = {
   sequelize,
-  Company: CompanyModel,
-  User: UserModel,
-  Vehicle: VehicleModel,
-  Driver: DriverModel,
-  Customer: CustomerModel,
-  Trip: TripModel,
-  Booking: BookingModel,
-  Event: EventModel,
-  Sale: SaleModel
+  Company,
+  User,
+  Vehicle,
+  Driver,
+  Customer,
+  Trip,
+  Booking,
+  Event,
+  Sale
 };
 

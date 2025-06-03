@@ -1,391 +1,419 @@
 const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database');
 
-module.exports = (sequelize) => {
-  const Sale = sequelize.define('Sale', {
-    id: {
-      type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
-      primaryKey: true
+const Sale = sequelize.define('Sale', {
+  id: {
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
+    primaryKey: true
+  },
+  
+  // Informações básicas da venda
+  sale_number: {
+    type: DataTypes.STRING(20),
+    allowNull: false,
+    unique: true,
+    comment: 'Número único da venda (ex: VND-2024-001)'
+  },
+  
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    comment: 'Descrição detalhada da venda'
+  },
+  
+  // Valores financeiros
+  subtotal: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false,
+    defaultValue: 0.00,
+    validate: {
+      min: {
+        args: [0],
+        msg: 'Subtotal deve ser um valor positivo'
+      }
     },
-    
-    // Informações básicas da venda
-    sale_number: {
-      type: DataTypes.STRING(20),
-      allowNull: false,
+    comment: 'Valor subtotal da venda'
+  },
+  
+  discount_amount: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: true,
+    defaultValue: 0.00,
+    validate: {
+      min: {
+        args: [0],
+        msg: 'Desconto deve ser um valor positivo'
+      }
+    },
+    comment: 'Valor do desconto em reais'
+  },
+  
+  discount_percentage: {
+    type: DataTypes.DECIMAL(5, 2),
+    allowNull: true,
+    defaultValue: 0.00,
+    validate: {
+      min: {
+        args: [0],
+        msg: 'Percentual de desconto deve ser positivo'
+      },
+      max: {
+        args: [100],
+        msg: 'Percentual de desconto não pode ser maior que 100%'
+      }
+    },
+    comment: 'Percentual de desconto aplicado'
+  },
+  
+  tax_amount: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: true,
+    defaultValue: 0.00,
+    validate: {
+      min: {
+        args: [0],
+        msg: 'Valor de impostos deve ser positivo'
+      }
+    },
+    comment: 'Valor dos impostos'
+  },
+  
+  total_amount: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false,
+    defaultValue: 0.00,
+    validate: {
+      min: {
+        args: [0],
+        msg: 'Valor total deve ser positivo'
+      }
+    },
+    comment: 'Valor total da venda (subtotal - desconto + impostos)'
+  },
+  
+  // Comissões
+  commission_percentage: {
+    type: DataTypes.DECIMAL(5, 2),
+    allowNull: true,
+    defaultValue: 0.00,
+    validate: {
+      min: {
+        args: [0],
+        msg: 'Percentual de comissão deve ser positivo'
+      },
+      max: {
+        args: [100],
+        msg: 'Percentual de comissão não pode ser maior que 100%'
+      }
+    },
+    comment: 'Percentual de comissão do vendedor'
+  },
+  
+  commission_amount: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: true,
+    defaultValue: 0.00,
+    validate: {
+      min: {
+        args: [0],
+        msg: 'Valor da comissão deve ser positivo'
+      }
+    },
+    comment: 'Valor da comissão calculada'
+  },
+  
+  // Status da venda
+  status: {
+    type: DataTypes.ENUM('orcamento', 'pendente', 'confirmada', 'paga', 'cancelada', 'reembolsada'),
+    defaultValue: 'orcamento',
+    allowNull: false,
+    comment: 'Status atual da venda'
+  },
+  
+  priority: {
+    type: DataTypes.ENUM('baixa', 'media', 'alta', 'urgente'),
+    defaultValue: 'media',
+    allowNull: false,
+    comment: 'Prioridade da venda'
+  },
+  
+  // Informações de pagamento
+  payment_method: {
+    type: DataTypes.ENUM('dinheiro', 'cartao_credito', 'cartao_debito', 'pix', 'transferencia', 'boleto', 'cheque', 'outro'),
+    allowNull: true,
+    comment: 'Método de pagamento utilizado'
+  },
+  
+  payment_status: {
+    type: DataTypes.ENUM('pendente', 'parcial', 'pago', 'atrasado', 'cancelado'),
+    defaultValue: 'pendente',
+    allowNull: false,
+    comment: 'Status do pagamento'
+  },
+  
+  // Datas importantes
+  sale_date: {
+    type: DataTypes.DATEONLY,
+    allowNull: false,
+    defaultValue: DataTypes.NOW,
+    comment: 'Data da venda'
+  },
+  
+  due_date: {
+    type: DataTypes.DATEONLY,
+    allowNull: true,
+    comment: 'Data de vencimento do pagamento'
+  },
+  
+  payment_date: {
+    type: DataTypes.DATEONLY,
+    allowNull: true,
+    comment: 'Data do pagamento'
+  },
+  
+  delivery_date: {
+    type: DataTypes.DATEONLY,
+    allowNull: true,
+    comment: 'Data de entrega/realização do serviço'
+  },
+  
+  // Parcelamento
+  installments: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    defaultValue: 1,
+    validate: {
+      min: {
+        args: [1],
+        msg: 'Número de parcelas deve ser pelo menos 1'
+      },
+      max: {
+        args: [24],
+        msg: 'Número máximo de parcelas é 24'
+      }
+    },
+    comment: 'Número de parcelas'
+  },
+  
+  // Observações
+  notes: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    comment: 'Observações públicas da venda'
+  },
+  
+  internal_notes: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    comment: 'Notas internas (não visíveis ao cliente)'
+  },
+  
+  // Relacionamentos
+  customer_id: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    references: {
+      model: 'customers',
+      key: 'id'
+    },
+    comment: 'Cliente da venda'
+  },
+  
+  event_id: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    references: {
+      model: 'events',
+      key: 'id'
+    },
+    comment: 'Evento relacionado à venda (opcional)'
+  },
+  
+  company_id: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    references: {
+      model: 'companies',
+      key: 'id'
+    },
+    comment: 'Empresa responsável pela venda'
+  },
+  
+  created_by: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    references: {
+      model: 'users',
+      key: 'id'
+    },
+    comment: 'Usuário que criou a venda'
+  }
+}, {
+  tableName: 'sales',
+  indexes: [
+    {
       unique: true,
-      comment: 'Número único da venda (ex: VND-2024-001)'
+      fields: ['sale_number']
     },
-    
-    description: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-      comment: 'Descrição detalhada da venda'
+    {
+      fields: ['company_id']
     },
-    
-    // Valores financeiros
-    subtotal: {
-      type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
-      defaultValue: 0.00,
-      validate: {
-        min: 0
-      },
-      comment: 'Valor subtotal (sem descontos/taxas)'
+    {
+      fields: ['customer_id']
     },
-    
-    discount_amount: {
-      type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
-      defaultValue: 0.00,
-      validate: {
-        min: 0
-      },
-      comment: 'Valor do desconto aplicado'
+    {
+      fields: ['event_id']
     },
-    
-    discount_percentage: {
-      type: DataTypes.DECIMAL(5, 2),
-      allowNull: true,
-      validate: {
-        min: 0,
-        max: 100
-      },
-      comment: 'Percentual de desconto (0-100%)'
+    {
+      fields: ['created_by']
     },
-    
-    tax_amount: {
-      type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
-      defaultValue: 0.00,
-      validate: {
-        min: 0
-      },
-      comment: 'Valor de impostos/taxas'
+    {
+      fields: ['status']
     },
-    
-    total_amount: {
-      type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
-      validate: {
-        min: 0
-      },
-      comment: 'Valor total da venda (subtotal - desconto + taxas)'
+    {
+      fields: ['payment_status']
     },
-    
-    // Status e controle
-    status: {
-      type: DataTypes.ENUM(
-        'orcamento',      // Orçamento/cotação
-        'pendente',       // Venda pendente de aprovação
-        'confirmada',     // Venda confirmada
-        'paga',          // Pagamento recebido
-        'cancelada',     // Venda cancelada
-        'reembolsada'    // Venda reembolsada
-      ),
-      allowNull: false,
-      defaultValue: 'orcamento',
-      comment: 'Status atual da venda'
+    {
+      fields: ['sale_date']
     },
-    
-    priority: {
-      type: DataTypes.ENUM('baixa', 'media', 'alta', 'urgente'),
-      allowNull: false,
-      defaultValue: 'media',
-      comment: 'Prioridade da venda'
+    {
+      fields: ['due_date']
     },
-    
-    // Informações de pagamento
-    payment_method: {
-      type: DataTypes.ENUM(
-        'dinheiro',
-        'cartao_credito',
-        'cartao_debito',
-        'pix',
-        'transferencia',
-        'boleto',
-        'parcelado',
-        'outros'
-      ),
-      allowNull: true,
-      comment: 'Método de pagamento utilizado'
+    {
+      fields: ['company_id', 'status']
     },
-    
-    payment_status: {
-      type: DataTypes.ENUM(
-        'pendente',
-        'parcial',
-        'pago',
-        'atrasado',
-        'cancelado'
-      ),
-      allowNull: false,
-      defaultValue: 'pendente',
-      comment: 'Status do pagamento'
-    },
-    
-    payment_date: {
-      type: DataTypes.DATE,
-      allowNull: true,
-      comment: 'Data do pagamento'
-    },
-    
-    due_date: {
-      type: DataTypes.DATE,
-      allowNull: true,
-      comment: 'Data de vencimento do pagamento'
-    },
-    
-    installments: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 1,
-      validate: {
-        min: 1,
-        max: 24
-      },
-      comment: 'Número de parcelas (1-24)'
-    },
-    
-    // Datas importantes
-    sale_date: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-      comment: 'Data da venda'
-    },
-    
-    delivery_date: {
-      type: DataTypes.DATE,
-      allowNull: true,
-      comment: 'Data de entrega/realização do serviço'
-    },
-    
-    // Informações adicionais
-    commission_percentage: {
-      type: DataTypes.DECIMAL(5, 2),
-      allowNull: false,
-      defaultValue: 0.00,
-      validate: {
-        min: 0,
-        max: 100
-      },
-      comment: 'Percentual de comissão (0-100%)'
-    },
-    
-    commission_amount: {
-      type: DataTypes.DECIMAL(10, 2),
-      allowNull: false,
-      defaultValue: 0.00,
-      validate: {
-        min: 0
-      },
-      comment: 'Valor da comissão calculada'
-    },
-    
-    notes: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-      comment: 'Observações e anotações sobre a venda'
-    },
-    
-    internal_notes: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-      comment: 'Notas internas (não visíveis ao cliente)'
-    },
-    
-    // Campos de controle
-    is_active: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: true,
-      comment: 'Indica se a venda está ativa'
-    },
-    
-    // Relacionamentos (foreign keys)
-    customer_id: {
-      type: DataTypes.UUID,
-      allowNull: false,
-      references: {
-        model: 'customers',
-        key: 'id'
-      },
-      onDelete: 'CASCADE',
-      onUpdate: 'CASCADE',
-      comment: 'ID do cliente'
-    },
-    
-    event_id: {
-      type: DataTypes.UUID,
-      allowNull: true,
-      references: {
-        model: 'events',
-        key: 'id'
-      },
-      onDelete: 'SET NULL',
-      onUpdate: 'CASCADE',
-      comment: 'ID do evento relacionado (opcional)'
-    },
-    
-    company_id: {
-      type: DataTypes.UUID,
-      allowNull: false,
-      references: {
-        model: 'companies',
-        key: 'id'
-      },
-      onDelete: 'CASCADE',
-      onUpdate: 'CASCADE',
-      comment: 'ID da empresa'
-    },
-    
-    created_by: {
-      type: DataTypes.UUID,
-      allowNull: false,
-      references: {
-        model: 'users',
-        key: 'id'
-      },
-      onDelete: 'RESTRICT',
-      onUpdate: 'CASCADE',
-      comment: 'ID do usuário que criou a venda'
+    {
+      fields: ['company_id', 'sale_date']
     }
-  }, {
-    tableName: 'sales',
-    timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at',
-    
-    // Índices para performance
-    indexes: [
-      {
-        fields: ['company_id']
-      },
-      {
-        fields: ['customer_id']
-      },
-      {
-        fields: ['event_id']
-      },
-      {
-        fields: ['created_by']
-      },
-      {
-        fields: ['status']
-      },
-      {
-        fields: ['payment_status']
-      },
-      {
-        fields: ['sale_date']
-      },
-      {
-        fields: ['due_date']
-      },
-      {
-        fields: ['sale_number'],
-        unique: true
-      },
-      {
-        fields: ['company_id', 'status']
-      },
-      {
-        fields: ['company_id', 'sale_date']
+  ],
+  hooks: {
+    beforeValidate: (sale) => {
+      // Calcular valor total
+      const subtotal = parseFloat(sale.subtotal) || 0;
+      const discountAmount = parseFloat(sale.discount_amount) || 0;
+      const taxAmount = parseFloat(sale.tax_amount) || 0;
+      
+      sale.total_amount = subtotal - discountAmount + taxAmount;
+      
+      // Calcular comissão
+      if (sale.commission_percentage && sale.total_amount) {
+        sale.commission_amount = (sale.total_amount * sale.commission_percentage) / 100;
       }
-    ],
+      
+      // Gerar número da venda se não existir
+      if (!sale.sale_number) {
+        const year = new Date().getFullYear();
+        const timestamp = Date.now().toString().slice(-6);
+        sale.sale_number = `VND-${year}-${timestamp}`;
+      }
+    },
     
-    // Hooks para cálculos automáticos
-    hooks: {
-      beforeValidate: (sale) => {
-        // Calcular total_amount
-        const subtotal = parseFloat(sale.subtotal) || 0;
-        const discount = parseFloat(sale.discount_amount) || 0;
-        const tax = parseFloat(sale.tax_amount) || 0;
-        
-        sale.total_amount = subtotal - discount + tax;
-        
-        // Calcular commission_amount se commission_percentage foi definido
-        if (sale.commission_percentage && sale.commission_percentage > 0) {
-          sale.commission_amount = (sale.total_amount * sale.commission_percentage) / 100;
-        }
-        
-        // Gerar sale_number se não existir
-        if (!sale.sale_number) {
-          const year = new Date().getFullYear();
-          const timestamp = Date.now().toString().slice(-6);
-          sale.sale_number = `VND-${year}-${timestamp}`;
-        }
+    beforeUpdate: (sale) => {
+      // Recalcular valores na atualização
+      const subtotal = parseFloat(sale.subtotal) || 0;
+      const discountAmount = parseFloat(sale.discount_amount) || 0;
+      const taxAmount = parseFloat(sale.tax_amount) || 0;
+      
+      sale.total_amount = subtotal - discountAmount + taxAmount;
+      
+      if (sale.commission_percentage && sale.total_amount) {
+        sale.commission_amount = (sale.total_amount * sale.commission_percentage) / 100;
       }
     }
-  });
+  }
+});
+
+// Métodos de instância
+Sale.prototype.toJSON = function() {
+  const values = { ...this.get() };
   
-  // Métodos estáticos úteis
-  Sale.findByCompany = function(companyId, options = {}) {
-    return this.findAll({
-      where: { company_id: companyId, is_active: true },
-      include: [
-        { association: 'customer' },
-        { association: 'event' },
-        { association: 'company' },
-        { association: 'creator' }
-      ],
-      order: [['sale_date', 'DESC']],
-      ...options
-    });
-  };
+  // Formatar valores monetários
+  if (values.subtotal) values.subtotal = parseFloat(values.subtotal);
+  if (values.discount_amount) values.discount_amount = parseFloat(values.discount_amount);
+  if (values.tax_amount) values.tax_amount = parseFloat(values.tax_amount);
+  if (values.total_amount) values.total_amount = parseFloat(values.total_amount);
+  if (values.commission_amount) values.commission_amount = parseFloat(values.commission_amount);
   
-  Sale.findByStatus = function(status, companyId = null, options = {}) {
-    const where = { status, is_active: true };
-    if (companyId) where.company_id = companyId;
-    
-    return this.findAll({
-      where,
-      include: [
-        { association: 'customer' },
-        { association: 'event' },
-        { association: 'company' },
-        { association: 'creator' }
-      ],
-      order: [['sale_date', 'DESC']],
-      ...options
-    });
-  };
-  
-  Sale.findByCustomer = function(customerId, options = {}) {
-    return this.findAll({
-      where: { customer_id: customerId, is_active: true },
-      include: [
-        { association: 'event' },
-        { association: 'company' },
-        { association: 'creator' }
-      ],
-      order: [['sale_date', 'DESC']],
-      ...options
-    });
-  };
-  
-  Sale.getTotalsByCompany = function(companyId, startDate = null, endDate = null) {
-    const where = { company_id: companyId, is_active: true };
-    
-    if (startDate && endDate) {
-      where.sale_date = {
-        [sequelize.Sequelize.Op.between]: [startDate, endDate]
-      };
-    }
-    
-    return this.findAll({
-      where,
-      attributes: [
-        'status',
-        [sequelize.fn('COUNT', sequelize.col('id')), 'count'],
-        [sequelize.fn('SUM', sequelize.col('total_amount')), 'total_amount'],
-        [sequelize.fn('SUM', sequelize.col('commission_amount')), 'total_commission']
-      ],
-      group: ['status'],
-      raw: true
-    });
-  };
-  
-  return Sale;
+  return values;
 };
+
+Sale.prototype.isOverdue = function() {
+  if (!this.due_date || this.payment_status === 'pago') return false;
+  return new Date(this.due_date) < new Date();
+};
+
+Sale.prototype.getDaysUntilDue = function() {
+  if (!this.due_date) return null;
+  const today = new Date();
+  const dueDate = new Date(this.due_date);
+  const diffTime = dueDate - today;
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+};
+
+// Métodos estáticos
+Sale.findByCompany = function(companyId, options = {}) {
+  return this.findAll({
+    where: { company_id: companyId },
+    order: [['sale_date', 'DESC']],
+    ...options
+  });
+};
+
+Sale.findByCustomer = function(customerId, options = {}) {
+  return this.findAll({
+    where: { customer_id: customerId },
+    order: [['sale_date', 'DESC']],
+    ...options
+  });
+};
+
+Sale.findByStatus = function(companyId, status, options = {}) {
+  return this.findAll({
+    where: { 
+      company_id: companyId,
+      status: status 
+    },
+    order: [['sale_date', 'DESC']],
+    ...options
+  });
+};
+
+Sale.findOverdue = function(companyId) {
+  return this.findAll({
+    where: {
+      company_id: companyId,
+      due_date: {
+        [DataTypes.Op.lt]: new Date()
+      },
+      payment_status: {
+        [DataTypes.Op.notIn]: ['pago', 'cancelado']
+      }
+    },
+    order: [['due_date', 'ASC']]
+  });
+};
+
+Sale.getStats = function(companyId, startDate = null, endDate = null) {
+  const whereClause = { company_id: companyId };
+  
+  if (startDate && endDate) {
+    whereClause.sale_date = {
+      [DataTypes.Op.between]: [startDate, endDate]
+    };
+  }
+  
+  return this.findAll({
+    where: whereClause,
+    attributes: [
+      [sequelize.fn('COUNT', sequelize.col('id')), 'total_sales'],
+      [sequelize.fn('SUM', sequelize.col('total_amount')), 'total_revenue'],
+      [sequelize.fn('SUM', sequelize.col('commission_amount')), 'total_commission'],
+      [sequelize.fn('AVG', sequelize.col('total_amount')), 'average_sale']
+    ],
+    raw: true
+  });
+};
+
+module.exports = Sale;
 
