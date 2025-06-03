@@ -18,6 +18,7 @@ const driverRoutes = require('./routes/drivers');
 const customerRoutes = require('./routes/customers');
 const tripRoutes = require('./routes/trips');
 const bookingRoutes = require('./routes/bookings');
+const eventRoutes = require('./routes/events');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -69,6 +70,7 @@ app.use('/api/drivers', driverRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/trips', tripRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/events', eventRoutes);
 
 // Middleware de tratamento de erros
 app.use(notFound);
@@ -82,10 +84,10 @@ async function startServer() {
     console.log('✅ Conexão com banco de dados estabelecida com sucesso.');
 
     // Sincronizar modelos (apenas em desenvolvimento)
-    /*if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === 'development') {
       await sequelize.sync({ force: true });
       console.log('✅ Modelos sincronizados com o banco de dados.');
-    }*/
+    }
 
     // Iniciar servidor
     const server = app.listen(PORT, '0.0.0.0', () => {

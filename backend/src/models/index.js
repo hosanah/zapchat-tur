@@ -8,113 +8,156 @@ const Driver = require('./Driver');
 const Customer = require('./Customer');
 const Trip = require('./Trip');
 const Booking = require('./Booking');
+const Event = require('./Event');
+
+// Inicializar modelos
+const CompanyModel = Company(sequelize);
+const UserModel = User(sequelize);
+const VehicleModel = Vehicle(sequelize);
+const DriverModel = Driver(sequelize);
+const CustomerModel = Customer(sequelize);
+const TripModel = Trip(sequelize);
+const BookingModel = Booking(sequelize);
+const EventModel = Event(sequelize);
 
 // Definir associações
 // Company associations
-Company.hasMany(User, {
-  foreignKey: 'companyId',
+CompanyModel.hasMany(UserModel, {
+  foreignKey: 'company_id',
   as: 'users'
 });
 
-Company.hasMany(Vehicle, {
-  foreignKey: 'companyId',
+CompanyModel.hasMany(VehicleModel, {
+  foreignKey: 'company_id',
   as: 'vehicles'
 });
 
-Company.hasMany(Driver, {
-  foreignKey: 'companyId',
+CompanyModel.hasMany(DriverModel, {
+  foreignKey: 'company_id',
   as: 'drivers'
 });
 
-Company.hasMany(Customer, {
-  foreignKey: 'companyId',
+CompanyModel.hasMany(CustomerModel, {
+  foreignKey: 'company_id',
   as: 'customers'
 });
 
-Company.hasMany(Trip, {
-  foreignKey: 'companyId',
+CompanyModel.hasMany(TripModel, {
+  foreignKey: 'company_id',
   as: 'trips'
 });
 
+CompanyModel.hasMany(EventModel, {
+  foreignKey: 'company_id',
+  as: 'events'
+});
+
 // User associations
-User.belongsTo(Company, {
-  foreignKey: 'companyId',
-  as: 'Company'
+UserModel.belongsTo(CompanyModel, {
+  foreignKey: 'company_id',
+  as: 'company'
+});
+
+UserModel.hasMany(EventModel, {
+  foreignKey: 'created_by',
+  as: 'created_events'
 });
 
 // Vehicle associations
-Vehicle.belongsTo(Company, {
-  foreignKey: 'companyId',
-  as: 'Company'
+VehicleModel.belongsTo(CompanyModel, {
+  foreignKey: 'company_id',
+  as: 'company'
 });
 
-Vehicle.hasMany(Trip, {
-  foreignKey: 'vehicleId',
+VehicleModel.hasMany(TripModel, {
+  foreignKey: 'vehicle_id',
   as: 'trips'
 });
 
 // Driver associations
-Driver.belongsTo(Company, {
-  foreignKey: 'companyId',
-  as: 'Company'
+DriverModel.belongsTo(CompanyModel, {
+  foreignKey: 'company_id',
+  as: 'company'
 });
 
-Driver.hasMany(Trip, {
-  foreignKey: 'driverId',
+DriverModel.hasMany(TripModel, {
+  foreignKey: 'driver_id',
   as: 'trips'
 });
 
 // Customer associations
-Customer.belongsTo(Company, {
-  foreignKey: 'companyId',
-  as: 'Company'
+CustomerModel.belongsTo(CompanyModel, {
+  foreignKey: 'company_id',
+  as: 'company'
 });
 
-Customer.hasMany(Booking, {
-  foreignKey: 'customerId',
+CustomerModel.hasMany(BookingModel, {
+  foreignKey: 'customer_id',
   as: 'bookings'
 });
 
 // Trip associations
-Trip.belongsTo(Company, {
-  foreignKey: 'companyId',
-  as: 'Company'
+TripModel.belongsTo(CompanyModel, {
+  foreignKey: 'company_id',
+  as: 'company'
 });
 
-Trip.belongsTo(Vehicle, {
-  foreignKey: 'vehicleId',
-  as: 'Vehicle'
+TripModel.belongsTo(VehicleModel, {
+  foreignKey: 'vehicle_id',
+  as: 'vehicle'
 });
 
-Trip.belongsTo(Driver, {
-  foreignKey: 'driverId',
-  as: 'Driver'
+TripModel.belongsTo(DriverModel, {
+  foreignKey: 'driver_id',
+  as: 'driver'
 });
 
-Trip.hasMany(Booking, {
-  foreignKey: 'tripId',
-  as: 'Bookings'
+TripModel.hasMany(BookingModel, {
+  foreignKey: 'trip_id',
+  as: 'bookings'
+});
+
+TripModel.hasMany(EventModel, {
+  foreignKey: 'trip_id',
+  as: 'events'
 });
 
 // Booking associations
-Booking.belongsTo(Customer, {
-  foreignKey: 'customerId',
-  as: 'Customer'
+BookingModel.belongsTo(CustomerModel, {
+  foreignKey: 'customer_id',
+  as: 'customer'
 });
 
-Booking.belongsTo(Trip, {
-  foreignKey: 'tripId',
-  as: 'Trip'
+BookingModel.belongsTo(TripModel, {
+  foreignKey: 'trip_id',
+  as: 'trip'
+});
+
+// Event associations
+EventModel.belongsTo(CompanyModel, {
+  foreignKey: 'company_id',
+  as: 'company'
+});
+
+EventModel.belongsTo(TripModel, {
+  foreignKey: 'trip_id',
+  as: 'trip'
+});
+
+EventModel.belongsTo(UserModel, {
+  foreignKey: 'created_by',
+  as: 'creator'
 });
 
 module.exports = {
   sequelize,
-  Company,
-  User,
-  Vehicle,
-  Driver,
-  Customer,
-  Trip,
-  Booking
+  Company: CompanyModel,
+  User: UserModel,
+  Vehicle: VehicleModel,
+  Driver: DriverModel,
+  Customer: CustomerModel,
+  Trip: TripModel,
+  Booking: BookingModel,
+  Event: EventModel
 };
 
