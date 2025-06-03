@@ -27,7 +27,7 @@ app.use(helmet());
 
 // Configuração CORS
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
   credentials: true
 }));
 
@@ -82,10 +82,10 @@ async function startServer() {
     console.log('✅ Conexão com banco de dados estabelecida com sucesso.');
 
     // Sincronizar modelos (apenas em desenvolvimento)
-    if (process.env.NODE_ENV === 'development') {
+    /*if (process.env.NODE_ENV === 'development') {
       await sequelize.sync({ force: true });
       console.log('✅ Modelos sincronizados com o banco de dados.');
-    }
+    }*/
 
     // Iniciar servidor
     const server = app.listen(PORT, '0.0.0.0', () => {
