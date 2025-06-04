@@ -1,0 +1,236 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Estilos customizados para o ZapChat Tur */
+@layer base {
+  body {
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  /* Componentes customizados */
+  .shadow-card {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  }
+  
+  .shadow-card-hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  
+  /* Gradientes personalizados */
+  .gradient-zapchat {
+    background: linear-gradient(135deg, #99CD85 0%, #7FA653 100%);
+  }
+  
+  .gradient-zapchat-dark {
+    background: linear-gradient(135deg, #63783D 0%, #1C2B20 100%);
+  }
+  
+  /* Estilos para botões */
+  .btn-primary {
+    background-color: #99CD85;
+    color: white;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s;
+  }
+  
+  .btn-primary:hover {
+    background-color: #7FA653;
+  }
+
+  .btn-secondary {
+    background-color: #e5e7eb;
+    color: #1f2937;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s;
+  }
+  
+  .btn-secondary:hover {
+    background-color: #d1d5db;
+  }
+
+  /* Estilos para cards */
+  .card {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    padding: 1.5rem;
+    transition: box-shadow 0.2s;
+  }
+  
+  .card:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  /* Estilos para a sidebar */
+  .sidebar-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 0.75rem;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .sidebar-item.active {
+    color: white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+
+  .sidebar-item:not(.active) {
+    color: #4b5563;
+  }
+  
+  .sidebar-item:not(.active):hover {
+    background-color: #f9fafb;
+    color: #111827;
+  }
+}
+
+@layer utilities {
+  /* Cores personalizadas do ZapChat */
+  .bg-zapchat-primary {
+    background-color: #99CD85;
+  }
+  
+  .bg-zapchat-light {
+    background-color: #CFE0BC;
+  }
+  
+  .bg-zapchat-medium {
+    background-color: #7FA653;
+  }
+  
+  .bg-zapchat-dark {
+    background-color: #63783D;
+  }
+  
+  .bg-zapchat-darker {
+    background-color: #1C2B20;
+  }
+  
+  .text-zapchat-primary {
+    color: #99CD85;
+  }
+  
+  .text-zapchat-light {
+    color: #CFE0BC;
+  }
+  
+  .text-zapchat-medium {
+    color: #7FA653;
+  }
+  
+  .text-zapchat-dark {
+    color: #63783D;
+  }
+  
+  .text-zapchat-darker {
+    color: #1C2B20;
+  }
+  
+  /* Utilitários customizados */
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .bg-sidebar-bg {
+    background-color: #1C2B20;
+  }
+  
+  .bg-sidebar-hover {
+    background-color: #63783D;
+  }
+  
+  .bg-sidebar-active {
+    background-color: #7FA653;
+  }
+  
+  .text-sidebar-text {
+    color: #CFE0BC;
+  }
+}
+
+/* Animações customizadas */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Scrollbar customizada */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #99CD85;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #7FA653;
+}
+
+/* Estilos para elementos de formulário */
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(153, 205, 133, 0.2);
+  border-color: #99CD85;
+}
+
+/* Responsividade para texto */
+@media (max-width: 640px) {
+  .text-responsive {
+    font-size: 0.875rem;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .text-responsive {
+    font-size: 1rem;
+  }
+}
+
+@media (min-width: 1025px) {
+  .text-responsive {
+    font-size: 1.125rem;
+  }
+}
+
