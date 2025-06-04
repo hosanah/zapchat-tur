@@ -61,41 +61,40 @@ const Toast = ({ toast, onRemove }) => {
   };
 
   return (
-    <div
-      className={`
-        max-w-sm w-full ${getBackgroundColor()} border rounded-lg shadow-lg p-4 mb-3
-        transform transition-all duration-300 ease-in-out
-        animate-slide-in-right
-      `}
-    >
-      <div className="flex items-start">
-        <div className="flex-shrink-0">
-          {getIcon()}
-        </div>
-        <div className="ml-3 w-0 flex-1">
-          {toast.title && (
-            <p className={`text-sm font-medium ${getTextColor()}`}>
-              {toast.title}
-            </p>
-          )}
-          <p className={`text-sm ${getTextColor()} ${toast.title ? 'mt-1' : ''}`}>
-            {toast.message}
-          </p>
-        </div>
-        <div className="ml-4 flex-shrink-0 flex">
-          <button
-            className={`
-              inline-flex ${getTextColor()} hover:opacity-75 focus:outline-none 
-              focus:ring-2 focus:ring-offset-2 focus:ring-zapchat-primary rounded-md
-            `}
-            onClick={() => onRemove(toast.id)}
-          >
-            <span className="sr-only">Fechar</span>
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
+<div
+  className={`
+    w-full max-w-sm sm:max-w-md ${getBackgroundColor()} border rounded-lg shadow-lg px-4 py-3 mb-3
+    transform transition-all duration-300 ease-in-out break-words animate-slide-in-right
+  `}
+>
+  <div className="flex items-start">
+    <div className="flex-shrink-0">{getIcon()}</div>
+    <div className="ml-3 flex-1 min-w-0">
+      {toast.title && (
+        <p className={`text-sm font-medium ${getTextColor()}`}>
+          {toast.title}
+        </p>
+      )}
+      <p className={`text-sm ${getTextColor()} ${toast.title ? 'mt-1' : ''}`}>
+        {toast.message}
+      </p>
     </div>
+    <div className="ml-4 flex-shrink-0 flex">
+      <button
+        className={`
+          inline-flex ${getTextColor()} hover:opacity-75 focus:outline-none 
+          focus:ring-2 focus:ring-offset-2 focus:ring-zapchat-primary rounded-md
+        `}
+        onClick={() => onRemove(toast.id)}
+      >
+        <span className="sr-only">Fechar</span>
+        <X className="h-4 w-4" />
+      </button>
+    </div>
+  </div>
+</div>
+
+
   );
 };
 

@@ -75,8 +75,33 @@ const Drivers = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Mapeia os dados do formData para os nomes esperados no backend
+      const [firstName, ...lastParts] = formData.name.trim().split(' ');
+      const lastName = lastParts.join(' ') || 'Sobrenome';
+
+      const statusMap = {
+        ACTIVE: 'ativo',
+        INACTIVE: 'inativo',
+        VACATION: 'ferias',
+        SICK_LEAVE: 'licenca'
+      };
+
       const submitData = {
-        ...formData,
+        firstName: firstName || 'Nome',
+        lastName,
+        email: formData.email || undefined,
+        phone: formData.phone,
+        cpf: formData.cpf,
+        rg: formData.rg,
+        birthDate: formData.birthDate,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zipCode: formData.zipCode,
+        licenseNumber: formData.cnh,
+        licenseCategory: formData.cnhCategory,
+        licenseExpiry: formData.cnhExpiry || null,
+        status: statusMap[formData.status] || 'ativo',
         vehicleId: formData.vehicleId || null
       };
 
@@ -94,10 +119,20 @@ const Drivers = () => {
       fetchDrivers();
     } catch (error) {
       console.error('Erro ao salvar motorista:', error);
-      const errorMessage = error.response?.data?.message || 'Erro ao salvar motorista';
-      showError(errorMessage);
+    
+      const response = error.response?.data;
+    
+      if (response?.success === false && Array.isArray(response.details)) {
+        response.details.forEach((detail) => {
+          if (detail.msg) showError(detail.msg);
+        });
+      } else {
+        const errorMessage = response?.message || 'Erro ao salvar motorista';
+        showError(errorMessage);
+      }
     }
   };
+
 
   const handleEdit = (driver) => {
     setEditingDriver(driver);
@@ -318,7 +353,7 @@ const Drivers = () => {
                   </div>
                   {driver.cnhExpiry && (
                     <div className={`flex items-center text-sm ${isExpired(driver.cnhExpiry) ? 'text-red-600' :
-                        isExpiringSoon(driver.cnhExpiry) ? 'text-yellow-600' : 'text-gray-600'
+                      isExpiringSoon(driver.cnhExpiry) ? 'text-yellow-600' : 'text-gray-600'
                       }`}>
                       <Calendar className="w-4 h-4 mr-2" />
                       Vence: {formatDate(driver.cnhExpiry)}
