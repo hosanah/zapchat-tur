@@ -47,7 +47,7 @@ class CustomerController {
         include: [
           {
             model: Company,
-            as: 'Company',
+            as: 'company',
             attributes: ['id', 'name']
           }
         ]
@@ -86,7 +86,7 @@ class CustomerController {
         include: [
           {
             model: Company,
-            as: 'Company',
+            as: 'company',
             attributes: ['id', 'name']
           }
         ]

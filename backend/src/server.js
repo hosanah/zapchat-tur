@@ -86,7 +86,7 @@ async function startServer() {
     console.log('✅ Conexão com banco de dados estabelecida com sucesso.');
 
     // Sincronizar modelos (apenas em desenvolvimento)
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === 'development' && process.env.DB_RECREATE_FORCE === true) {
       await sequelize.sync({ force: true });
       console.log('✅ Modelos sincronizados com o banco de dados.');
     }

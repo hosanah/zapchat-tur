@@ -50,7 +50,7 @@ class DriverController {
         include: [
           {
             model: Company,
-            as: 'Company',
+            as: 'company',
             attributes: ['id', 'name']
           }
         ]
@@ -89,7 +89,7 @@ class DriverController {
         include: [
           {
             model: Company,
-            as: 'Company',
+            as: 'company',
             attributes: ['id', 'name']
           }
         ]

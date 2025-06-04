@@ -108,7 +108,7 @@ class BookingController {
             include: [
               {
                 model: Company,
-                as: 'Company',
+                as: 'company',
                 attributes: ['id', 'name']
               }
             ]

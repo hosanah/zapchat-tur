@@ -53,7 +53,7 @@ class UserController {
         include: [
           {
             model: Company,
-            as: 'Company',
+            as: 'company',
             attributes: ['id', 'name', 'email']
           }
         ]
@@ -92,7 +92,7 @@ class UserController {
         include: [
           {
             model: Company,
-            as: 'Company',
+            as: 'company',
             attributes: ['id', 'name', 'email', 'cnpj']
           }
         ]
@@ -434,7 +434,7 @@ class UserController {
         include: [
           {
             model: Company,
-            as: 'Company',
+            as: 'company',
             attributes: ['id', 'name', 'email', 'cnpj']
           }
         ]

@@ -63,7 +63,7 @@ class TripController {
         include: [
           {
             model: Company,
-            as: 'Company',
+            as: 'company',
             attributes: ['id', 'name']
           },
           {
@@ -112,7 +112,7 @@ class TripController {
         include: [
           {
             model: Company,
-            as: 'Company',
+            as: 'company',
             attributes: ['id', 'name']
           },
           {
