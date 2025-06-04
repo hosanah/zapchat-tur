@@ -40,22 +40,22 @@ node -e "require('./src/database/seeders').seedDatabase()"
 ### Instalação
 ```bash
 cd frontend
-pnpm install
+npm install
 ```
 
 ### Desenvolvimento
 ```bash
 # Iniciar servidor de desenvolvimento
-pnpm run dev
+npm run dev
 
 # Iniciar servidor de desenvolvimento com acesso externo
-pnpm run dev --host
+npm run dev --host
 
 # Build para produção
-pnpm run build
+npm run build
 
 # Preview do build de produção
-pnpm run preview
+npm run preview
 ```
 
 ## Execução Completa
