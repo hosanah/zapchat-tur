@@ -19,10 +19,10 @@ class DriverController {
       const where = {};
       
       // Filtro por empresa (usuários não-master só veem da própria empresa)
-      if (req.user.isMaster() && req.user.companyId) {
-        where.company_id = req.user.companyId;
+      if (req.user.isMaster() && req.user.company_id) {
+        where.company_id = req.user.company_id;
       } else if (!req.user.isMaster()) {
-        where.company_id = req.user.companyId;
+        where.company_id = req.user.company_id;
       }
 
       if (search) {
@@ -103,7 +103,7 @@ class DriverController {
       }
 
       // Verificar permissão de acesso
-      if (!req.user.isMaster() && driver.companyId !== req.user.companyId) {
+      if (!req.user.isMaster() && driver.company_id !== req.user.company_id) {
         return res.status(403).json({
           success: false,
           error: 'Acesso negado'
@@ -139,11 +139,11 @@ class DriverController {
 
       // Definir empresa (usuários não-master só podem criar para sua empresa)
       if (!req.user.isMaster()) {
-        driverData.companyId = req.user.companyId;
+        driverData.company_id = req.user.company_id;
       }
 
       // Verificar se empresa existe
-      const company = await Company.findByPk(driverData.companyId);
+      const company = await Company.findByPk(driverData.company_id);
       if (!company) {
         return res.status(400).json({
           success: false,
@@ -152,7 +152,7 @@ class DriverController {
       }
 
       // Verificar se CPF já existe na empresa
-      const existingDriverByCpf = await Driver.findByCpf(driverData.cpf, driverData.companyId);
+      const existingDriverByCpf = await Driver.findByCpf(driverData.cpf, driverData.company_id);
       if (existingDriverByCpf) {
         return res.status(409).json({
           success: false,
@@ -161,7 +161,7 @@ class DriverController {
       }
 
       // Verificar se CNH já existe na empresa
-      const existingDriverByLicense = await Driver.findByLicense(driverData.licenseNumber, driverData.companyId);
+      const existingDriverByLicense = await Driver.findByLicense(driverData.licenseNumber, driverData.company_id);
       if (existingDriverByLicense) {
         return res.status(409).json({
           success: false,
@@ -209,7 +209,7 @@ class DriverController {
       }
 
       // Verificar permissão de acesso
-      if (!req.user.isMaster() && driver.companyId !== req.user.companyId) {
+      if (!req.user.isMaster() && driver.company_id !== req.user.company_id) {
         return res.status(403).json({
           success: false,
           error: 'Acesso negado'
@@ -218,7 +218,7 @@ class DriverController {
 
       // Verificar se CPF já existe (exceto para o motorista atual)
       if (updateData.cpf && updateData.cpf !== driver.cpf) {
-        const existingDriver = await Driver.findByCpf(updateData.cpf, driver.companyId);
+        const existingDriver = await Driver.findByCpf(updateData.cpf, driver.company_id);
         if (existingDriver && existingDriver.id !== id) {
           return res.status(409).json({
             success: false,
@@ -229,7 +229,7 @@ class DriverController {
 
       // Verificar se CNH já existe (exceto para o motorista atual)
       if (updateData.licenseNumber && updateData.licenseNumber !== driver.licenseNumber) {
-        const existingDriver = await Driver.findByLicense(updateData.licenseNumber, driver.companyId);
+        const existingDriver = await Driver.findByLicense(updateData.licenseNumber, driver.company_id);
         if (existingDriver && existingDriver.id !== id) {
           return res.status(409).json({
             success: false,
@@ -239,7 +239,7 @@ class DriverController {
       }
 
       // Não permitir alterar empresa
-      delete updateData.companyId;
+      delete updateData.company_id;
 
       await driver.update(updateData);
 
@@ -270,7 +270,7 @@ class DriverController {
       }
 
       // Verificar permissão de acesso
-      if (!req.user.isMaster() && driver.companyId !== req.user.companyId) {
+      if (!req.user.isMaster() && driver.company_id !== req.user.company_id) {
         return res.status(403).json({
           success: false,
           error: 'Acesso negado'
@@ -315,7 +315,7 @@ class DriverController {
       }
 
       // Verificar permissão de acesso
-      if (!req.user.isMaster() && driver.companyId !== req.user.companyId) {
+      if (!req.user.isMaster() && driver.company_id !== req.user.company_id) {
         return res.status(403).json({
           success: false,
           error: 'Acesso negado'
@@ -340,14 +340,13 @@ class DriverController {
    */
   static async getActive(req, res, next) {
     try {
-      const { companyId } = req.query;
-
+      
       // Determinar empresa
       let targetCompanyId;
-      if (req.user.isMaster() && req.user.companyId) {
-        targetCompanyId = companyId;
+      if (req.user.isMaster() && req.user.company_id) {
+        targetCompanyId = req.user.company_id;
       } else {
-        targetCompanyId = req.user.companyId;
+        targetCompanyId = req.user.company_id;
       }
 
       const drivers = await Driver.findActive(targetCompanyId);
@@ -367,14 +366,14 @@ class DriverController {
    */
   static async getExpiringLicenses(req, res, next) {
     try {
-      const { companyId, days = 30 } = req.query;
+      const {  days = 30 } = req.query;
 
       // Determinar empresa
       let targetCompanyId;
-      if (req.user.isMaster() && req.user.companyId) {
-        targetCompanyId = companyId;
+      if (req.user.isMaster() && req.user.company_id) {
+        targetCompanyId = req.user.company_id;
       } else {
-        targetCompanyId = req.user.companyId;
+        targetCompanyId = req.user.company_id;
       }
 
       const drivers = await Driver.findExpiringLicenses(targetCompanyId, parseInt(days));
@@ -394,14 +393,12 @@ class DriverController {
    */
   static async getStats(req, res, next) {
     try {
-      const { companyId } = req.query;
-
-      // Determinar empresa
+            // Determinar empresa
       let targetCompanyId;
-      if (req.user.isMaster() && req.user.companyId) {
-        targetCompanyId = companyId;
+      if (req.user.isMaster() && req.user.company_id) {
+        targetCompanyId = req.user.company_id;
       } else {
-        targetCompanyId = req.user.companyId;
+        targetCompanyId = req.user.company_id;
       }
 
       const stats = await Driver.getStatsByCompany(targetCompanyId);

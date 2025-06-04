@@ -12,15 +12,15 @@ class BookingController {
    */
   static async getAll(req, res, next) {
     try {
-      const { page = 1, limit = 10, search, status, companyId, tripId, customerId } = req.query;
+      const { page = 1, limit = 10, search, status, company_id, tripId, customerId } = req.query;
       const offset = (page - 1) * limit;
 
       // Construir filtros para Trip (empresa)
       const tripWhere = {};
-      if (req.user.isMaster() && req.user.companyId) {
-        tripwhere.company_id = req.user.companyId;
+      if (req.user.isMaster() && req.user.company_id) {
+        tripWhere.company_id = req.user.company_id;
       } else if (!req.user.isMaster()) {
-        tripWhere.companyId = req.user.companyId;
+        tripWhere.company_id = req.user.company_id;
       }
 
       // Construir filtros para Booking
@@ -129,7 +129,7 @@ class BookingController {
       }
 
       // Verificar permissão de acesso
-      if (!req.user.isMaster() && booking.Trip.companyId !== req.user.companyId) {
+      if (!req.user.isMaster() && booking.Trip.company_id !== req.user.company_id) {
         return res.status(403).json({
           success: false,
           error: 'Acesso negado'
@@ -173,7 +173,7 @@ class BookingController {
       }
 
       // Verificar permissão de acesso ao passeio
-      if (!req.user.isMaster() && trip.companyId !== req.user.companyId) {
+      if (!req.user.isMaster() && trip.company_id !== req.user.company_id) {
         return res.status(403).json({
           success: false,
           error: 'Acesso negado'
@@ -190,7 +190,7 @@ class BookingController {
       }
 
       // Verificar se cliente pertence à mesma empresa
-      if (customer.companyId !== trip.companyId) {
+      if (customer.company_id !== trip.company_id) {
         return res.status(400).json({
           success: false,
           error: 'Cliente não pertence à mesma empresa do passeio'
@@ -287,7 +287,7 @@ class BookingController {
       }
 
       // Verificar permissão de acesso
-      if (!req.user.isMaster() && booking.Trip.companyId !== req.user.companyId) {
+      if (!req.user.isMaster() && booking.Trip.company_id !== req.user.company_id) {
         return res.status(403).json({
           success: false,
           error: 'Acesso negado'
@@ -351,7 +351,7 @@ class BookingController {
       }
 
       // Verificar permissão de acesso
-      if (!req.user.isMaster() && booking.Trip.companyId !== req.user.companyId) {
+      if (!req.user.isMaster() && booking.Trip.company_id !== req.user.company_id) {
         return res.status(403).json({
           success: false,
           error: 'Acesso negado'
@@ -402,7 +402,7 @@ class BookingController {
       }
 
       // Verificar permissão de acesso
-      if (!req.user.isMaster() && booking.Trip.companyId !== req.user.companyId) {
+      if (!req.user.isMaster() && booking.Trip.company_id !== req.user.company_id) {
         return res.status(403).json({
           success: false,
           error: 'Acesso negado'
@@ -427,14 +427,13 @@ class BookingController {
    */
   static async getPending(req, res, next) {
     try {
-      const { companyId } = req.query;
 
       // Determinar empresa
       let targetCompanyId;
-      if (req.user.isMaster() && req.user.companyId) {
-        targetCompanyId = companyId;
+      if (req.user.isMaster() && req.user.company_id) {
+        targetCompanyId = req.user.company_id;
       } else {
-        targetCompanyId = req.user.companyId;
+        targetCompanyId = req.user.company_id;
       }
 
       const bookings = await Booking.findPending(targetCompanyId);
@@ -454,7 +453,7 @@ class BookingController {
    */
   static async getRevenue(req, res, next) {
     try {
-      const { companyId, startDate, endDate } = req.query;
+      const { startDate, endDate } = req.query;
 
       if (!startDate || !endDate) {
         return res.status(400).json({
@@ -465,10 +464,10 @@ class BookingController {
 
       // Determinar empresa
       let targetCompanyId;
-      if (req.user.isMaster() && req.user.companyId) {
-        targetCompanyId = companyId;
+      if (req.user.isMaster() && req.user.company_id) {
+        targetCompanyId = req.user.company_id;
       } else {
-        targetCompanyId = req.user.companyId;
+        targetCompanyId = req.user.company_id;
       }
 
       const revenue = await Booking.getRevenueStats(targetCompanyId, startDate, endDate);

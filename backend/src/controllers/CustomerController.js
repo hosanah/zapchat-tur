@@ -19,10 +19,10 @@ class CustomerController {
       const where = {};
       
       // Filtro por empresa (usuários não-master só veem da própria empresa)
-      if (req.user.isMaster() && req.user.companyId) {
-        where.company_id = req.user.companyId;
+      if (req.user.isMaster() && req.user.company_id) {
+        where.company_id = req.user.company_id;
       } else if (!req.user.isMaster()) {
-        where.companyId = req.user.companyId;
+        where.company_id = req.user.company_id;
       }
 
       if (search) {
@@ -100,7 +100,7 @@ class CustomerController {
       }
 
       // Verificar permissão de acesso
-      if (!req.user.isMaster() && customer.companyId !== req.user.companyId) {
+      if (!req.user.isMaster() && customer.company_id !== req.user.company_id) {
         return res.status(403).json({
           success: false,
           error: 'Acesso negado'
@@ -136,11 +136,11 @@ class CustomerController {
 
       // Definir empresa (usuários não-master só podem criar para sua empresa)
       if (!req.user.isMaster()) {
-        customerData.companyId = req.user.companyId;
+        customerData.company_id = req.user.company_id;
       }
 
       // Verificar se empresa existe
-      const company = await Company.findByPk(customerData.companyId);
+      const company = await Company.findByPk(customerData.company_id);
       if (!company) {
         return res.status(400).json({
           success: false,
@@ -149,7 +149,7 @@ class CustomerController {
       }
 
       // Verificar se email já existe na empresa
-      const existingCustomerByEmail = await Customer.findByEmail(customerData.email, customerData.companyId);
+      const existingCustomerByEmail = await Customer.findByEmail(customerData.email, customerData.company_id);
       if (existingCustomerByEmail) {
         return res.status(409).json({
           success: false,
@@ -159,7 +159,7 @@ class CustomerController {
 
       // Verificar se CPF já existe na empresa (se fornecido)
       if (customerData.cpf) {
-        const existingCustomerByCpf = await Customer.findByCpf(customerData.cpf, customerData.companyId);
+        const existingCustomerByCpf = await Customer.findByCpf(customerData.cpf, customerData.company_id);
         if (existingCustomerByCpf) {
           return res.status(409).json({
             success: false,
@@ -208,7 +208,7 @@ class CustomerController {
       }
 
       // Verificar permissão de acesso
-      if (!req.user.isMaster() && customer.companyId !== req.user.companyId) {
+      if (!req.user.isMaster() && customer.company_id !== req.user.company_id) {
         return res.status(403).json({
           success: false,
           error: 'Acesso negado'
@@ -217,7 +217,7 @@ class CustomerController {
 
       // Verificar se email já existe (exceto para o cliente atual)
       if (updateData.email && updateData.email !== customer.email) {
-        const existingCustomer = await Customer.findByEmail(updateData.email, customer.companyId);
+        const existingCustomer = await Customer.findByEmail(updateData.email, customer.company_id);
         if (existingCustomer && existingCustomer.id !== id) {
           return res.status(409).json({
             success: false,
@@ -228,7 +228,7 @@ class CustomerController {
 
       // Verificar se CPF já existe (exceto para o cliente atual)
       if (updateData.cpf && updateData.cpf !== customer.cpf) {
-        const existingCustomer = await Customer.findByCpf(updateData.cpf, customer.companyId);
+        const existingCustomer = await Customer.findByCpf(updateData.cpf, customer.company_id);
         if (existingCustomer && existingCustomer.id !== id) {
           return res.status(409).json({
             success: false,
@@ -238,7 +238,7 @@ class CustomerController {
       }
 
       // Não permitir alterar empresa
-      delete updateData.companyId;
+      delete updateData.company_id;
 
       await customer.update(updateData);
 
@@ -269,7 +269,7 @@ class CustomerController {
       }
 
       // Verificar permissão de acesso
-      if (!req.user.isMaster() && customer.companyId !== req.user.companyId) {
+      if (!req.user.isMaster() && customer.company_id !== req.user.company_id) {
         return res.status(403).json({
           success: false,
           error: 'Acesso negado'
@@ -314,7 +314,7 @@ class CustomerController {
       }
 
       // Verificar permissão de acesso
-      if (!req.user.isMaster() && customer.companyId !== req.user.companyId) {
+      if (!req.user.isMaster() && customer.company_id !== req.user.company_id) {
         return res.status(403).json({
           success: false,
           error: 'Acesso negado'
@@ -339,14 +339,12 @@ class CustomerController {
    */
   static async getActive(req, res, next) {
     try {
-      const { companyId } = req.query;
-
       // Determinar empresa
       let targetCompanyId;
-      if (req.user.isMaster() && req.user.companyId) {
-        targetCompanyId = companyId;
+      if (req.user.isMaster() && req.user.company_id) {
+        targetCompanyId = req.user.company_id;
       } else {
-        targetCompanyId = req.user.companyId;
+        targetCompanyId = req.user.company_id;
       }
 
       const customers = await Customer.findActive(targetCompanyId);
@@ -366,14 +364,13 @@ class CustomerController {
    */
   static async getRecent(req, res, next) {
     try {
-      const { companyId, days = 30 } = req.query;
 
       // Determinar empresa
       let targetCompanyId;
-      if (req.user.isMaster() && req.user.companyId) {
-        targetCompanyId = companyId;
+      if (req.user.isMaster() && req.user.company_id) {
+        targetCompanyId = req.user.company_id;
       } else {
-        targetCompanyId = req.user.companyId;
+        targetCompanyId = req.user.company_id;
       }
 
       const customers = await Customer.findRecentCustomers(targetCompanyId, parseInt(days));
@@ -393,14 +390,14 @@ class CustomerController {
    */
   static async getTop(req, res, next) {
     try {
-      const { companyId, limit = 10 } = req.query;
+      
 
       // Determinar empresa
       let targetCompanyId;
-      if (req.user.isMaster() && req.user.companyId) {
-        targetCompanyId = companyId;
+      if (req.user.isMaster() && req.user.company_id) {
+        targetCompanyId = req.user.company_id;
       } else {
-        targetCompanyId = req.user.companyId;
+        targetCompanyId = req.user.company_id;
       }
 
       const customers = await Customer.findTopCustomers(targetCompanyId, parseInt(limit));
@@ -420,14 +417,14 @@ class CustomerController {
    */
   static async getStats(req, res, next) {
     try {
-      const { companyId } = req.query;
+      
 
       // Determinar empresa
       let targetCompanyId;
-      if (req.user.isMaster() && req.user.companyId) {
-        targetCompanyId = companyId;
+      if (req.user.isMaster() && req.user.company_id) {
+        targetCompanyId = req.user.company_id;
       } else {
-        targetCompanyId = req.user.companyId;
+        targetCompanyId = req.user.company_id;
       }
 
       const stats = await Customer.getStatsByCompany(targetCompanyId);

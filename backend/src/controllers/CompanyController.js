@@ -230,7 +230,7 @@ class CompanyController {
       // Verificar se há usuários ativos associados
       const activeUsers = await User.count({
         where: {
-          companyId: id,
+          company_id: id,
           isActive: true
         }
       });
@@ -301,7 +301,7 @@ class CompanyController {
 
       // Contar usuários por role
       const userStats = await User.findAll({
-        where: { companyId: id },
+        where: { company_id: id },
         attributes: [
           'role',
           'isActive',

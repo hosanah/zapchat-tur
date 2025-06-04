@@ -36,13 +36,13 @@ class UserController {
       }
 
       if (companyId) {
-        where.companyId = companyId;
+        where.company_id = companyId;
       }
 
       // Verificar se usuário pode ver todos os usuários ou apenas da sua empresa
       const currentUser = req.user;
       if (currentUser && !currentUser.isMaster()) {
-        where.companyId = currentUser.companyId;
+        where.company_id = currentUser.company_id;
       }
 
       const { count, rows: users } = await User.findAndCountAll({
@@ -107,7 +107,7 @@ class UserController {
 
       // Verificar se usuário pode ver este usuário
       const currentUser = req.user;
-      if (currentUser && !currentUser.isMaster() && user.companyId !== currentUser.companyId) {
+      if (currentUser && !currentUser.isMaster() && user.company_id !== currentUser.company_id) {
         return res.status(403).json({
           success: false,
           error: 'Acesso negado'
@@ -151,8 +151,8 @@ class UserController {
       }
 
       // Verificar se empresa existe (para usuários não-master)
-      if (userData.role !== 'master' && userData.companyId) {
-        const company = await Company.findByPk(userData.companyId);
+      if (userData.role !== 'master' && userData.company_id) {
+        const company = await Company.findByPk(userData.company_id);
         if (!company) {
           return res.status(400).json({
             success: false,
@@ -171,7 +171,7 @@ class UserController {
       }
 
       // Verificar se usuário não-master está criando usuário para sua empresa
-      if (currentUser && !currentUser.isMaster() && userData.companyId !== currentUser.companyId) {
+      if (currentUser && !currentUser.isMaster() && userData.company_id !== currentUser.company_id) {
         return res.status(403).json({
           success: false,
           error: 'Você só pode criar usuários para sua própria empresa'
@@ -219,7 +219,7 @@ class UserController {
 
       // Verificar permissões
       const currentUser = req.user;
-      if (currentUser && !currentUser.isMaster() && user.companyId !== currentUser.companyId) {
+      if (currentUser && !currentUser.isMaster() && user.company_id !== currentUser.company_id) {
         return res.status(403).json({
           success: false,
           error: 'Acesso negado'
@@ -238,8 +238,8 @@ class UserController {
       }
 
       // Verificar se empresa existe (para usuários não-master)
-      if (updateData.companyId && updateData.role !== 'master') {
-        const company = await Company.findByPk(updateData.companyId);
+      if (updateData.company_id && updateData.role !== 'master') {
+        const company = await Company.findByPk(updateData.company_id);
         if (!company) {
           return res.status(400).json({
             success: false,
@@ -286,7 +286,7 @@ class UserController {
 
       // Verificar permissões
       const currentUser = req.user;
-      if (currentUser && !currentUser.isMaster() && user.companyId !== currentUser.companyId) {
+      if (currentUser && !currentUser.isMaster() && user.company_id !== currentUser.company_id) {
         return res.status(403).json({
           success: false,
           error: 'Acesso negado'
@@ -331,7 +331,7 @@ class UserController {
 
       // Verificar permissões
       const currentUser = req.user;
-      if (currentUser && !currentUser.isMaster() && user.companyId !== currentUser.companyId) {
+      if (currentUser && !currentUser.isMaster() && user.company_id !== currentUser.company_id) {
         return res.status(403).json({
           success: false,
           error: 'Acesso negado'

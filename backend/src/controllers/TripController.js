@@ -19,10 +19,10 @@ class TripController {
       const where = {};
       
       // Filtro por empresa (usuários não-master só veem da própria empresa)
-      if (req.user.isMaster() && req.user.companyId) {
-        where.company_id = req.user.companyId;
+      if (req.user.isMaster() && req.user.company_id) {
+        where.company_id = req.user.company_id;
       } else if (!req.user.isMaster()) {
-        where.companyId = req.user.companyId;
+        where.company_id = req.user.company_id;
       }
 
       if (search) {
@@ -147,7 +147,7 @@ class TripController {
       }
 
       // Verificar permissão de acesso
-      if (!req.user.isMaster() && trip.companyId !== req.user.companyId) {
+      if (!req.user.isMaster() && trip.company_id !== req.user.company_id) {
         return res.status(403).json({
           success: false,
           error: 'Acesso negado'
@@ -183,11 +183,11 @@ class TripController {
 
       // Definir empresa (usuários não-master só podem criar para sua empresa)
       if (!req.user.isMaster()) {
-        tripData.companyId = req.user.companyId;
+        tripData.company_id = req.user.company_id;
       }
 
       // Verificar se empresa existe
-      const company = await Company.findByPk(tripData.companyId);
+      const company = await Company.findByPk(tripData.company_id);
       if (!company) {
         return res.status(400).json({
           success: false,
@@ -198,7 +198,7 @@ class TripController {
       // Verificar se veículo existe e pertence à empresa (se fornecido)
       if (tripData.vehicleId) {
         const vehicle = await Vehicle.findByPk(tripData.vehicleId);
-        if (!vehicle || vehicle.companyId !== tripData.companyId) {
+        if (!vehicle || vehicle.company_id !== tripData.company_id) {
           return res.status(400).json({
             success: false,
             error: 'Veículo não encontrado ou não pertence à empresa'
@@ -214,7 +214,7 @@ class TripController {
       // Verificar se motorista existe e pertence à empresa (se fornecido)
       if (tripData.driverId) {
         const driver = await Driver.findByPk(tripData.driverId);
-        if (!driver || driver.companyId !== tripData.companyId) {
+        if (!driver || driver.company_id !== tripData.company_id) {
           return res.status(400).json({
             success: false,
             error: 'Motorista não encontrado ou não pertence à empresa'
@@ -262,7 +262,7 @@ class TripController {
       }
 
       // Verificar permissão de acesso
-      if (!req.user.isMaster() && trip.companyId !== req.user.companyId) {
+      if (!req.user.isMaster() && trip.company_id !== req.user.company_id) {
         return res.status(403).json({
           success: false,
           error: 'Acesso negado'
@@ -272,7 +272,7 @@ class TripController {
       // Verificar se veículo existe e pertence à empresa (se fornecido)
       if (updateData.vehicleId) {
         const vehicle = await Vehicle.findByPk(updateData.vehicleId);
-        if (!vehicle || vehicle.companyId !== trip.companyId) {
+        if (!vehicle || vehicle.company_id !== trip.company_id) {
           return res.status(400).json({
             success: false,
             error: 'Veículo não encontrado ou não pertence à empresa'
@@ -283,7 +283,7 @@ class TripController {
       // Verificar se motorista existe e pertence à empresa (se fornecido)
       if (updateData.driverId) {
         const driver = await Driver.findByPk(updateData.driverId);
-        if (!driver || driver.companyId !== trip.companyId) {
+        if (!driver || driver.company_id !== trip.company_id) {
           return res.status(400).json({
             success: false,
             error: 'Motorista não encontrado ou não pertence à empresa'
@@ -292,7 +292,7 @@ class TripController {
       }
 
       // Não permitir alterar empresa
-      delete updateData.companyId;
+      delete updateData.company_id;
 
       await trip.update(updateData);
 
@@ -323,7 +323,7 @@ class TripController {
       }
 
       // Verificar permissão de acesso
-      if (!req.user.isMaster() && trip.companyId !== req.user.companyId) {
+      if (!req.user.isMaster() && trip.company_id !== req.user.company_id) {
         return res.status(403).json({
           success: false,
           error: 'Acesso negado'
@@ -383,7 +383,7 @@ class TripController {
       }
 
       // Verificar permissão de acesso
-      if (!req.user.isMaster() && trip.companyId !== req.user.companyId) {
+      if (!req.user.isMaster() && trip.company_id !== req.user.company_id) {
         return res.status(403).json({
           success: false,
           error: 'Acesso negado'
@@ -408,14 +408,12 @@ class TripController {
    */
   static async getActive(req, res, next) {
     try {
-      const { companyId } = req.query;
-
-      // Determinar empresa
+            // Determinar empresa
       let targetCompanyId;
-      if (req.user.isMaster() && req.user.companyId) {
-        targetCompanyId = companyId;
+      if (req.user.isMaster() && req.user.company_id) {
+        targetCompanyId = req.user.company_id;
       } else {
-        targetCompanyId = req.user.companyId;
+        targetCompanyId = req.user.company_id;
       }
 
       const trips = await Trip.findActive(targetCompanyId);
@@ -435,14 +433,14 @@ class TripController {
    */
   static async getUpcoming(req, res, next) {
     try {
-      const { companyId, days = 30 } = req.query;
+      const {  days = 30 } = req.query;
 
       // Determinar empresa
       let targetCompanyId;
-      if (req.user.isMaster() && req.user.companyId) {
-        targetCompanyId = companyId;
+      if (req.user.isMaster() && req.user.company_id) {
+        targetCompanyId = req.user.company_id;
       } else {
-        targetCompanyId = req.user.companyId;
+        targetCompanyId = req.user.company_id;
       }
 
       const trips = await Trip.findUpcoming(targetCompanyId, parseInt(days));
@@ -462,14 +460,13 @@ class TripController {
    */
   static async getAvailable(req, res, next) {
     try {
-      const { companyId } = req.query;
-
+      
       // Determinar empresa
       let targetCompanyId;
-      if (req.user.isMaster() && req.user.companyId) {
-        targetCompanyId = companyId;
+      if (req.user.isMaster() && req.user.company_id) {
+        targetCompanyId = req.user.company_id;
       } else {
-        targetCompanyId = req.user.companyId;
+        targetCompanyId = req.user.company_id;
       }
 
       const trips = await Trip.findAvailableTrips(targetCompanyId);
@@ -489,14 +486,12 @@ class TripController {
    */
   static async getStats(req, res, next) {
     try {
-      const { companyId } = req.query;
-
       // Determinar empresa
       let targetCompanyId;
-      if (req.user.isMaster() && req.user.companyId) {
-        targetCompanyId = companyId;
+      if (req.user.isMaster() && req.user.company_id) {
+        targetCompanyId = req.user.company_id;
       } else {
-        targetCompanyId = req.user.companyId;
+        targetCompanyId = req.user.company_id;
       }
 
       const stats = await Trip.getStatsByCompany(targetCompanyId);
@@ -553,7 +548,7 @@ class TripController {
    */
   static async getRevenue(req, res, next) {
     try {
-      const { companyId, startDate, endDate } = req.query;
+      const { startDate, endDate } = req.query;
 
       if (!startDate || !endDate) {
         return res.status(400).json({
@@ -564,10 +559,10 @@ class TripController {
 
       // Determinar empresa
       let targetCompanyId;
-      if (req.user.isMaster() && req.user.companyId) {
-        targetCompanyId = companyId;
+      if (req.user.isMaster() && req.user.company_id) {
+        targetCompanyId = req.user.company_id;
       } else {
-        targetCompanyId = req.user.companyId;
+        targetCompanyId = req.user.company_id;
       }
 
       const revenue = await Trip.getRevenueByPeriod(targetCompanyId, startDate, endDate);

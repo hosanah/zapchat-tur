@@ -54,11 +54,7 @@ const Drivers = () => {
   const fetchDrivers = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/drivers', {
-        params: {
-          companyId: user?.companyId,
-        },
-      });
+      const response = await api.get('/drivers');
       setDrivers(response.data.drivers || []);
     } catch (error) {
       console.error('Erro ao carregar motoristas:', error);
@@ -70,11 +66,7 @@ const Drivers = () => {
   
   const fetchVehicles = async () => {
     try {
-      const response = await api.get('/vehicles', {
-        params: {
-          companyId: user?.companyId,
-        },
-      });
+      const response = await api.get('/vehicles');
       setVehicles(response.data.vehicles || []);
     } catch (error) {
       console.error('Erro ao carregar veículos:', error);

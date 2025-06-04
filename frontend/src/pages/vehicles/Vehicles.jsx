@@ -34,8 +34,7 @@ const Vehicles = () => {
       const response = await vehicleService.getAll({
         search: searchTerm,
         status: statusFilter !== 'all' ? statusFilter : undefined,
-        type: typeFilter !== 'all' ? typeFilter : undefined,
-        companyId: user.companyId,
+        type: typeFilter !== 'all' ? typeFilter : undefined
       });
       setVehicles(response.data.vehicles || []);
     } catch (err) {

@@ -19,10 +19,10 @@ class VehicleController {
       const where = {};
       
       // Filtro por empresa (usuários não-master só veem da própria empresa)
-      if (req.user.isMaster() && req.user.companyId) {
-        where.company_id = req.user.companyId;
+      if (req.user.isMaster() && req.user.company_id) {
+        where.company_id = req.user.company_id;
       } else if (!req.user.isMaster()) {
-        where.company_id = req.user.companyId;
+        where.company_id = req.user.company_id;
       }
 
       if (search) {
@@ -103,7 +103,7 @@ class VehicleController {
       }
 
       // Verificar permissão de acesso
-      if (!req.user.isMaster() && vehicle.companyId !== req.user.companyId) {
+      if (!req.user.isMaster() && vehicle.company_id !== req.user.company_id) {
         return res.status(403).json({
           success: false,
           error: 'Acesso negado'
@@ -139,11 +139,11 @@ class VehicleController {
 
       // Definir empresa (usuários não-master só podem criar para sua empresa)
       if (!req.user.isMaster()) {
-        vehicleData.companyId = req.user.companyId;
+        vehicleData.company_id = req.user.company_id;
       }
 
       // Verificar se empresa existe
-      const company = await Company.findByPk(vehicleData.companyId);
+      const company = await Company.findByPk(vehicleData.company_id);
       if (!company) {
         return res.status(400).json({
           success: false,
@@ -152,7 +152,7 @@ class VehicleController {
       }
 
       // Verificar se placa já existe na empresa
-      const existingVehicle = await Vehicle.findByPlate(vehicleData.plate, vehicleData.companyId);
+      const existingVehicle = await Vehicle.findByPlate(vehicleData.plate, vehicleData.company_id);
       if (existingVehicle) {
         return res.status(409).json({
           success: false,
@@ -200,7 +200,7 @@ class VehicleController {
       }
 
       // Verificar permissão de acesso
-      if (!req.user.isMaster() && vehicle.companyId !== req.user.companyId) {
+      if (!req.user.isMaster() && vehicle.company_id !== req.user.company_id) {
         return res.status(403).json({
           success: false,
           error: 'Acesso negado'
@@ -209,7 +209,7 @@ class VehicleController {
 
       // Verificar se placa já existe (exceto para o veículo atual)
       if (updateData.plate && updateData.plate !== vehicle.plate) {
-        const existingVehicle = await Vehicle.findByPlate(updateData.plate, vehicle.companyId);
+        const existingVehicle = await Vehicle.findByPlate(updateData.plate, vehicle.company_id);
         if (existingVehicle && existingVehicle.id !== id) {
           return res.status(409).json({
             success: false,
@@ -219,7 +219,7 @@ class VehicleController {
       }
 
       // Não permitir alterar empresa
-      delete updateData.companyId;
+      delete updateData.company_id;
 
       await vehicle.update(updateData);
 
@@ -250,7 +250,7 @@ class VehicleController {
       }
 
       // Verificar permissão de acesso
-      if (!req.user.isMaster() && vehicle.companyId !== req.user.companyId) {
+      if (!req.user.isMaster() && vehicle.company_id !== req.user.company_id) {
         return res.status(403).json({
           success: false,
           error: 'Acesso negado'
@@ -295,7 +295,7 @@ class VehicleController {
       }
 
       // Verificar permissão de acesso
-      if (!req.user.isMaster() && vehicle.companyId !== req.user.companyId) {
+      if (!req.user.isMaster() && vehicle.company_id !== req.user.company_id) {
         return res.status(403).json({
           success: false,
           error: 'Acesso negado'
@@ -324,10 +324,10 @@ class VehicleController {
 
       // Determinar empresa
       let targetCompanyId;
-      if (req.user.isMaster() && req.user.companyId) {
+      if (req.user.isMaster() && req.user.company_id) {
         targetCompanyId = companyId;
       } else {
-        targetCompanyId = req.user.companyId;
+        targetCompanyId = req.user.company_id;
       }
 
       const vehicles = await Vehicle.findAvailable(targetCompanyId);
@@ -351,10 +351,10 @@ class VehicleController {
 
       // Determinar empresa
       let targetCompanyId;
-      if (req.user.isMaster() && req.user.companyId) {
+      if (req.user.isMaster() && req.user.company_id) {
         targetCompanyId = companyId;
       } else {
-        targetCompanyId = req.user.companyId;
+        targetCompanyId = req.user.company_id;
       }
 
       const stats = await Vehicle.getStatsByCompany(targetCompanyId);
