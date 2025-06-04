@@ -81,7 +81,7 @@ const Drivers = () => {
       } else {
         await api.post('/drivers', submitData);
       }
-      
+
       setShowModal(false);
       setEditingDriver(null);
       resetForm();
@@ -306,10 +306,9 @@ const Drivers = () => {
                     Categoria: {driver.cnhCategory}
                   </div>
                   {driver.cnhExpiry && (
-                    <div className={`flex items-center text-sm ${
-                      isExpired(driver.cnhExpiry) ? 'text-red-600' : 
-                      isExpiringSoon(driver.cnhExpiry) ? 'text-yellow-600' : 'text-gray-600'
-                    }`}>
+                    <div className={`flex items-center text-sm ${isExpired(driver.cnhExpiry) ? 'text-red-600' :
+                        isExpiringSoon(driver.cnhExpiry) ? 'text-yellow-600' : 'text-gray-600'
+                      }`}>
                       <Calendar className="w-4 h-4 mr-2" />
                       Vence: {formatDate(driver.cnhExpiry)}
                       {isExpired(driver.cnhExpiry) && ' (Vencida)'}
@@ -364,13 +363,14 @@ const Drivers = () => {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 px-4 py-6">
+          <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-white rounded-lg shadow-xl p-6">
+
             <div className="mt-3">
               <h3 className="text-lg font-medium text-gray-900 mb-4">
                 {editingDriver ? 'Editar Motorista' : 'Novo Motorista'}
               </h3>
-              
+
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Dados Pessoais */}
                 <div>
