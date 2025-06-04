@@ -30,7 +30,7 @@ const authenticate = async (req, res, next) => {
 
     // Buscar usuário
     const user = await User.findByPk(decoded.userId, {
-      include: ['Company']
+      include: ['company']
     });
 
     if (!user) {
@@ -49,7 +49,7 @@ const authenticate = async (req, res, next) => {
     }
 
     // Verificar se empresa está ativa (para usuários não-master)
-    if (user.companyId && (!user.Company || !user.Company.isActive)) {
+    if (user.company_id && (!user.company || !user.company.isActive)) {
       return res.status(401).json({
         success: false,
         error: 'Empresa inativa'
@@ -201,7 +201,7 @@ const optionalAuth = async (req, res, next) => {
     try {
       const decoded = JWTUtils.verifyAccessToken(token);
       const user = await User.findByPk(decoded.userId, {
-        include: ['Company']
+        include: ['company']
       });
 
       if (user && user.isActive) {

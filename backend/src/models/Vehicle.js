@@ -168,7 +168,7 @@ const Vehicle = sequelize.define('Vehicle', {
     type: DataTypes.TEXT,
     allowNull: true
   },
-  companyId: {
+  company_id: {
     type: DataTypes.UUID,
     allowNull: false,
     references: {
@@ -238,18 +238,18 @@ Vehicle.prototype.isInMaintenance = function() {
 };
 
 // Métodos estáticos
-Vehicle.findByPlate = function(plate, companyId) {
+Vehicle.findByPlate = function(plate, company_id) {
   const normalizedPlate = plate.toUpperCase().replace(/[^A-Z0-9]/g, '');
   return this.findOne({
     where: { 
       plate: normalizedPlate,
-      companyId 
+      company_id: company_id 
     }
   });
 };
 
-Vehicle.findByCompany = function(companyId, options = {}) {
-  const where = { companyId };
+Vehicle.findByCompany = function(company_id, options = {}) {
+  const where = { company_id: company_id };
   
   if (options.status) {
     where.status = options.status;
@@ -265,19 +265,19 @@ Vehicle.findByCompany = function(companyId, options = {}) {
   });
 };
 
-Vehicle.findAvailable = function(companyId) {
+Vehicle.findAvailable = function(company_id) {
   return this.findAll({
     where: { 
-      companyId,
+      company_id: company_id,
       status: 'ativo'
     },
     order: [['brand', 'ASC'], ['model', 'ASC']]
   });
 };
 
-Vehicle.getStatsByCompany = function(companyId) {
+Vehicle.getStatsByCompany = function(company_id) {
   return this.findAll({
-    where: { companyId },
+    where: { company_id: company_id },
     attributes: [
       'status',
       'type',

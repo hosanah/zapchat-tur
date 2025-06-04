@@ -114,7 +114,7 @@ const User = sequelize.define('User', {
     defaultValue: {},
     allowNull: true
   },
-  companyId: {
+  company_id: {
     type: DataTypes.UUID,
     allowNull: true, // null para usuários master
     references: {
@@ -154,14 +154,14 @@ const User = sequelize.define('User', {
         user.email = user.email.toLowerCase().trim();
       }
 
-      // Validar que usuários não-master tenham companyId
-      if (user.role !== 'master' && !user.companyId) {
+      // Validar que usuários não-master tenham company_id
+      if (user.role !== 'master' && !user.company_id) {
         throw new Error('Usuários não-master devem estar associados a uma empresa');
       }
 
-      // Validar que usuários master não tenham companyId
-      if (user.role === 'master' && user.companyId) {
-        user.companyId = null;
+      // Validar que usuários master não tenham company_id
+      if (user.role === 'master' && user.company_id) {
+        user.company_id = null;
       }
     },
     beforeCreate: async (user) => {
@@ -205,14 +205,14 @@ User.prototype.isAdmin = function() {
   return this.role === 'admin';
 };
 
-User.prototype.canAccessCompany = function(companyId) {
+User.prototype.canAccessCompany = function(company_id) {
   // Usuários master podem acessar qualquer empresa
   if (this.isMaster()) {
     return true;
   }
   
   // Usuários comuns só podem acessar sua própria empresa
-  return this.companyId === companyId;
+  return this.company_id === company_id;
 };
 
 User.prototype.updateLastLogin = function() {
@@ -224,14 +224,14 @@ User.prototype.updateLastLogin = function() {
 User.findByEmail = function(email) {
   return this.findOne({
     where: { email: email.toLowerCase().trim() },
-    include: ['Company']
+    include: ['company']
   });
 };
 
-User.findByCompany = function(companyId) {
+User.findByCompany = function(company_id) {
   return this.findAll({
     where: { 
-      companyId,
+      company_id: company_id,
       isActive: true 
     },
     order: [['firstName', 'ASC'], ['lastName', 'ASC']]
@@ -251,7 +251,7 @@ User.findMasters = function() {
 User.findActive = function() {
   return this.findAll({
     where: { isActive: true },
-    include: ['Company'],
+    include: ['company'],
     order: [['firstName', 'ASC'], ['lastName', 'ASC']]
   });
 };

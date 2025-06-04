@@ -176,7 +176,7 @@ const Customer = sequelize.define('Customer', {
     type: DataTypes.TEXT,
     allowNull: true
   },
-  companyId: {
+  company_id: {
     type: DataTypes.UUID,
     allowNull: false,
     references: {
@@ -286,17 +286,17 @@ Customer.prototype.updateStats = async function(tripCount = 0, amount = 0) {
 };
 
 // Métodos estáticos
-Customer.findByEmail = function(email, companyId) {
+Customer.findByEmail = function(email, company_id) {
   const normalizedEmail = email.toLowerCase().trim();
   return this.findOne({
     where: { 
       email: normalizedEmail,
-      companyId 
+      company_id 
     }
   });
 };
 
-Customer.findByCpf = function(cpf, companyId) {
+Customer.findByCpf = function(cpf, company_id) {
   // Normalizar CPF para busca
   const normalizedCpf = cpf.replace(/\D/g, '');
   let formattedCpf = cpf;
@@ -311,13 +311,13 @@ Customer.findByCpf = function(cpf, companyId) {
   return this.findOne({
     where: { 
       cpf: formattedCpf,
-      companyId 
+      company_id 
     }
   });
 };
 
-Customer.findByCompany = function(companyId, options = {}) {
-  const where = { companyId };
+Customer.findByCompany = function(company_id, options = {}) {
+  const where = { company_id };
   
   if (options.status) {
     where.status = options.status;
@@ -329,31 +329,31 @@ Customer.findByCompany = function(companyId, options = {}) {
   });
 };
 
-Customer.findActive = function(companyId) {
+Customer.findActive = function(company_id) {
   return this.findAll({
     where: { 
-      companyId,
+      company_id,
       status: 'ativo'
     },
     order: [['firstName', 'ASC'], ['lastName', 'ASC']]
   });
 };
 
-Customer.findTopCustomers = function(companyId, limit = 10) {
+Customer.findTopCustomers = function(company_id, limit = 10) {
   return this.findAll({
-    where: { companyId },
+    where: { company_id },
     order: [['totalSpent', 'DESC'], ['totalTrips', 'DESC']],
     limit
   });
 };
 
-Customer.findRecentCustomers = function(companyId, days = 30) {
+Customer.findRecentCustomers = function(company_id, days = 30) {
   const sinceDate = new Date();
   sinceDate.setDate(sinceDate.getDate() - days);
 
   return this.findAll({
     where: {
-      companyId,
+      company_id,
       customerSince: {
         [Op.gte]: sinceDate
       }
@@ -362,9 +362,9 @@ Customer.findRecentCustomers = function(companyId, days = 30) {
   });
 };
 
-Customer.getStatsByCompany = function(companyId) {
+Customer.getStatsByCompany = function(company_id) {
   return this.findAll({
-    where: { companyId },
+    where: { company_id },
     attributes: [
       'status',
       [sequelize.fn('COUNT', sequelize.col('id')), 'count'],

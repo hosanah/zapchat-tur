@@ -352,9 +352,9 @@ Sale.prototype.getDaysUntilDue = function() {
 };
 
 // Métodos estáticos
-Sale.findByCompany = function(companyId, options = {}) {
+Sale.findByCompany = function(company_id, options = {}) {
   return this.findAll({
-    where: { company_id: companyId },
+    where: { company_id: company_id },
     order: [['sale_date', 'DESC']],
     ...options
   });
@@ -368,10 +368,10 @@ Sale.findByCustomer = function(customerId, options = {}) {
   });
 };
 
-Sale.findByStatus = function(companyId, status, options = {}) {
+Sale.findByStatus = function(company_id, status, options = {}) {
   return this.findAll({
     where: { 
-      company_id: companyId,
+      company_id: company_id,
       status: status 
     },
     order: [['sale_date', 'DESC']],
@@ -379,10 +379,10 @@ Sale.findByStatus = function(companyId, status, options = {}) {
   });
 };
 
-Sale.findOverdue = function(companyId) {
+Sale.findOverdue = function(company_id) {
   return this.findAll({
     where: {
-      company_id: companyId,
+      company_id: company_id,
       due_date: {
         [DataTypes.Op.lt]: new Date()
       },
@@ -394,8 +394,8 @@ Sale.findOverdue = function(companyId) {
   });
 };
 
-Sale.getStats = function(companyId, startDate = null, endDate = null) {
-  const whereClause = { company_id: companyId };
+Sale.getStats = function(company_id, startDate = null, endDate = null) {
+  const whereClause = { company_id: company_id };
   
   if (startDate && endDate) {
     whereClause.sale_date = {

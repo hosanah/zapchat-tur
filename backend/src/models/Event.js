@@ -210,22 +210,22 @@ Event.prototype.getDuration = function() {
 };
 
 // Métodos estáticos
-Event.findByCompany = function(companyId, options = {}) {
+Event.findByCompany = function(company_id, options = {}) {
   return this.findAll({
-    where: { company_id: companyId },
+    where: { company_id: company_id },
     order: [['start_date', 'ASC']],
     ...options
   });
 };
 
-Event.findUpcoming = function(companyId, days = 30) {
+Event.findUpcoming = function(company_id, days = 30) {
   const now = new Date();
   const futureDate = new Date();
   futureDate.setDate(now.getDate() + days);
 
   return this.findAll({
     where: {
-      company_id: companyId,
+      company_id: company_id,
       start_date: {
         [DataTypes.Op.between]: [now, futureDate]
       },
@@ -237,10 +237,10 @@ Event.findUpcoming = function(companyId, days = 30) {
   });
 };
 
-Event.findByDateRange = function(companyId, startDate, endDate) {
+Event.findByDateRange = function(company_id, startDate, endDate) {
   return this.findAll({
     where: {
-      company_id: companyId,
+      company_id: company_id,
       start_date: {
         [DataTypes.Op.between]: [startDate, endDate]
       }
@@ -249,14 +249,14 @@ Event.findByDateRange = function(companyId, startDate, endDate) {
   });
 };
 
-Event.findToday = function(companyId) {
+Event.findToday = function(company_id) {
   const today = new Date();
   const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
   const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
 
   return this.findAll({
     where: {
-      company_id: companyId,
+      company_id: company_id,
       start_date: {
         [DataTypes.Op.between]: [startOfDay, endOfDay]
       }

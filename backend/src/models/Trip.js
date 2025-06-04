@@ -226,7 +226,7 @@ const Trip = sequelize.define('Trip', {
     onUpdate: 'CASCADE',
     onDelete: 'SET NULL'
   },
-  companyId: {
+  company_id: {
     type: DataTypes.UUID,
     allowNull: false,
     references: {
@@ -343,8 +343,8 @@ Trip.prototype.updateStatus = async function(newStatus) {
 };
 
 // Métodos estáticos
-Trip.findByCompany = function(companyId, options = {}) {
-  const where = { companyId };
+Trip.findByCompany = function(company_id, options = {}) {
+  const where = { company_id };
   
   if (options.status) {
     where.status = options.status;
@@ -374,10 +374,10 @@ Trip.findByCompany = function(companyId, options = {}) {
   });
 };
 
-Trip.findActive = function(companyId) {
+Trip.findActive = function(company_id) {
   return this.findAll({
     where: { 
-      companyId,
+      company_id,
       status: {
         [Op.in]: ['planejado', 'confirmado', 'em_andamento']
       }
@@ -386,14 +386,14 @@ Trip.findActive = function(companyId) {
   });
 };
 
-Trip.findUpcoming = function(companyId, days = 30) {
+Trip.findUpcoming = function(company_id, days = 30) {
   const today = new Date();
   const futureDate = new Date();
   futureDate.setDate(today.getDate() + days);
 
   return this.findAll({
     where: {
-      companyId,
+      company_id,
       startDate: {
         [Op.between]: [today, futureDate]
       },
@@ -431,10 +431,10 @@ Trip.findByDriver = function(driverId, options = {}) {
   });
 };
 
-Trip.findAvailableTrips = function(companyId) {
+Trip.findAvailableTrips = function(company_id) {
   return this.findAll({
     where: {
-      companyId,
+      company_id,
       status: {
         [Op.in]: ['planejado', 'confirmado']
       },
@@ -446,9 +446,9 @@ Trip.findAvailableTrips = function(companyId) {
   });
 };
 
-Trip.getStatsByCompany = function(companyId) {
+Trip.getStatsByCompany = function(company_id) {
   return this.findAll({
-    where: { companyId },
+    where: { company_id },
     attributes: [
       'status',
       'type',
@@ -462,10 +462,10 @@ Trip.getStatsByCompany = function(companyId) {
   });
 };
 
-Trip.getRevenueByPeriod = function(companyId, startDate, endDate) {
+Trip.getRevenueByPeriod = function(company_id, startDate, endDate) {
   return this.findAll({
     where: {
-      companyId,
+      company_id,
       startDate: {
         [Op.between]: [startDate, endDate]
       },

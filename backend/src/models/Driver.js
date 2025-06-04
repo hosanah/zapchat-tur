@@ -213,7 +213,7 @@ const Driver = sequelize.define('Driver', {
     type: DataTypes.TEXT,
     allowNull: true
   },
-  companyId: {
+  company_id: {
     type: DataTypes.UUID,
     allowNull: false,
     references: {
@@ -327,7 +327,7 @@ Driver.prototype.canDriveVehicle = function(vehicleType) {
 };
 
 // Métodos estáticos
-Driver.findByCpf = function(cpf, companyId) {
+Driver.findByCpf = function(cpf, company_id) {
   // Normalizar CPF para busca
   const normalizedCpf = cpf.replace(/\D/g, '');
   let formattedCpf = cpf;
@@ -342,22 +342,22 @@ Driver.findByCpf = function(cpf, companyId) {
   return this.findOne({
     where: { 
       cpf: formattedCpf,
-      companyId 
+      company_id 
     }
   });
 };
 
-Driver.findByLicense = function(licenseNumber, companyId) {
+Driver.findByLicense = function(licenseNumber, company_id) {
   return this.findOne({
     where: { 
       licenseNumber,
-      companyId 
+      company_id 
     }
   });
 };
 
-Driver.findByCompany = function(companyId, options = {}) {
-  const where = { companyId };
+Driver.findByCompany = function(company_id, options = {}) {
+  const where = { company_id };
   
   if (options.status) {
     where.status = options.status;
@@ -373,23 +373,23 @@ Driver.findByCompany = function(companyId, options = {}) {
   });
 };
 
-Driver.findActive = function(companyId) {
+Driver.findActive = function(company_id) {
   return this.findAll({
     where: { 
-      companyId,
+      company_id,
       status: 'ativo'
     },
     order: [['firstName', 'ASC'], ['lastName', 'ASC']]
   });
 };
 
-Driver.findExpiringLicenses = function(companyId, days = 30) {
+Driver.findExpiringLicenses = function(company_id, days = 30) {
   const futureDate = new Date();
   futureDate.setDate(futureDate.getDate() + days);
 
   return this.findAll({
     where: {
-      companyId,
+      company_id,
       licenseExpiry: {
         [sequelize.Op.lte]: futureDate
       },
@@ -399,9 +399,9 @@ Driver.findExpiringLicenses = function(companyId, days = 30) {
   });
 };
 
-Driver.getStatsByCompany = function(companyId) {
+Driver.getStatsByCompany = function(company_id) {
   return this.findAll({
-    where: { companyId },
+    where: { company_id },
     attributes: [
       'status',
       'licenseCategory',

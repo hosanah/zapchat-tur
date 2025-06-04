@@ -237,7 +237,7 @@ Booking.findByTrip = function(tripId, options = {}) {
   });
 };
 
-Booking.findPending = function(companyId) {
+Booking.findPending = function(company_id) {
   return this.findAll({
     where: {
       status: 'pendente'
@@ -245,7 +245,7 @@ Booking.findPending = function(companyId) {
     include: [
       {
         model: sequelize.models.Trip,
-        where: { companyId },
+        where: { company_id },
         required: true
       },
       {
@@ -257,7 +257,7 @@ Booking.findPending = function(companyId) {
   });
 };
 
-Booking.findByDateRange = function(companyId, startDate, endDate) {
+Booking.findByDateRange = function(company_id, startDate, endDate) {
   return this.findAll({
     where: {
       bookingDate: {
@@ -267,7 +267,7 @@ Booking.findByDateRange = function(companyId, startDate, endDate) {
     include: [
       {
         model: sequelize.models.Trip,
-        where: { companyId },
+        where: { company_id },
         required: true
       },
       {
@@ -279,7 +279,7 @@ Booking.findByDateRange = function(companyId, startDate, endDate) {
   });
 };
 
-Booking.getRevenueStats = function(companyId, startDate, endDate) {
+Booking.getRevenueStats = function(company_id, startDate, endDate) {
   return this.findAll({
     where: {
       status: 'pago',
@@ -290,7 +290,7 @@ Booking.getRevenueStats = function(companyId, startDate, endDate) {
     include: [
       {
         model: sequelize.models.Trip,
-        where: { companyId },
+        where: { company_id },
         required: true,
         attributes: []
       }
