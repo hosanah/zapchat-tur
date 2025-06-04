@@ -48,7 +48,7 @@ async function seedDatabase() {
       role: 'master',
       isActive: true,
       emailVerified: true,
-      companyId: null // Usuário master não tem empresa específica
+      company_id: null // Usuário master não tem empresa específica
     });
 
     console.log('✅ Usuário master criado:', masterUser.email);
@@ -63,7 +63,7 @@ async function seedDatabase() {
       role: 'admin',
       isActive: true,
       emailVerified: true,
-      companyId: exampleCompany.id
+      company_id: exampleCompany.id
     });
 
     console.log('✅ Usuário admin criado:', adminUser.email);
@@ -78,7 +78,7 @@ async function seedDatabase() {
       role: 'user',
       isActive: true,
       emailVerified: true,
-      companyId: exampleCompany.id
+      company_id: exampleCompany.id
     });
 
     console.log('✅ Usuário comum criado:', commonUser.email);
