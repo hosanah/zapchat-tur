@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { ToastProvider } from './contexts/ToastContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import ModernLayout from './components/layout/ModernLayout';
 
@@ -44,51 +45,53 @@ const Bookings = () => (
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <div className="min-h-screen bg-gray-50">
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            
-            {/* Protected Routes */}
-            <Route path="/" element={
-              <ProtectedRoute>
-                <ModernLayout />
-              </ProtectedRoute>
-            }>
-              <Route index element={<Navigate to="/dashboard" replace />} />
-              <Route path="dashboard" element={<ModernDashboard />} />
+      <ToastProvider>
+        <Router>
+          <div className="min-h-screen bg-gray-50">
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
               
-              {/* Master only routes */}
-              <Route path="companies" element={
-                <ProtectedRoute requiredRole="master">
-                  <Companies />
+              {/* Protected Routes */}
+              <Route path="/" element={
+                <ProtectedRoute>
+                  <ModernLayout />
                 </ProtectedRoute>
-              } />
+              }>
+                <Route index element={<Navigate to="/dashboard" replace />} />
+                <Route path="dashboard" element={<ModernDashboard />} />
+                
+                {/* Master only routes */}
+                <Route path="companies" element={
+                  <ProtectedRoute requiredRole="master">
+                    <Companies />
+                  </ProtectedRoute>
+                } />
+                
+                {/* Admin and Master routes */}
+                <Route path="users" element={
+                  <ProtectedRoute requiredRole={["admin", "master"]}>
+                    <Users />
+                  </ProtectedRoute>
+                } />
+                
+                {/* All authenticated users */}
+                <Route path="vehicles" element={<Vehicles />} />
+                <Route path="drivers" element={<Drivers />} />
+                <Route path="customers" element={<Customers />} />
+                <Route path="trips" element={<Trips />} />
+                <Route path="events" element={<Events />} />
+                <Route path="sales" element={<Sales />} />
+                <Route path="bookings" element={<Bookings />} />
+              </Route>
               
-              {/* Admin and Master routes */}
-              <Route path="users" element={
-                <ProtectedRoute requiredRole={["admin", "master"]}>
-                  <Users />
-                </ProtectedRoute>
-              } />
-              
-              {/* All authenticated users */}
-              <Route path="vehicles" element={<Vehicles />} />
-              <Route path="drivers" element={<Drivers />} />
-              <Route path="customers" element={<Customers />} />
-              <Route path="trips" element={<Trips />} />
-              <Route path="events" element={<Events />} />
-              <Route path="sales" element={<Sales />} />
-              <Route path="bookings" element={<Bookings />} />
-            </Route>
-            
-            {/* Catch all route */}
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          </Routes>
-        </div>
-      </Router>
+              {/* Catch all route */}
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            </Routes>
+          </div>
+        </Router>
+      </ToastProvider>
     </AuthProvider>
   );
 }

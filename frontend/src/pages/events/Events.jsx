@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 import api from '../../services/api';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -26,6 +27,7 @@ import {
 
 const Events = () => {
   const { user } = useAuth();
+  const { showSuccess, showError } = useToast();
   const calendarRef = useRef(null);
   const [events, setEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
@@ -126,6 +128,7 @@ const Events = () => {
       setEvents(eventsData);
     } catch (error) {
       console.error('Erro ao carregar eventos:', error);
+      showError('Erro ao carregar lista de eventos');
     } finally {
       setLoading(false);
     }
@@ -142,6 +145,7 @@ const Events = () => {
       setTrips(response.data.data || []);
     } catch (error) {
       console.error('Erro ao carregar passeios:', error);
+      showError('Erro ao carregar lista de passeios');
     }
   };
 
@@ -217,8 +221,10 @@ const Events = () => {
 
       if (modalMode === 'create') {
         await api.post('/events', eventData);
+        showSuccess('Evento criado com sucesso!');
       } else if (modalMode === 'edit') {
         await api.put(`/events/${selectedEvent.id}`, eventData);
+        showSuccess('Evento atualizado com sucesso!');
       }
 
       setShowModal(false);
@@ -226,6 +232,8 @@ const Events = () => {
       resetForm();
     } catch (error) {
       console.error('Erro ao salvar evento:', error);
+      const errorMessage = error.response?.data?.message || 'Erro ao salvar evento';
+      showError(errorMessage);
     }
   };
 
@@ -233,10 +241,13 @@ const Events = () => {
     if (window.confirm('Tem certeza que deseja excluir este evento?')) {
       try {
         await api.delete(`/events/${eventId}`);
+        showSuccess('Evento excluído com sucesso!');
         setShowModal(false);
         fetchEvents();
       } catch (error) {
         console.error('Erro ao excluir evento:', error);
+        const errorMessage = error.response?.data?.message || 'Erro ao excluir evento';
+        showError(errorMessage);
       }
     }
   };

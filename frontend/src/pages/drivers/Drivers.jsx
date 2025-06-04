@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Edit, Trash2, User, Phone, Mail, Calendar, MapPin, Car } from 'lucide-react';
 import api from '../../services/api';
+import { useToast } from '../../contexts/ToastContext';
 
 const Drivers = () => {
   const [drivers, setDrivers] = useState([]);
@@ -9,6 +10,7 @@ const Drivers = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingDriver, setEditingDriver] = useState(null);
+  const { showSuccess, showError } = useToast();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -54,6 +56,7 @@ const Drivers = () => {
       setDrivers(response.data.drivers || []);
     } catch (error) {
       console.error('Erro ao carregar motoristas:', error);
+      showError('Erro ao carregar lista de motoristas');
     } finally {
       setLoading(false);
     }
@@ -65,6 +68,7 @@ const Drivers = () => {
       setVehicles(response.data.vehicles || []);
     } catch (error) {
       console.error('Erro ao carregar veículos:', error);
+      showError('Erro ao carregar lista de veículos');
     }
   };
 
@@ -78,8 +82,10 @@ const Drivers = () => {
 
       if (editingDriver) {
         await api.put(`/drivers/${editingDriver.id}`, submitData);
+        showSuccess('Motorista atualizado com sucesso!');
       } else {
         await api.post('/drivers', submitData);
+        showSuccess('Motorista cadastrado com sucesso!');
       }
       
       setShowModal(false);
@@ -88,6 +94,8 @@ const Drivers = () => {
       fetchDrivers();
     } catch (error) {
       console.error('Erro ao salvar motorista:', error);
+      const errorMessage = error.response?.data?.message || 'Erro ao salvar motorista';
+      showError(errorMessage);
     }
   };
 
@@ -117,9 +125,12 @@ const Drivers = () => {
     if (window.confirm('Tem certeza que deseja excluir este motorista?')) {
       try {
         await api.delete(`/drivers/${id}`);
+        showSuccess('Motorista excluído com sucesso!');
         fetchDrivers();
       } catch (error) {
         console.error('Erro ao excluir motorista:', error);
+        const errorMessage = error.response?.data?.message || 'Erro ao excluir motorista';
+        showError(errorMessage);
       }
     }
   };

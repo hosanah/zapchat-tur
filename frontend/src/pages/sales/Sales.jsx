@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import AuthContext from '@/contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 import api from '../../services/api';
 import {
   DollarSign,
@@ -27,6 +28,7 @@ import {
 
 const Sales = () => {
   const { user } = useContext(AuthContext);
+  const { showSuccess, showError } = useToast();
   const [sales, setSales] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [events, setEvents] = useState([]);
@@ -167,8 +169,10 @@ const Sales = () => {
 
       if (modalMode === 'create') {
         await api.post('/sales', dataToSend);
+        showSuccess('Venda criada com sucesso!');
       } else {
         await api.put(`/sales/${selectedSale.id}`, dataToSend);
+        showSuccess('Venda atualizada com sucesso!');
       }
 
       setShowModal(false);
@@ -177,7 +181,8 @@ const Sales = () => {
       fetchStats();
     } catch (error) {
       console.error('Erro ao salvar venda:', error);
-      alert('Erro ao salvar venda. Verifique os dados e tente novamente.');
+      const errorMessage = error.response?.data?.message || 'Erro ao salvar venda';
+      showError(errorMessage);
     }
   };
 
@@ -185,11 +190,13 @@ const Sales = () => {
     if (window.confirm('Tem certeza que deseja excluir esta venda?')) {
       try {
         await api.delete(`/sales/${id}`);
+        showSuccess('Venda excluída com sucesso!');
         fetchSales();
         fetchStats();
       } catch (error) {
         console.error('Erro ao excluir venda:', error);
-        alert('Erro ao excluir venda.');
+        const errorMessage = error.response?.data?.message || 'Erro ao excluir venda';
+        showError(errorMessage);
       }
     }
   };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Edit, Trash2, User, Phone, Mail, MapPin, Calendar, Users } from 'lucide-react';
 import api from '../../services/api';
+import { useToast } from '../../contexts/ToastContext';
 
 const Customers = () => {
   const [customers, setCustomers] = useState([]);
@@ -8,6 +9,7 @@ const Customers = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState(null);
+  const { showSuccess, showError } = useToast();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -42,6 +44,7 @@ const Customers = () => {
       setCustomers(response.data.customers || []);
     } catch (error) {
       console.error('Erro ao carregar clientes:', error);
+      showError('Erro ao carregar lista de clientes');
     } finally {
       setLoading(false);
     }
@@ -52,8 +55,10 @@ const Customers = () => {
     try {
       if (editingCustomer) {
         await api.put(`/customers/${editingCustomer.id}`, formData);
+        showSuccess('Cliente atualizado com sucesso!');
       } else {
         await api.post('/customers', formData);
+        showSuccess('Cliente cadastrado com sucesso!');
       }
       
       setShowModal(false);
@@ -62,6 +67,8 @@ const Customers = () => {
       fetchCustomers();
     } catch (error) {
       console.error('Erro ao salvar cliente:', error);
+      const errorMessage = error.response?.data?.message || 'Erro ao salvar cliente';
+      showError(errorMessage);
     }
   };
 
@@ -90,9 +97,12 @@ const Customers = () => {
     if (window.confirm('Tem certeza que deseja excluir este cliente?')) {
       try {
         await api.delete(`/customers/${id}`);
+        showSuccess('Cliente excluído com sucesso!');
         fetchCustomers();
       } catch (error) {
         console.error('Erro ao excluir cliente:', error);
+        const errorMessage = error.response?.data?.message || 'Erro ao excluir cliente';
+        showError(errorMessage);
       }
     }
   };

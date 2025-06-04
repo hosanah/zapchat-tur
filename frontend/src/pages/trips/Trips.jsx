@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Edit, Trash2, MapPin, Calendar, Clock, Users, Car, User, DollarSign } from 'lucide-react';
 import api from '../../services/api';
+import { useToast } from '../../contexts/ToastContext';
 
 const Trips = () => {
   const [trips, setTrips] = useState([]);
@@ -11,6 +12,7 @@ const Trips = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingTrip, setEditingTrip] = useState(null);
+  const { showSuccess, showError } = useToast();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -50,6 +52,7 @@ const Trips = () => {
       setTrips(response.data.trips || []);
     } catch (error) {
       console.error('Erro ao carregar passeios:', error);
+      showError('Erro ao carregar lista de passeios');
     } finally {
       setLoading(false);
     }
@@ -61,6 +64,7 @@ const Trips = () => {
       setVehicles(response.data.vehicles || []);
     } catch (error) {
       console.error('Erro ao carregar veículos:', error);
+      showError('Erro ao carregar lista de veículos');
     }
   };
 
@@ -70,6 +74,7 @@ const Trips = () => {
       setDrivers(response.data.drivers || []);
     } catch (error) {
       console.error('Erro ao carregar motoristas:', error);
+      showError('Erro ao carregar lista de motoristas');
     }
   };
 
@@ -79,6 +84,7 @@ const Trips = () => {
       setCustomers(response.data.customers || []);
     } catch (error) {
       console.error('Erro ao carregar clientes:', error);
+      showError('Erro ao carregar lista de clientes');
     }
   };
 
@@ -95,8 +101,10 @@ const Trips = () => {
 
       if (editingTrip) {
         await api.put(`/trips/${editingTrip.id}`, submitData);
+        showSuccess('Passeio atualizado com sucesso!');
       } else {
         await api.post('/trips', submitData);
+        showSuccess('Passeio cadastrado com sucesso!');
       }
       
       setShowModal(false);
@@ -105,6 +113,8 @@ const Trips = () => {
       fetchTrips();
     } catch (error) {
       console.error('Erro ao salvar passeio:', error);
+      const errorMessage = error.response?.data?.message || 'Erro ao salvar passeio';
+      showError(errorMessage);
     }
   };
 
@@ -133,9 +143,12 @@ const Trips = () => {
     if (window.confirm('Tem certeza que deseja excluir este passeio?')) {
       try {
         await api.delete(`/trips/${id}`);
+        showSuccess('Passeio excluído com sucesso!');
         fetchTrips();
       } catch (error) {
         console.error('Erro ao excluir passeio:', error);
+        const errorMessage = error.response?.data?.message || 'Erro ao excluir passeio';
+        showError(errorMessage);
       }
     }
   };
