@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { AuthContext } from '../../contexts/AuthContext';
+import AuthContext from '@/contexts/AuthContext';
 import api from '../../services/api';
 import {
   DollarSign,
