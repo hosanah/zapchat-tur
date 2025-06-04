@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Search, Edit, Trash2, User, Phone, Mail, Calendar, MapPin, Car } from 'lucide-react';
 import api from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Drivers = () => {
   const [drivers, setDrivers] = useState([]);
@@ -11,6 +12,7 @@ const Drivers = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingDriver, setEditingDriver] = useState(null);
   const { showSuccess, showError } = useToast();
+  const { isAdmin, user } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -52,7 +54,11 @@ const Drivers = () => {
   const fetchDrivers = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/drivers');
+      const response = await api.get('/drivers', {
+        params: {
+          companyId: user?.companyId,
+        },
+      });
       setDrivers(response.data.drivers || []);
     } catch (error) {
       console.error('Erro ao carregar motoristas:', error);
@@ -61,17 +67,21 @@ const Drivers = () => {
       setLoading(false);
     }
   };
-
+  
   const fetchVehicles = async () => {
     try {
-      const response = await api.get('/vehicles');
+      const response = await api.get('/vehicles', {
+        params: {
+          companyId: user?.companyId,
+        },
+      });
       setVehicles(response.data.vehicles || []);
     } catch (error) {
       console.error('Erro ao carregar veículos:', error);
       showError('Erro ao carregar lista de veículos');
     }
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {

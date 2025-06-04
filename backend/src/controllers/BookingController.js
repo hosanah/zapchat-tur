@@ -17,8 +17,8 @@ class BookingController {
 
       // Construir filtros para Trip (empresa)
       const tripWhere = {};
-      if (req.user.isMaster() && companyId) {
-        tripWhere.companyId = companyId;
+      if (req.user.isMaster() && req.user.companyId) {
+        tripwhere.company_id = req.user.companyId;
       } else if (!req.user.isMaster()) {
         tripWhere.companyId = req.user.companyId;
       }
@@ -431,7 +431,7 @@ class BookingController {
 
       // Determinar empresa
       let targetCompanyId;
-      if (req.user.isMaster() && companyId) {
+      if (req.user.isMaster() && req.user.companyId) {
         targetCompanyId = companyId;
       } else {
         targetCompanyId = req.user.companyId;
@@ -465,7 +465,7 @@ class BookingController {
 
       // Determinar empresa
       let targetCompanyId;
-      if (req.user.isMaster() && companyId) {
+      if (req.user.isMaster() && req.user.companyId) {
         targetCompanyId = companyId;
       } else {
         targetCompanyId = req.user.companyId;

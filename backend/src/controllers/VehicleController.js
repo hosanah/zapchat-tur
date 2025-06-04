@@ -12,17 +12,17 @@ class VehicleController {
    */
   static async getAll(req, res, next) {
     try {
-      const { page = 1, limit = 10, search, status, type, companyId } = req.query;
+      const { page = 1, limit = 10, search, status, type } = req.query;
       const offset = (page - 1) * limit;
 
       // Construir filtros
       const where = {};
       
       // Filtro por empresa (usuários não-master só veem da própria empresa)
-      if (req.user.isMaster() && companyId) {
-        where.companyId = companyId;
+      if (req.user.isMaster() && req.user.companyId) {
+        where.company_id = req.user.companyId;
       } else if (!req.user.isMaster()) {
-        where.company_id = companyId;
+        where.company_id = req.user.companyId;
       }
 
       if (search) {
@@ -324,7 +324,7 @@ class VehicleController {
 
       // Determinar empresa
       let targetCompanyId;
-      if (req.user.isMaster() && companyId) {
+      if (req.user.isMaster() && req.user.companyId) {
         targetCompanyId = companyId;
       } else {
         targetCompanyId = req.user.companyId;
@@ -351,7 +351,7 @@ class VehicleController {
 
       // Determinar empresa
       let targetCompanyId;
-      if (req.user.isMaster() && companyId) {
+      if (req.user.isMaster() && req.user.companyId) {
         targetCompanyId = companyId;
       } else {
         targetCompanyId = req.user.companyId;
