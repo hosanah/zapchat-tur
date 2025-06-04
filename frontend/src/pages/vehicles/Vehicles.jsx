@@ -22,7 +22,7 @@ const Vehicles = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
 
   useEffect(() => {
     loadVehicles();
@@ -35,6 +35,7 @@ const Vehicles = () => {
         search: searchTerm,
         status: statusFilter !== 'all' ? statusFilter : undefined,
         type: typeFilter !== 'all' ? typeFilter : undefined,
+        companyId: user.companyId,
       });
       setVehicles(response.data.vehicles || []);
     } catch (err) {

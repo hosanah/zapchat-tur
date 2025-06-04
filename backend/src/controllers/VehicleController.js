@@ -22,7 +22,7 @@ class VehicleController {
       if (req.user.isMaster() && companyId) {
         where.companyId = companyId;
       } else if (!req.user.isMaster()) {
-        where.companyId = req.user.companyId;
+        where.company_id = companyId;
       }
 
       if (search) {

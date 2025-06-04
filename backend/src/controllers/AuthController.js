@@ -80,8 +80,8 @@ class AuthController {
             lastName: user.lastName,
             email: user.email,
             role: user.role,
-            companyId: user.companyId,
-            Company: user.Company
+            companyId: user.company_id,
+            Company: user.company
           },
           tokens
         }
