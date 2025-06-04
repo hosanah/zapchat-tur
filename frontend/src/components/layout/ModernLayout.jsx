@@ -156,7 +156,7 @@ const ModernLayout = () => {
       {/* Sidebar */}
       <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl transform ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-      } transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 border-r border-gray-200`}>
+      } transition-transform duration-300 ease-in-out lg:translate-x-0 lg:inset-0 border-r border-gray-200`}>
         
         {/* Logo */}
         <div className="flex items-center justify-center h-16 px-4 bg-gradient-to-r from-zapchat-primary to-zapchat-medium">
