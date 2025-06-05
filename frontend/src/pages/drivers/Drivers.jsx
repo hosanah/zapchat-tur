@@ -55,7 +55,15 @@ const Drivers = () => {
     try {
       setLoading(true);
       const response = await api.get('/drivers');
-      setDrivers(response.data.drivers || []);
+      setDrivers(
+      (response.data.drivers || []).map(driver => ({
+        ...driver,
+        cnh: driver.licenseNumber, 
+        cnhCategory: driver.licenseCategory,
+        name: [driver.firstName, driver.lastName].filter(Boolean).join(' '),
+        cnhExpiry: driver.licenseExpiry
+      }))
+    );
     } catch (error) {
       console.error('Erro ao carregar motoristas:', error);
       showError('Erro ao carregar lista de motoristas');
