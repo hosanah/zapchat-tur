@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { vehicleService } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 import {
   Car,
   Plus,
@@ -13,6 +13,8 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
+  X,
+  Save,
 } from 'lucide-react';
 
 const Vehicles = () => {
@@ -22,7 +24,52 @@ const Vehicles = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
-  const { isAdmin, user } = useAuth();
+  const [showModal, setShowModal] = useState(false);
+  const [editingVehicle, setEditingVehicle] = useState(null);
+  const { isAdmin } = useAuth();
+  const { showSuccess, showError } = useToast();
+
+  const [formData, setFormData] = useState({
+    plate: '',
+    brand: '',
+    model: '',
+    year: '',
+    capacity: '',
+    type: 'van',
+    status: 'ativo',
+    mileage: '',
+    color: '',
+    registration: '',
+    insurance_number: '',
+    insurance_expiry: '',
+    last_maintenance: '',
+    next_maintenance: '',
+    fuel: '',
+    observations: ''
+  });
+
+  const vehicleTypes = [
+    { value: 'van', label: 'Van' },
+    { value: 'micro_onibus', label: 'Micro-ônibus' },
+    { value: 'onibus', label: 'Ônibus' },
+    { value: 'carro', label: 'Carro' },
+    { value: 'suv', label: 'SUV' }
+  ];
+
+  const statusOptions = [
+    { value: 'ativo', label: 'Ativo', color: 'bg-green-100 text-green-800' },
+    { value: 'manutencao', label: 'Manutenção', color: 'bg-yellow-100 text-yellow-800' },
+    { value: 'inativo', label: 'Inativo', color: 'bg-red-100 text-red-800' }
+  ];
+  
+  const fuelOptions = [
+    { value: 'gasolina', label: 'Gasolina', color: 'bg-green-100 text-green-800' },
+    { value: 'etanol', label: 'Etanol', color: 'bg-yellow-100 text-yellow-800' },
+    { value: 'diesel', label: 'Diesel', color: 'bg-red-100 text-red-800' },
+    { value: 'flex', label: 'Flex', color: 'bg-red-100 text-red-800' },
+    { value: 'eletrico', label: 'Elétrico', color: 'bg-red-100 text-red-800' },
+    { value: 'hibrido', label: 'Híbrido', color: 'bg-red-100 text-red-800' }
+  ];
 
   useEffect(() => {
     loadVehicles();
@@ -34,15 +81,78 @@ const Vehicles = () => {
       const response = await vehicleService.getAll({
         search: searchTerm,
         status: statusFilter !== 'all' ? statusFilter : undefined,
-        type: typeFilter !== 'all' ? typeFilter : undefined
+        type: typeFilter !== 'all' ? typeFilter : undefined,
       });
       setVehicles(response.data.vehicles || []);
+      setError(null);
     } catch (err) {
       setError('Erro ao carregar veículos');
       console.error(err);
+      showError('Erro ao carregar lista de veículos');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const submitData = {
+        ...formData,
+        year: parseInt(formData.year) || new Date().getFullYear(),
+        capacity: parseInt(formData.capacity) || 0,
+        mileage: parseInt(formData.mileage) || 0
+      };
+
+      if (editingVehicle) {
+        await vehicleService.update(editingVehicle.id, submitData);
+        showSuccess('Veículo atualizado com sucesso!');
+      } else {
+        await vehicleService.create(submitData);
+        showSuccess('Veículo cadastrado com sucesso!');
+      }
+      
+      setShowModal(false);
+      setEditingVehicle(null);
+      resetForm();
+      loadVehicles();
+    } catch (error) {
+      console.error('Erro ao salvar veículo:', error);
+    
+      const response = error.response?.data;
+    
+      if (response?.success === false && Array.isArray(response.details)) {
+        response.details.forEach((detail) => {
+          if (detail.msg) showError(detail.msg);
+        });
+      } else {
+        const errorMessage = response?.message || 'Erro ao salvar veículo';
+        showError(errorMessage);
+      }
+    }
+  };
+
+  const handleEdit = (vehicle) => {
+    setEditingVehicle(vehicle);
+    setFormData({
+      plate: vehicle.plate || '',
+      brand: vehicle.brand || '',
+      model: vehicle.model || '',
+      year: vehicle.year || '',
+      capacity: vehicle.capacity || '',
+      type: vehicle.type || 'van',
+      status: vehicle.status || 'ativo',
+      mileage: vehicle.mileage || '',
+      color: vehicle.color || '',
+      registration: vehicle.registration || '',
+      insurance_number: vehicle.insurance_number || '',
+      insurance_expiry: vehicle.insurance_expiry ? vehicle.insurance_expiry.split('T')[0] : '',
+      last_maintenance: vehicle.last_maintenance ? vehicle.last_maintenance.split('T')[0] : '',
+      next_maintenance: vehicle.next_maintenance ? vehicle.next_maintenance.split('T')[0] : '',
+      fuel: vehicle.fuel,
+      observations: vehicle.observations || ''
+    });
+    setShowModal(true);
   };
 
   const handleDelete = async (id) => {
@@ -52,21 +162,48 @@ const Vehicles = () => {
 
     try {
       await vehicleService.delete(id);
+      showSuccess('Veículo excluído com sucesso!');
       setVehicles(vehicles.filter(v => v.id !== id));
     } catch (err) {
-      alert('Erro ao excluir veículo');
+      console.error('Erro ao excluir veículo:', err);
+      const errorMessage = err.response?.data?.message || 'Erro ao excluir veículo';
+      showError(errorMessage);
     }
   };
 
   const handleStatusChange = async (id, newStatus) => {
     try {
       await vehicleService.updateStatus(id, newStatus);
+      showSuccess(`Status do veículo alterado para ${getStatusText(newStatus)}`);
       setVehicles(vehicles.map(v => 
         v.id === id ? { ...v, status: newStatus } : v
       ));
     } catch (err) {
-      alert('Erro ao atualizar status');
+      console.error('Erro ao atualizar status:', err);
+      const errorMessage = err.response?.data?.message || 'Erro ao atualizar status';
+      showError(errorMessage);
     }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      plate: '',
+      brand: '',
+      model: '',
+      year: '',
+      capacity: '',
+      type: 'van',
+      status: 'ativo',
+      mileage: '',
+      color: '',
+      registration: '',
+      insurance_number: '',
+      insurance_expiry: '',
+      last_maintenance: '',
+      next_maintenance: '',
+      fuel: '',
+      observations: ''
+    });
   };
 
   const getStatusIcon = (status) => {
@@ -139,13 +276,17 @@ const Vehicles = () => {
           <p className="text-gray-600">Gerencie a frota de veículos</p>
         </div>
         {isAdmin() && (
-          <Link
-            to="/vehicles/new"
+          <button
+            onClick={() => {
+              resetForm();
+              setEditingVehicle(null);
+              setShowModal(true);
+            }}
             className="bg-[#99CD85] text-white px-4 py-2 rounded-md hover:bg-[#7FA653] transition-colors flex items-center"
           >
             <Plus className="h-5 w-5 mr-2" />
             Novo Veículo
-          </Link>
+          </button>
         )}
       </div>
 
@@ -306,14 +447,7 @@ const Vehicles = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex items-center justify-end space-x-2">
                           <button
-                            onClick={() => window.location.href = `/vehicles/${vehicle.id}`}
-                            className="text-[#7FA653] hover:text-[#63783D]"
-                            title="Visualizar"
-                          >
-                            <Eye className="h-5 w-5" />
-                          </button>
-                          <button
-                            onClick={() => window.location.href = `/vehicles/${vehicle.id}/edit`}
+                            onClick={() => handleEdit(vehicle)}
                             className="text-[#99CD85] hover:text-[#7FA653]"
                             title="Editar"
                           >
@@ -395,6 +529,271 @@ const Vehicles = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal de Criação/Edição */}
+      {showModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium text-gray-900">
+                {editingVehicle ? 'Editar Veículo' : 'Novo Veículo'}
+              </h3>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-gray-400 hover:text-gray-500"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Placa *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.plate}
+                    onChange={(e) => setFormData({ ...formData, plate: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#99CD85] focus:border-[#99CD85]"
+                    placeholder="ABC1234"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Marca *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.brand}
+                    onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#99CD85] focus:border-[#99CD85]"
+                    placeholder="Mercedes-Benz"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Modelo *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.model}
+                    onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#99CD85] focus:border-[#99CD85]"
+                    placeholder="Sprinter"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Ano
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.year}
+                    onChange={(e) => setFormData({ ...formData, year: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#99CD85] focus:border-[#99CD85]"
+                    placeholder="2023"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Capacidade (passageiros) *
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    value={formData.capacity}
+                    onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#99CD85] focus:border-[#99CD85]"
+                    placeholder="15"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Tipo *
+                  </label>
+                  <select
+                    required
+                    value={formData.type}
+                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#99CD85] focus:border-[#99CD85]"
+                  >
+                    {vehicleTypes.map((type) => (
+                      <option key={type.value} value={type.value}>
+                        {type.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status *
+                  </label>
+                  <select
+                    required
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#99CD85] focus:border-[#99CD85]"
+                  >
+                    {statusOptions.map((status) => (
+                      <option key={status.value} value={status.value}>
+                        {status.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Quilometragem
+                  </label>
+                  <input
+                    type="number"
+                    value={formData.mileage}
+                    onChange={(e) => setFormData({ ...formData, mileage: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#99CD85] focus:border-[#99CD85]"
+                    placeholder="50000"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Cor
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.color}
+                    onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#99CD85] focus:border-[#99CD85]"
+                    placeholder="Branco"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Registro/RENAVAM
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.registration}
+                    onChange={(e) => setFormData({ ...formData, registration: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#99CD85] focus:border-[#99CD85]"
+                    placeholder="12345678901"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Número do Seguro
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.insurance_number}
+                    onChange={(e) => setFormData({ ...formData, insurance_number: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#99CD85] focus:border-[#99CD85]"
+                    placeholder="987654321"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Vencimento do Seguro
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.insurance_expiry}
+                    onChange={(e) => setFormData({ ...formData, insurance_expiry: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#99CD85] focus:border-[#99CD85]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Última Manutenção
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.last_maintenance}
+                    onChange={(e) => setFormData({ ...formData, last_maintenance: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#99CD85] focus:border-[#99CD85]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Próxima Manutenção
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.next_maintenance}
+                    onChange={(e) => setFormData({ ...formData, next_maintenance: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#99CD85] focus:border-[#99CD85]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Combustível *
+                  </label>
+                  <select
+                    required
+                    value={formData.fuel}
+                    onChange={(e) => setFormData({ ...formData, fuel: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#99CD85] focus:border-[#99CD85]"
+                  >
+                    <option value="" disabled>Selecione o combustível</option>
+                    {fuelOptions.map((fuel) => (
+                      <option key={fuel.value} value={fuel.value}>
+                        {fuel.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Observações
+                </label>
+                <textarea
+                  value={formData.observations}
+                  onChange={(e) => setFormData({ ...formData, observations: e.target.value })}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#99CD85] focus:border-[#99CD85]"
+                  placeholder="Informações adicionais sobre o veículo..."
+                />
+              </div>
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-[#99CD85] text-white rounded-md hover:bg-[#7FA653] flex items-center"
+                >
+                  <Save className="h-5 w-5 mr-2" />
+                  {editingVehicle ? 'Atualizar' : 'Salvar'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

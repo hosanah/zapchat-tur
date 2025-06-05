@@ -148,7 +148,7 @@ const Vehicle = sequelize.define('Vehicle', {
     defaultValue: null,
     validate: {
       min: {
-        args: 0,
+        args: 1,
         msg: 'Quilometragem não pode ser negativa'
       }
     }
