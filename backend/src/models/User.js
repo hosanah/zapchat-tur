@@ -116,7 +116,7 @@ const User = sequelize.define('User', {
   },
   company_id: {
     type: DataTypes.UUID,
-    allowNull: true, // null para usuários master
+    allowNull: true,
     references: {
       model: 'companies',
       key: 'id'

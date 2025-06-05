@@ -397,7 +397,7 @@ class AuthController {
 
       // Buscar dados atualizados do usuário
       const currentUser = await User.findByPk(user.id, {
-        include: ['Company']
+        include: ['company']
       });
 
       if (!currentUser) {
