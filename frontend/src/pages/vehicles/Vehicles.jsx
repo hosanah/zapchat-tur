@@ -694,7 +694,7 @@ const Vehicles = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Número do Seguro
+                    Número do Chassi
                   </label>
                   <input
                     type="text"
@@ -702,42 +702,6 @@ const Vehicles = () => {
                     onChange={(e) => setFormData({ ...formData, insurance_number: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#99CD85] focus:border-[#99CD85]"
                     placeholder="987654321"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Vencimento do Seguro
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.insurance_expiry}
-                    onChange={(e) => setFormData({ ...formData, insurance_expiry: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#99CD85] focus:border-[#99CD85]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Última Manutenção
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.last_maintenance}
-                    onChange={(e) => setFormData({ ...formData, last_maintenance: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#99CD85] focus:border-[#99CD85]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Próxima Manutenção
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.next_maintenance}
-                    onChange={(e) => setFormData({ ...formData, next_maintenance: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#99CD85] focus:border-[#99CD85]"
                   />
                 </div>
 
