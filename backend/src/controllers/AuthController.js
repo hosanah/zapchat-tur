@@ -53,8 +53,8 @@ class AuthController {
       }
 
       // Verificar se empresa está ativa (para usuários não-master)
-      if (user.companyId) {
-        const company = await Company.findByPk(user.companyId);
+      if (user.company_id) {
+        const company = await Company.findByPk(user.company_id);
         if (!company || !company.isActive) {
           return res.status(401).json({
             success: false,
@@ -80,7 +80,7 @@ class AuthController {
             lastName: user.lastName,
             email: user.email,
             role: user.role,
-            companyId: user.company_id,
+            company_id: user.company_id,
             Company: user.company
           },
           tokens
@@ -119,8 +119,8 @@ class AuthController {
       }
 
       // Verificar se empresa existe (para usuários não-master)
-      if (userData.role !== 'master' && userData.companyId) {
-        const company = await Company.findByPk(userData.companyId);
+      if (userData.role !== 'master' && userData.company_id) {
+        const company = await Company.findByPk(userData.company_id);
         if (!company) {
           return res.status(400).json({
             success: false,
@@ -155,7 +155,7 @@ class AuthController {
             lastName: user.lastName,
             email: user.email,
             role: user.role,
-            companyId: user.companyId,
+            company_id: user.company_id,
             emailVerified: user.emailVerified
           },
           tokens
@@ -205,7 +205,7 @@ class AuthController {
       }
 
       // Verificar se empresa está ativa (para usuários não-master)
-      if (user.companyId && (!user.Company || !user.Company.isActive)) {
+      if (user.company_id && (!user.Company || !user.Company.isActive)) {
         return res.status(401).json({
           success: false,
           error: 'Empresa inativa'

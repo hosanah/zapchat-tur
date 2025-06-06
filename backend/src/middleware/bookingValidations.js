@@ -141,7 +141,7 @@ const bookingValidations = {
       .isIn(['pendente', 'confirmado', 'pago', 'cancelado'])
       .withMessage('Status deve ser pendente, confirmado, pago ou cancelado'),
     
-    query('companyId')
+    query('company_id')
       .optional()
       .isUUID()
       .withMessage('ID da empresa deve ser um UUID válido'),

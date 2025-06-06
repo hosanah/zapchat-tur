@@ -92,7 +92,8 @@ export const userService = {
   update: (id, data) => api.put(`/users/${id}`, data),
   delete: (id) => api.delete(`/users/${id}`),
   updateStatus: (id, status) => api.patch(`/users/${id}/status`, { status }),
-  getByCompany: (companyId, params) => api.get('/users', { params: { companyId, ...params } }),
+  getByCompany: (company_id, params) =>
+    api.get('/users', { params: { company_id, ...params } }),
 };
 
 // Serviços de veículos

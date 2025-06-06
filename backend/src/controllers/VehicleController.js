@@ -320,12 +320,12 @@ class VehicleController {
    */
   static async getAvailable(req, res, next) {
     try {
-      const { companyId } = req.query;
+      const { company_id } = req.query;
 
       // Determinar empresa
       let targetCompanyId;
       if (req.user.isMaster() && req.user.company_id) {
-        targetCompanyId = companyId;
+        targetCompanyId = company_id;
       } else {
         targetCompanyId = req.user.company_id;
       }
@@ -347,12 +347,12 @@ class VehicleController {
    */
   static async getStats(req, res, next) {
     try {
-      const { companyId } = req.query;
+      const { company_id } = req.query;
 
       // Determinar empresa
       let targetCompanyId;
       if (req.user.isMaster() && req.user.company_id) {
-        targetCompanyId = companyId;
+        targetCompanyId = company_id;
       } else {
         targetCompanyId = req.user.company_id;
       }

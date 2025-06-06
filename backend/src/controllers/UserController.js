@@ -13,7 +13,7 @@ class UserController {
    */
   static async getAll(req, res, next) {
     try {
-      const { page = 1, limit = 10, search, role, active, companyId } = req.query;
+      const { page = 1, limit = 10, search, role, active, company_id } = req.query;
       const offset = (page - 1) * limit;
 
       // Construir filtros
@@ -35,8 +35,8 @@ class UserController {
         where.isActive = active === 'true';
       }
 
-      if (companyId) {
-        where.company_id = companyId;
+      if (company_id) {
+        where.company_id = company_id;
       }
 
       // Verificar se usuário pode ver todos os usuários ou apenas da sua empresa
