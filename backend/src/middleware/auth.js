@@ -130,9 +130,9 @@ const requireCompanyAccess = (req, res, next) => {
   }
 
   // Obter ID da empresa do parâmetro ou query
-  const companyId = req.params.companyId || req.query.companyId || req.body.companyId;
+  const company_id = req.params.company_id || req.query.company_id || req.body.company_id;
 
-  if (!companyId) {
+  if (!company_id) {
     return res.status(400).json({
       success: false,
       error: 'ID da empresa é obrigatório'
@@ -140,7 +140,7 @@ const requireCompanyAccess = (req, res, next) => {
   }
 
   // Verificar se usuário pode acessar a empresa
-  if (!req.user.canAccessCompany(companyId)) {
+  if (!req.user.canAccessCompany(company_id)) {
     return res.status(403).json({
       success: false,
       error: 'Acesso negado. Você não pode acessar dados desta empresa.'

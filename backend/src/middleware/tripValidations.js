@@ -165,7 +165,7 @@ const tripValidations = {
       .isUUID()
       .withMessage('ID do motorista deve ser um UUID válido'),
     
-    body('companyId')
+    body('company_id')
       .optional()
       .isUUID()
       .withMessage('ID da empresa deve ser um UUID válido')
@@ -343,7 +343,7 @@ const tripValidations = {
       .isIn(['turismo', 'transfer', 'excursao', 'fretamento', 'outros'])
       .withMessage('Tipo deve ser turismo, transfer, excursao, fretamento ou outros'),
     
-    query('companyId')
+    query('company_id')
       .optional()
       .isUUID()
       .withMessage('ID da empresa deve ser um UUID válido'),

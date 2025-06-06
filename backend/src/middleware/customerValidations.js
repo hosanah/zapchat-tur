@@ -109,7 +109,7 @@ const customerValidations = {
       .isLength({ max: 1000 })
       .withMessage('Observações devem ter no máximo 1000 caracteres'),
     
-    body('companyId')
+    body('company_id')
       .optional()
       .isUUID()
       .withMessage('ID da empresa deve ser um UUID válido')
@@ -246,7 +246,7 @@ const customerValidations = {
       .isIn(['ativo', 'inativo', 'bloqueado'])
       .withMessage('Status deve ser ativo, inativo ou bloqueado'),
     
-    query('companyId')
+    query('company_id')
       .optional()
       .isUUID()
       .withMessage('ID da empresa deve ser um UUID válido'),

@@ -146,7 +146,7 @@ const driverValidations = {
       .isLength({ max: 1000 })
       .withMessage('Observações devem ter no máximo 1000 caracteres'),
     
-    body('companyId')
+    body('company_id')
       .optional()
       .isUUID()
       .withMessage('ID da empresa deve ser um UUID válido')
@@ -325,7 +325,7 @@ const driverValidations = {
       .isIn(['A', 'B', 'C', 'D', 'E', 'AB', 'AC', 'AD', 'AE'])
       .withMessage('Categoria deve ser A, B, C, D, E, AB, AC, AD ou AE'),
     
-    query('companyId')
+    query('company_id')
       .optional()
       .isUUID()
       .withMessage('ID da empresa deve ser um UUID válido'),
