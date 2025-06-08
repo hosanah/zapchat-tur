@@ -88,7 +88,7 @@ const vehicleValidations = {
       .isLength({ max: 1000 })
       .withMessage('Observações devem ter no máximo 1000 caracteres'),
     
-    body('companyId')
+    body('company_id')
       .optional()
       .isUUID()
       .withMessage('ID da empresa deve ser um UUID válido')
@@ -205,7 +205,7 @@ const vehicleValidations = {
       .isIn(['van', 'micro-onibus', 'onibus', 'carro', 'suv'])
       .withMessage('Tipo deve ser van, micro-onibus, onibus, carro ou suv'),
     
-    query('companyId')
+    query('company_id')
       .optional()
       .isUUID()
       .withMessage('ID da empresa deve ser um UUID válido')

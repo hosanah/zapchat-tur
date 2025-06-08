@@ -5,6 +5,7 @@ import { useToast } from '../../contexts/ToastContext';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Trips = () => {
+  const { isMaster, user } = useAuth();
   const [trips, setTrips] = useState([]);
   const [vehicles, setVehicles] = useState([]);
   const [drivers, setDrivers] = useState([]);
@@ -19,6 +20,7 @@ const Trips = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    origin: '',
     destination: '',
     origin: '',
     startDate: '',
@@ -31,7 +33,8 @@ const Trips = () => {
     driverId: '',
     company_id: '',
     status: 'planejado',
-    observations: ''
+    observations: '',
+    notes: ''
   });
 
   const statusOptions = [
@@ -47,7 +50,9 @@ const Trips = () => {
     fetchVehicles();
     fetchDrivers();
     fetchCustomers();
-    if (isMaster()) fetchCompanies();
+    if (isMaster()) {
+      fetchCompanies();
+    }
   }, []);
 
   const fetchTrips = async () => {
@@ -111,6 +116,11 @@ const Trips = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const buildDateTime = (date, time) => {
+        if (!date) return '';
+        return time ? `${date}T${time}` : date;
+      };
+
       const submitData = {
         title: formData.title,
         description: formData.description,
@@ -118,13 +128,22 @@ const Trips = () => {
         origin: formData.origin,
         startDate: combineDateTime(formData.startDate, formData.startTime),
         endDate: combineDateTime(formData.endDate, formData.endTime),
+        origin: formData.origin,
+        destination: formData.destination,
+        startDate: buildDateTime(formData.startDate, formData.startTime),
+        endDate: buildDateTime(formData.endDate, formData.endTime) || null,
         pricePerPerson: parseFloat(formData.pricePerPerson) || 0,
         maxPassengers: parseInt(formData.maxPassengers) || 0,
         vehicleId: formData.vehicleId || null,
         driverId: formData.driverId || null,
         status: formData.status,
         observations: formData.observations,
+        notes: formData.notes
       };
+      if (isMaster()) {
+        submitData.company_id = formData.companyId;
+      }
+      delete submitData.companyId;
 
       if (isMaster()) {
         submitData.company_id = formData.company_id;
@@ -144,8 +163,15 @@ const Trips = () => {
       fetchTrips();
     } catch (error) {
       console.error('Erro ao salvar passeio:', error);
-      const errorMessage = error.response?.data?.message || 'Erro ao salvar passeio';
-      showError(errorMessage);
+      const response = error.response?.data;
+      if (response?.success === false && Array.isArray(response.details)) {
+        response.details.forEach((detail) => {
+          if (detail.msg) showError(detail.msg);
+        });
+      } else {
+        const errorMessage = response?.message || 'Erro ao salvar passeio';
+        showError(errorMessage);
+      }
     }
   };
 
@@ -154,6 +180,7 @@ const Trips = () => {
     setFormData({
       title: trip.title || '',
       description: trip.description || '',
+      origin: trip.origin || '',
       destination: trip.destination || '',
       origin: trip.origin || '',
       startDate: trip.startDate ? trip.startDate.split('T')[0] : '',
@@ -166,7 +193,8 @@ const Trips = () => {
       driverId: trip.driverId || '',
       company_id: trip.company_id || '',
       status: trip.status || 'planejado',
-      observations: trip.observations || ''
+      observations: trip.observations || '',
+      notes: trip.notes || ''
     });
     setShowModal(true);
   };
@@ -189,6 +217,7 @@ const Trips = () => {
     setFormData({
       title: '',
       description: '',
+      origin: '',
       destination: '',
       origin: '',
       startDate: '',
@@ -200,8 +229,9 @@ const Trips = () => {
       vehicleId: '',
       driverId: '',
       company_id: '',
+      observations: '',
       status: 'planejado',
-      observations: ''
+      notes: ''
     });
   };
 
@@ -430,10 +460,10 @@ const Trips = () => {
                     </div>
                   )}
 
-                  {trip.observations && (
+                  {trip.notes && (
                     <div className="mb-4 p-3 bg-gray-50 rounded-lg">
                       <p className="text-sm text-gray-600">
-                        <strong>Observações:</strong> {trip.observations}
+                        <strong>Observações:</strong> {trip.notes}
                       </p>
                     </div>
                   )}
@@ -473,8 +503,8 @@ const Trips = () => {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 px-4 py-6">
+          <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-white rounded-lg shadow-xl p-6">
             <div className="mt-3">
               <h3 className="text-lg font-medium text-gray-900 mb-4">
                 {editingTrip ? 'Editar Passeio' : 'Novo Passeio'}
@@ -485,6 +515,24 @@ const Trips = () => {
                 <div>
                   <h4 className="text-md font-medium text-gray-900 mb-3">Informações Básicas</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {isMaster() && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Empresa *
+                        </label>
+                        <select
+                          required
+                          value={formData.companyId}
+                          onChange={(e) => setFormData({ ...formData, companyId: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-zapchat-primary focus:border-zapchat-primary"
+                        >
+                          <option value="">Selecione a empresa</option>
+                          {companies.map((c) => (
+                            <option key={c.id} value={c.id}>{c.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Título do Passeio *
@@ -665,7 +713,7 @@ const Trips = () => {
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-zapchat-primary focus:border-zapchat-primary"
                       >
                         <option value="">Selecione um veículo</option>
-                        {vehicles.filter(v => v.status === 'ACTIVE').map(vehicle => (
+                        {vehicles.filter(v => v.status === 'ativo').map(vehicle => (
                           <option key={vehicle.id} value={vehicle.id}>
                             {vehicle.plate} - {vehicle.brand} {vehicle.model} (Cap: {vehicle.capacity})
                           </option>
@@ -683,9 +731,9 @@ const Trips = () => {
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-zapchat-primary focus:border-zapchat-primary"
                       >
                         <option value="">Selecione um motorista</option>
-                        {drivers.filter(d => d.status === 'ACTIVE').map(driver => (
+                        {drivers.filter(d => d.status === 'ativo').map(driver => (
                           <option key={driver.id} value={driver.id}>
-                            {driver.name} - CNH: {driver.cnh}
+                            {driver.firstName} - CNH: {driver.licenseNumber}
                           </option>
                         ))}
                       </select>
@@ -720,8 +768,8 @@ const Trips = () => {
                         Observações
                       </label>
                       <textarea
-                        value={formData.observations}
-                        onChange={(e) => setFormData({ ...formData, observations: e.target.value })}
+                        value={formData.notes}
+                        onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                         rows={3}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-zapchat-primary focus:border-zapchat-primary"
                         placeholder="Observações sobre o passeio..."

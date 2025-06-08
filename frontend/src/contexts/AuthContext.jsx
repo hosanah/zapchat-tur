@@ -207,9 +207,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Verificar se usuário pode acessar empresa
-  const canAccessCompany = (companyId) => {
+  const canAccessCompany = (company_id) => {
     if (isMaster()) return true;
-    return state.user?.companyId === companyId;
+    return state.user?.company_id === company_id;
   };
 
   const value = {

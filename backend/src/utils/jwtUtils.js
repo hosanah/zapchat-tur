@@ -94,7 +94,7 @@ class JWTUtils {
       userId: user.id,
       email: user.email,
       role: user.role,
-      companyId: user.companyId,
+      company_id: user.company_id,
       firstName: user.firstName,
       lastName: user.lastName
     };
@@ -158,7 +158,7 @@ class JWTUtils {
         userId: decoded.userId,
         email: decoded.email,
         role: decoded.role,
-        companyId: decoded.companyId,
+        company_id: decoded.company_id,
         issuedAt: new Date(decoded.iat * 1000),
         expiresAt: new Date(decoded.exp * 1000),
         issuer: decoded.iss,

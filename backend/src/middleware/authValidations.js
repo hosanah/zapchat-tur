@@ -66,7 +66,7 @@ const authValidations = {
       .isIn(['master', 'admin', 'user'])
       .withMessage('Role deve ser master, admin ou user'),
     
-    body('companyId')
+    body('company_id')
       .optional()
       .isUUID()
       .withMessage('ID da empresa deve ser um UUID válido')

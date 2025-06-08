@@ -433,18 +433,18 @@ class EventController {
     try {
       const { user } = req;
       
-      const companyId = user.role === 'master' ? 
+      const company_id = user.role === 'master' ? 
         (req.query.company_id || null) : 
         user.company_id;
 
-      if (!companyId) {
+      if (!company_id) {
         return res.status(400).json({
           success: false,
           message: 'ID da empresa é obrigatório'
         });
       }
 
-      const events = await Event.getTodayEvents(companyId);
+      const events = await Event.getTodayEvents(company_id);
 
       res.json({
         success: true,
@@ -466,18 +466,18 @@ class EventController {
       const { user } = req;
       const { limit = 10 } = req.query;
       
-      const companyId = user.role === 'master' ? 
+      const company_id = user.role === 'master' ? 
         (req.query.company_id || null) : 
         user.company_id;
 
-      if (!companyId) {
+      if (!company_id) {
         return res.status(400).json({
           success: false,
           message: 'ID da empresa é obrigatório'
         });
       }
 
-      const events = await Event.getUpcomingEvents(companyId, parseInt(limit));
+      const events = await Event.getUpcomingEvents(company_id, parseInt(limit));
 
       res.json({
         success: true,

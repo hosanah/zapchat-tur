@@ -13,7 +13,7 @@ class UserController {
    */
   static async getAll(req, res, next) {
     try {
-      const { page = 1, limit = 10, search, role, active, companyId } = req.query;
+      const { page = 1, limit = 10, search, role, active, company_id } = req.query;
       const offset = (page - 1) * limit;
 
       // Construir filtros
@@ -35,8 +35,8 @@ class UserController {
         where.isActive = active === 'true';
       }
 
-      if (companyId) {
-        where.company_id = companyId;
+      if (company_id) {
+        where.company_id = company_id;
       }
 
       // Verificar se usuário pode ver todos os usuários ou apenas da sua empresa
@@ -151,8 +151,8 @@ class UserController {
       }
 
       // Verificar se empresa existe (para usuários não-master)
-      if (userData.role !== 'master' && userData.company_id) {
-        const company = await Company.findByPk(userData.company_id);
+      if (userData.role !== 'master' && req.user.company_id) {
+        const company = await Company.findByPk(req.user.company_id);
         if (!company) {
           return res.status(400).json({
             success: false,
@@ -171,12 +171,14 @@ class UserController {
       }
 
       // Verificar se usuário não-master está criando usuário para sua empresa
-      if (currentUser && !currentUser.isMaster() && userData.company_id !== currentUser.company_id) {
+      if (currentUser && !currentUser.isMaster() && req.user.company_id !== currentUser.company_id) {
         return res.status(403).json({
           success: false,
           error: 'Você só pode criar usuários para sua própria empresa'
         });
       }
+
+      userData.company_id = req.user.company_id;
 
       const user = await User.create(userData);
 
