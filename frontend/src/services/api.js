@@ -91,7 +91,7 @@ export const userService = {
   create: (data) => api.post('/users', data),
   update: (id, data) => api.put(`/users/${id}`, data),
   delete: (id) => api.delete(`/users/${id}`),
-  updateStatus: (id, status) => api.patch(`/users/${id}/status`, { status }),
+  updateStatus: (id, status) => api.patch(`/users/${id}/toggle-status`, { status }),
   getByCompany: (company_id, params) =>
     api.get('/users', { params: { company_id, ...params } }),
 };

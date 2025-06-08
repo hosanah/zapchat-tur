@@ -151,8 +151,8 @@ class UserController {
       }
 
       // Verificar se empresa existe (para usuários não-master)
-      if (userData.role !== 'master' && userData.company_id) {
-        const company = await Company.findByPk(userData.company_id);
+      if (userData.role !== 'master' && req.user.company_id) {
+        const company = await Company.findByPk(req.user.company_id);
         if (!company) {
           return res.status(400).json({
             success: false,
@@ -171,12 +171,14 @@ class UserController {
       }
 
       // Verificar se usuário não-master está criando usuário para sua empresa
-      if (currentUser && !currentUser.isMaster() && userData.company_id !== currentUser.company_id) {
+      if (currentUser && !currentUser.isMaster() && req.user.company_id !== currentUser.company_id) {
         return res.status(403).json({
           success: false,
           error: 'Você só pode criar usuários para sua própria empresa'
         });
       }
+
+      userData.company_id = req.user.company_id;
 
       const user = await User.create(userData);
 
