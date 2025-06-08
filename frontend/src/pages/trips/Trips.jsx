@@ -30,7 +30,7 @@ const Trips = () => {
     vehicleId: '',
     driverId: '',
     companyId: '',
-    observations: ''
+    observations: '',
     status: 'planejado',
     notes: ''
   });
@@ -168,7 +168,7 @@ const Trips = () => {
       driverId: trip.driverId || '',
       companyId: trip.company_id || '',
       status: trip.status || 'PLANNED',
-      observations: trip.observations || ''
+      observations: trip.observations || '',
       notes: trip.notes || ''
     });
     setShowModal(true);
@@ -203,7 +203,7 @@ const Trips = () => {
       vehicleId: '',
       driverId: '',
       companyId: '',
-      observations: ''
+      observations: '',
       status: 'planejado',
       notes: ''
     });
