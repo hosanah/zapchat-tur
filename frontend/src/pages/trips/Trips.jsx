@@ -16,11 +16,13 @@ const Trips = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingTrip, setEditingTrip] = useState(null);
   const { showSuccess, showError } = useToast();
+  const { isMaster, user } = useAuth();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     origin: '',
     destination: '',
+    origin: '',
     startDate: '',
     startTime: '',
     endDate: '',
@@ -29,9 +31,9 @@ const Trips = () => {
     maxPassengers: '',
     vehicleId: '',
     driverId: '',
-    companyId: '',
-    observations: '',
+    company_id: '',
     status: 'planejado',
+    observations: '',
     notes: ''
   });
 
@@ -102,7 +104,13 @@ const Trips = () => {
       setCompanies(response.data.companies || []);
     } catch (error) {
       console.error('Erro ao carregar empresas:', error);
+      showError('Erro ao carregar lista de empresas');
     }
+  };
+
+  const combineDateTime = (date, time) => {
+    if (!date) return null;
+    return time ? `${date}T${time}` : date;
   };
 
   const handleSubmit = async (e) => {
@@ -116,6 +124,10 @@ const Trips = () => {
       const submitData = {
         title: formData.title,
         description: formData.description,
+        destination: formData.destination,
+        origin: formData.origin,
+        startDate: combineDateTime(formData.startDate, formData.startTime),
+        endDate: combineDateTime(formData.endDate, formData.endTime),
         origin: formData.origin,
         destination: formData.destination,
         startDate: buildDateTime(formData.startDate, formData.startTime),
@@ -125,12 +137,17 @@ const Trips = () => {
         vehicleId: formData.vehicleId || null,
         driverId: formData.driverId || null,
         status: formData.status,
+        observations: formData.observations,
         notes: formData.notes
       };
       if (isMaster()) {
         submitData.company_id = formData.companyId;
       }
       delete submitData.companyId;
+
+      if (isMaster()) {
+        submitData.company_id = formData.company_id;
+      }
 
       if (editingTrip) {
         await api.put(`/trips/${editingTrip.id}`, submitData);
@@ -165,16 +182,17 @@ const Trips = () => {
       description: trip.description || '',
       origin: trip.origin || '',
       destination: trip.destination || '',
+      origin: trip.origin || '',
       startDate: trip.startDate ? trip.startDate.split('T')[0] : '',
-      startTime: trip.startDate ? trip.startDate.split('T')[1]?.slice(0,5) || '' : '',
+      startTime: trip.startDate ? trip.startDate.split('T')[1]?.slice(0,5) : '',
       endDate: trip.endDate ? trip.endDate.split('T')[0] : '',
-      endTime: trip.endDate ? trip.endDate.split('T')[1]?.slice(0,5) || '' : '',
+      endTime: trip.endDate ? trip.endDate.split('T')[1]?.slice(0,5) : '',
       pricePerPerson: trip.pricePerPerson || '',
       maxPassengers: trip.maxPassengers || '',
       vehicleId: trip.vehicleId || '',
       driverId: trip.driverId || '',
-      companyId: trip.company_id || '',
-      status: trip.status || 'PLANNED',
+      company_id: trip.company_id || '',
+      status: trip.status || 'planejado',
       observations: trip.observations || '',
       notes: trip.notes || ''
     });
@@ -201,6 +219,7 @@ const Trips = () => {
       description: '',
       origin: '',
       destination: '',
+      origin: '',
       startDate: '',
       startTime: '',
       endDate: '',
@@ -209,7 +228,7 @@ const Trips = () => {
       maxPassengers: '',
       vehicleId: '',
       driverId: '',
-      companyId: '',
+      company_id: '',
       observations: '',
       status: 'planejado',
       notes: ''
@@ -302,9 +321,9 @@ const Trips = () => {
             </div>
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-600">Confirmados</p>
-                <p className="text-lg font-semibold text-gray-900">
-                  {trips.filter(t => t.status === 'confirmado').length}
-                </p>
+              <p className="text-lg font-semibold text-gray-900">
+                {trips.filter(t => t.status === 'confirmado').length}
+              </p>
             </div>
           </div>
         </div>
@@ -315,9 +334,9 @@ const Trips = () => {
             </div>
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-600">Em Andamento</p>
-                <p className="text-lg font-semibold text-gray-900">
-                  {trips.filter(t => t.status === 'em_andamento').length}
-                </p>
+              <p className="text-lg font-semibold text-gray-900">
+                {trips.filter(t => t.status === 'em_andamento').length}
+              </p>
             </div>
           </div>
         </div>
@@ -328,9 +347,9 @@ const Trips = () => {
             </div>
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-600">Concluídos</p>
-                <p className="text-lg font-semibold text-gray-900">
-                  {trips.filter(t => t.status === 'concluido').length}
-                </p>
+              <p className="text-lg font-semibold text-gray-900">
+                {trips.filter(t => t.status === 'concluido').length}
+              </p>
             </div>
           </div>
         </div>
@@ -341,9 +360,9 @@ const Trips = () => {
             </div>
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-600">Receita Total</p>
-                <p className="text-lg font-semibold text-gray-900">
-                  {formatCurrency(trips.reduce((total, t) => total + (parseFloat(t.pricePerPerson) || 0), 0))}
-                </p>
+              <p className="text-lg font-semibold text-gray-900">
+                {formatCurrency(trips.reduce((total, t) => total + (parseFloat(t.pricePerPerson) || 0), 0))}
+              </p>
             </div>
           </div>
         </div>
@@ -540,6 +559,25 @@ const Trips = () => {
                         placeholder="Descrição detalhada do passeio..."
                       />
                     </div>
+
+                    {isMaster() && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Empresa *
+                        </label>
+                        <select
+                          required
+                          value={formData.company_id}
+                          onChange={(e) => setFormData({ ...formData, company_id: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-zapchat-primary focus:border-zapchat-primary"
+                        >
+                          <option value="">Selecione uma empresa</option>
+                          {companies.map(c => (
+                            <option key={c.id} value={c.id}>{c.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
