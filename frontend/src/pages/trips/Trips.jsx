@@ -16,26 +16,26 @@ const Trips = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    origin: '',
     destination: '',
-    departureLocation: '',
-    departureDate: '',
-    departureTime: '',
-    returnDate: '',
-    returnTime: '',
-    price: '',
+    startDate: '',
+    startTime: '',
+    endDate: '',
+    endTime: '',
+    pricePerPerson: '',
     maxPassengers: '',
     vehicleId: '',
     driverId: '',
-    status: 'PLANNED',
-    observations: ''
+    status: 'planejado',
+    notes: ''
   });
 
   const statusOptions = [
-    { value: 'PLANNED', label: 'Planejado', color: 'bg-blue-100 text-blue-800' },
-    { value: 'CONFIRMED', label: 'Confirmado', color: 'bg-green-100 text-green-800' },
-    { value: 'IN_PROGRESS', label: 'Em Andamento', color: 'bg-yellow-100 text-yellow-800' },
-    { value: 'COMPLETED', label: 'Concluído', color: 'bg-purple-100 text-purple-800' },
-    { value: 'CANCELLED', label: 'Cancelado', color: 'bg-red-100 text-red-800' }
+    { value: 'planejado', label: 'Planejado', color: 'bg-blue-100 text-blue-800' },
+    { value: 'confirmado', label: 'Confirmado', color: 'bg-green-100 text-green-800' },
+    { value: 'em_andamento', label: 'Em Andamento', color: 'bg-yellow-100 text-yellow-800' },
+    { value: 'concluido', label: 'Concluído', color: 'bg-purple-100 text-purple-800' },
+    { value: 'cancelado', label: 'Cancelado', color: 'bg-red-100 text-red-800' }
   ];
 
   useEffect(() => {
@@ -91,12 +91,24 @@ const Trips = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const buildDateTime = (date, time) => {
+        if (!date) return '';
+        return time ? `${date}T${time}` : date;
+      };
+
       const submitData = {
-        ...formData,
+        title: formData.title,
+        description: formData.description,
+        origin: formData.origin,
+        destination: formData.destination,
+        startDate: buildDateTime(formData.startDate, formData.startTime),
+        endDate: buildDateTime(formData.endDate, formData.endTime) || null,
+        pricePerPerson: parseFloat(formData.pricePerPerson) || 0,
+        maxPassengers: parseInt(formData.maxPassengers) || 0,
         vehicleId: formData.vehicleId || null,
         driverId: formData.driverId || null,
-        price: parseFloat(formData.price) || 0,
-        maxPassengers: parseInt(formData.maxPassengers) || 0
+        status: formData.status,
+        notes: formData.notes
       };
 
       if (editingTrip) {
@@ -123,18 +135,18 @@ const Trips = () => {
     setFormData({
       title: trip.title || '',
       description: trip.description || '',
+      origin: trip.origin || '',
       destination: trip.destination || '',
-      departureLocation: trip.departureLocation || '',
-      departureDate: trip.departureDate ? trip.departureDate.split('T')[0] : '',
-      departureTime: trip.departureTime || '',
-      returnDate: trip.returnDate ? trip.returnDate.split('T')[0] : '',
-      returnTime: trip.returnTime || '',
-      price: trip.price || '',
+      startDate: trip.startDate ? trip.startDate.split('T')[0] : '',
+      startTime: trip.startDate ? trip.startDate.split('T')[1]?.slice(0,5) || '' : '',
+      endDate: trip.endDate ? trip.endDate.split('T')[0] : '',
+      endTime: trip.endDate ? trip.endDate.split('T')[1]?.slice(0,5) || '' : '',
+      pricePerPerson: trip.pricePerPerson || '',
       maxPassengers: trip.maxPassengers || '',
       vehicleId: trip.vehicleId || '',
       driverId: trip.driverId || '',
-      status: trip.status || 'PLANNED',
-      observations: trip.observations || ''
+      status: trip.status || 'planejado',
+      notes: trip.notes || ''
     });
     setShowModal(true);
   };
@@ -157,25 +169,25 @@ const Trips = () => {
     setFormData({
       title: '',
       description: '',
+      origin: '',
       destination: '',
-      departureLocation: '',
-      departureDate: '',
-      departureTime: '',
-      returnDate: '',
-      returnTime: '',
-      price: '',
+      startDate: '',
+      startTime: '',
+      endDate: '',
+      endTime: '',
+      pricePerPerson: '',
       maxPassengers: '',
       vehicleId: '',
       driverId: '',
-      status: 'PLANNED',
-      observations: ''
+      status: 'planejado',
+      notes: ''
     });
   };
 
   const filteredTrips = trips.filter(trip =>
     trip.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     trip.destination?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    trip.departureLocation?.toLowerCase().includes(searchTerm.toLowerCase())
+    trip.origin?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getStatusColor = (status) => {
@@ -196,10 +208,10 @@ const Trips = () => {
     }).format(value);
   };
 
-  const getDaysUntilTrip = (departureDate) => {
-    if (!departureDate) return null;
+  const getDaysUntilTrip = (startDate) => {
+    if (!startDate) return null;
     const today = new Date();
-    const departure = new Date(departureDate);
+    const departure = new Date(startDate);
     const diffTime = departure - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
@@ -258,9 +270,9 @@ const Trips = () => {
             </div>
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-600">Confirmados</p>
-              <p className="text-lg font-semibold text-gray-900">
-                {trips.filter(t => t.status === 'CONFIRMED').length}
-              </p>
+                <p className="text-lg font-semibold text-gray-900">
+                  {trips.filter(t => t.status === 'confirmado').length}
+                </p>
             </div>
           </div>
         </div>
@@ -271,9 +283,9 @@ const Trips = () => {
             </div>
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-600">Em Andamento</p>
-              <p className="text-lg font-semibold text-gray-900">
-                {trips.filter(t => t.status === 'IN_PROGRESS').length}
-              </p>
+                <p className="text-lg font-semibold text-gray-900">
+                  {trips.filter(t => t.status === 'em_andamento').length}
+                </p>
             </div>
           </div>
         </div>
@@ -284,9 +296,9 @@ const Trips = () => {
             </div>
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-600">Concluídos</p>
-              <p className="text-lg font-semibold text-gray-900">
-                {trips.filter(t => t.status === 'COMPLETED').length}
-              </p>
+                <p className="text-lg font-semibold text-gray-900">
+                  {trips.filter(t => t.status === 'concluido').length}
+                </p>
             </div>
           </div>
         </div>
@@ -297,9 +309,9 @@ const Trips = () => {
             </div>
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-600">Receita Total</p>
-              <p className="text-lg font-semibold text-gray-900">
-                {formatCurrency(trips.reduce((total, t) => total + (parseFloat(t.price) || 0), 0))}
-              </p>
+                <p className="text-lg font-semibold text-gray-900">
+                  {formatCurrency(trips.reduce((total, t) => total + (parseFloat(t.pricePerPerson) || 0), 0))}
+                </p>
             </div>
           </div>
         </div>
@@ -313,7 +325,7 @@ const Trips = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredTrips.map((trip) => {
-            const daysUntil = getDaysUntilTrip(trip.departureDate);
+            const daysUntil = getDaysUntilTrip(trip.startDate);
             return (
               <div key={trip.id} className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow">
                 <div className="p-6">
@@ -337,30 +349,30 @@ const Trips = () => {
                   )}
 
                   <div className="space-y-2 mb-4">
-                    {trip.departureLocation && (
+                    {trip.origin && (
                       <div className="flex items-center text-sm text-gray-600">
                         <MapPin className="w-4 h-4 mr-2" />
-                        Saída: {trip.departureLocation}
+                        Saída: {trip.origin}
                       </div>
                     )}
-                    {trip.departureDate && (
+                    {trip.startDate && (
                       <div className="flex items-center text-sm text-gray-600">
                         <Calendar className="w-4 h-4 mr-2" />
-                        Partida: {formatDate(trip.departureDate)}
-                        {trip.departureTime && ` às ${trip.departureTime}`}
+                        Partida: {formatDate(trip.startDate)}
+                        {trip.startDate.split('T')[1] && ` às ${trip.startDate.split('T')[1].slice(0,5)}`}
                       </div>
                     )}
-                    {trip.returnDate && (
+                    {trip.endDate && (
                       <div className="flex items-center text-sm text-gray-600">
                         <Calendar className="w-4 h-4 mr-2" />
-                        Retorno: {formatDate(trip.returnDate)}
-                        {trip.returnTime && ` às ${trip.returnTime}`}
+                        Retorno: {formatDate(trip.endDate)}
+                        {trip.endDate.split('T')[1] && ` às ${trip.endDate.split('T')[1].slice(0,5)}`}
                       </div>
                     )}
-                    {trip.price && (
+                    {trip.pricePerPerson && (
                       <div className="flex items-center text-sm text-gray-600">
                         <DollarSign className="w-4 h-4 mr-2" />
-                        Preço: {formatCurrency(trip.price)}
+                        Preço: {formatCurrency(trip.pricePerPerson)}
                       </div>
                     )}
                     {trip.maxPassengers && (
@@ -383,7 +395,7 @@ const Trips = () => {
                     )}
                   </div>
 
-                  {daysUntil !== null && trip.status !== 'COMPLETED' && trip.status !== 'CANCELLED' && (
+                  {daysUntil !== null && trip.status !== 'concluido' && trip.status !== 'cancelado' && (
                     <div className={`mb-4 p-2 rounded-lg text-sm ${
                       daysUntil < 0 ? 'bg-red-100 text-red-800' :
                       daysUntil === 0 ? 'bg-yellow-100 text-yellow-800' :
@@ -397,10 +409,10 @@ const Trips = () => {
                     </div>
                   )}
 
-                  {trip.observations && (
+                  {trip.notes && (
                     <div className="mb-4 p-3 bg-gray-50 rounded-lg">
                       <p className="text-sm text-gray-600">
-                        <strong>Observações:</strong> {trip.observations}
+                        <strong>Observações:</strong> {trip.notes}
                       </p>
                     </div>
                   )}
@@ -500,8 +512,8 @@ const Trips = () => {
                       <input
                         type="text"
                         required
-                        value={formData.departureLocation}
-                        onChange={(e) => setFormData({ ...formData, departureLocation: e.target.value })}
+                        value={formData.origin}
+                        onChange={(e) => setFormData({ ...formData, origin: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-zapchat-primary focus:border-zapchat-primary"
                         placeholder="Local de saída"
                       />
@@ -520,8 +532,8 @@ const Trips = () => {
                       <input
                         type="date"
                         required
-                        value={formData.departureDate}
-                        onChange={(e) => setFormData({ ...formData, departureDate: e.target.value })}
+                        value={formData.startDate}
+                        onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-zapchat-primary focus:border-zapchat-primary"
                       />
                     </div>
@@ -532,8 +544,8 @@ const Trips = () => {
                       </label>
                       <input
                         type="time"
-                        value={formData.departureTime}
-                        onChange={(e) => setFormData({ ...formData, departureTime: e.target.value })}
+                        value={formData.startTime}
+                        onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-zapchat-primary focus:border-zapchat-primary"
                       />
                     </div>
@@ -544,8 +556,8 @@ const Trips = () => {
                       </label>
                       <input
                         type="date"
-                        value={formData.returnDate}
-                        onChange={(e) => setFormData({ ...formData, returnDate: e.target.value })}
+                        value={formData.endDate}
+                        onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-zapchat-primary focus:border-zapchat-primary"
                       />
                     </div>
@@ -556,8 +568,8 @@ const Trips = () => {
                       </label>
                       <input
                         type="time"
-                        value={formData.returnTime}
-                        onChange={(e) => setFormData({ ...formData, returnTime: e.target.value })}
+                        value={formData.endTime}
+                        onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-zapchat-primary focus:border-zapchat-primary"
                       />
                     </div>
@@ -576,8 +588,8 @@ const Trips = () => {
                         type="number"
                         step="0.01"
                         min="0"
-                        value={formData.price}
-                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                        value={formData.pricePerPerson}
+                        onChange={(e) => setFormData({ ...formData, pricePerPerson: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-zapchat-primary focus:border-zapchat-primary"
                         placeholder="0.00"
                       />
@@ -668,8 +680,8 @@ const Trips = () => {
                         Observações
                       </label>
                       <textarea
-                        value={formData.observations}
-                        onChange={(e) => setFormData({ ...formData, observations: e.target.value })}
+                        value={formData.notes}
+                        onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                         rows={3}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-zapchat-primary focus:border-zapchat-primary"
                         placeholder="Observações sobre o passeio..."
