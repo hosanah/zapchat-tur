@@ -2,40 +2,44 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Search, Edit, Trash2, MapPin, Calendar, Clock, Users, Car, User, DollarSign } from 'lucide-react';
 import api from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Trips = () => {
   const [trips, setTrips] = useState([]);
   const [vehicles, setVehicles] = useState([]);
   const [drivers, setDrivers] = useState([]);
   const [customers, setCustomers] = useState([]);
+  const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingTrip, setEditingTrip] = useState(null);
   const { showSuccess, showError } = useToast();
+  const { isMaster, user } = useAuth();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     destination: '',
-    departureLocation: '',
-    departureDate: '',
-    departureTime: '',
-    returnDate: '',
-    returnTime: '',
-    price: '',
+    origin: '',
+    startDate: '',
+    startTime: '',
+    endDate: '',
+    endTime: '',
+    pricePerPerson: '',
     maxPassengers: '',
     vehicleId: '',
     driverId: '',
-    status: 'PLANNED',
+    company_id: '',
+    status: 'planejado',
     observations: ''
   });
 
   const statusOptions = [
-    { value: 'PLANNED', label: 'Planejado', color: 'bg-blue-100 text-blue-800' },
-    { value: 'CONFIRMED', label: 'Confirmado', color: 'bg-green-100 text-green-800' },
-    { value: 'IN_PROGRESS', label: 'Em Andamento', color: 'bg-yellow-100 text-yellow-800' },
-    { value: 'COMPLETED', label: 'Concluído', color: 'bg-purple-100 text-purple-800' },
-    { value: 'CANCELLED', label: 'Cancelado', color: 'bg-red-100 text-red-800' }
+    { value: 'planejado', label: 'Planejado', color: 'bg-blue-100 text-blue-800' },
+    { value: 'confirmado', label: 'Confirmado', color: 'bg-green-100 text-green-800' },
+    { value: 'em_andamento', label: 'Em Andamento', color: 'bg-yellow-100 text-yellow-800' },
+    { value: 'concluido', label: 'Concluído', color: 'bg-purple-100 text-purple-800' },
+    { value: 'cancelado', label: 'Cancelado', color: 'bg-red-100 text-red-800' }
   ];
 
   useEffect(() => {
@@ -43,6 +47,7 @@ const Trips = () => {
     fetchVehicles();
     fetchDrivers();
     fetchCustomers();
+    if (isMaster()) fetchCompanies();
   }, []);
 
   const fetchTrips = async () => {
@@ -88,16 +93,42 @@ const Trips = () => {
     }
   };
 
+  const fetchCompanies = async () => {
+    try {
+      const response = await api.get('/companies');
+      setCompanies(response.data.companies || []);
+    } catch (error) {
+      console.error('Erro ao carregar empresas:', error);
+      showError('Erro ao carregar lista de empresas');
+    }
+  };
+
+  const combineDateTime = (date, time) => {
+    if (!date) return null;
+    return time ? `${date}T${time}` : date;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const submitData = {
-        ...formData,
+        title: formData.title,
+        description: formData.description,
+        destination: formData.destination,
+        origin: formData.origin,
+        startDate: combineDateTime(formData.startDate, formData.startTime),
+        endDate: combineDateTime(formData.endDate, formData.endTime),
+        pricePerPerson: parseFloat(formData.pricePerPerson) || 0,
+        maxPassengers: parseInt(formData.maxPassengers) || 0,
         vehicleId: formData.vehicleId || null,
         driverId: formData.driverId || null,
-        price: parseFloat(formData.price) || 0,
-        maxPassengers: parseInt(formData.maxPassengers) || 0
+        status: formData.status,
+        observations: formData.observations,
       };
+
+      if (isMaster()) {
+        submitData.company_id = formData.company_id;
+      }
 
       if (editingTrip) {
         await api.put(`/trips/${editingTrip.id}`, submitData);
@@ -124,16 +155,17 @@ const Trips = () => {
       title: trip.title || '',
       description: trip.description || '',
       destination: trip.destination || '',
-      departureLocation: trip.departureLocation || '',
-      departureDate: trip.departureDate ? trip.departureDate.split('T')[0] : '',
-      departureTime: trip.departureTime || '',
-      returnDate: trip.returnDate ? trip.returnDate.split('T')[0] : '',
-      returnTime: trip.returnTime || '',
-      price: trip.price || '',
+      origin: trip.origin || '',
+      startDate: trip.startDate ? trip.startDate.split('T')[0] : '',
+      startTime: trip.startDate ? trip.startDate.split('T')[1]?.slice(0,5) : '',
+      endDate: trip.endDate ? trip.endDate.split('T')[0] : '',
+      endTime: trip.endDate ? trip.endDate.split('T')[1]?.slice(0,5) : '',
+      pricePerPerson: trip.pricePerPerson || '',
       maxPassengers: trip.maxPassengers || '',
       vehicleId: trip.vehicleId || '',
       driverId: trip.driverId || '',
-      status: trip.status || 'PLANNED',
+      company_id: trip.company_id || '',
+      status: trip.status || 'planejado',
       observations: trip.observations || ''
     });
     setShowModal(true);
@@ -158,16 +190,17 @@ const Trips = () => {
       title: '',
       description: '',
       destination: '',
-      departureLocation: '',
-      departureDate: '',
-      departureTime: '',
-      returnDate: '',
-      returnTime: '',
-      price: '',
+      origin: '',
+      startDate: '',
+      startTime: '',
+      endDate: '',
+      endTime: '',
+      pricePerPerson: '',
       maxPassengers: '',
       vehicleId: '',
       driverId: '',
-      status: 'PLANNED',
+      company_id: '',
+      status: 'planejado',
       observations: ''
     });
   };
@@ -175,7 +208,7 @@ const Trips = () => {
   const filteredTrips = trips.filter(trip =>
     trip.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     trip.destination?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    trip.departureLocation?.toLowerCase().includes(searchTerm.toLowerCase())
+    trip.origin?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getStatusColor = (status) => {
@@ -196,10 +229,10 @@ const Trips = () => {
     }).format(value);
   };
 
-  const getDaysUntilTrip = (departureDate) => {
-    if (!departureDate) return null;
+  const getDaysUntilTrip = (startDate) => {
+    if (!startDate) return null;
     const today = new Date();
-    const departure = new Date(departureDate);
+    const departure = new Date(startDate);
     const diffTime = departure - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
@@ -259,7 +292,7 @@ const Trips = () => {
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-600">Confirmados</p>
               <p className="text-lg font-semibold text-gray-900">
-                {trips.filter(t => t.status === 'CONFIRMED').length}
+                {trips.filter(t => t.status === 'confirmado').length}
               </p>
             </div>
           </div>
@@ -272,7 +305,7 @@ const Trips = () => {
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-600">Em Andamento</p>
               <p className="text-lg font-semibold text-gray-900">
-                {trips.filter(t => t.status === 'IN_PROGRESS').length}
+                {trips.filter(t => t.status === 'em_andamento').length}
               </p>
             </div>
           </div>
@@ -285,7 +318,7 @@ const Trips = () => {
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-600">Concluídos</p>
               <p className="text-lg font-semibold text-gray-900">
-                {trips.filter(t => t.status === 'COMPLETED').length}
+                {trips.filter(t => t.status === 'concluido').length}
               </p>
             </div>
           </div>
@@ -298,7 +331,7 @@ const Trips = () => {
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-600">Receita Total</p>
               <p className="text-lg font-semibold text-gray-900">
-                {formatCurrency(trips.reduce((total, t) => total + (parseFloat(t.price) || 0), 0))}
+                {formatCurrency(trips.reduce((total, t) => total + (parseFloat(t.pricePerPerson) || 0), 0))}
               </p>
             </div>
           </div>
@@ -313,7 +346,7 @@ const Trips = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredTrips.map((trip) => {
-            const daysUntil = getDaysUntilTrip(trip.departureDate);
+            const daysUntil = getDaysUntilTrip(trip.startDate);
             return (
               <div key={trip.id} className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow">
                 <div className="p-6">
@@ -337,30 +370,30 @@ const Trips = () => {
                   )}
 
                   <div className="space-y-2 mb-4">
-                    {trip.departureLocation && (
+                    {trip.origin && (
                       <div className="flex items-center text-sm text-gray-600">
                         <MapPin className="w-4 h-4 mr-2" />
-                        Saída: {trip.departureLocation}
+                        Saída: {trip.origin}
                       </div>
                     )}
-                    {trip.departureDate && (
+                    {trip.startDate && (
                       <div className="flex items-center text-sm text-gray-600">
                         <Calendar className="w-4 h-4 mr-2" />
-                        Partida: {formatDate(trip.departureDate)}
-                        {trip.departureTime && ` às ${trip.departureTime}`}
+                        Partida: {formatDate(trip.startDate)}
+                        {trip.startDate.split('T')[1] && ` às ${trip.startDate.split('T')[1].slice(0,5)}`}
                       </div>
                     )}
-                    {trip.returnDate && (
+                    {trip.endDate && (
                       <div className="flex items-center text-sm text-gray-600">
                         <Calendar className="w-4 h-4 mr-2" />
-                        Retorno: {formatDate(trip.returnDate)}
-                        {trip.returnTime && ` às ${trip.returnTime}`}
+                        Retorno: {formatDate(trip.endDate)}
+                        {trip.endDate.split('T')[1] && ` às ${trip.endDate.split('T')[1].slice(0,5)}`}
                       </div>
                     )}
-                    {trip.price && (
+                    {trip.pricePerPerson && (
                       <div className="flex items-center text-sm text-gray-600">
                         <DollarSign className="w-4 h-4 mr-2" />
-                        Preço: {formatCurrency(trip.price)}
+                        Preço: {formatCurrency(trip.pricePerPerson)}
                       </div>
                     )}
                     {trip.maxPassengers && (
@@ -383,7 +416,7 @@ const Trips = () => {
                     )}
                   </div>
 
-                  {daysUntil !== null && trip.status !== 'COMPLETED' && trip.status !== 'CANCELLED' && (
+                  {daysUntil !== null && trip.status !== 'concluido' && trip.status !== 'cancelado' && (
                     <div className={`mb-4 p-2 rounded-lg text-sm ${
                       daysUntil < 0 ? 'bg-red-100 text-red-800' :
                       daysUntil === 0 ? 'bg-yellow-100 text-yellow-800' :
@@ -479,6 +512,25 @@ const Trips = () => {
                       />
                     </div>
 
+                    {isMaster() && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Empresa *
+                        </label>
+                        <select
+                          required
+                          value={formData.company_id}
+                          onChange={(e) => setFormData({ ...formData, company_id: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-zapchat-primary focus:border-zapchat-primary"
+                        >
+                          <option value="">Selecione uma empresa</option>
+                          {companies.map(c => (
+                            <option key={c.id} value={c.id}>{c.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Destino *
@@ -500,8 +552,8 @@ const Trips = () => {
                       <input
                         type="text"
                         required
-                        value={formData.departureLocation}
-                        onChange={(e) => setFormData({ ...formData, departureLocation: e.target.value })}
+                        value={formData.origin}
+                        onChange={(e) => setFormData({ ...formData, origin: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-zapchat-primary focus:border-zapchat-primary"
                         placeholder="Local de saída"
                       />
@@ -520,8 +572,8 @@ const Trips = () => {
                       <input
                         type="date"
                         required
-                        value={formData.departureDate}
-                        onChange={(e) => setFormData({ ...formData, departureDate: e.target.value })}
+                        value={formData.startDate}
+                        onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-zapchat-primary focus:border-zapchat-primary"
                       />
                     </div>
@@ -532,8 +584,8 @@ const Trips = () => {
                       </label>
                       <input
                         type="time"
-                        value={formData.departureTime}
-                        onChange={(e) => setFormData({ ...formData, departureTime: e.target.value })}
+                        value={formData.startTime}
+                        onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-zapchat-primary focus:border-zapchat-primary"
                       />
                     </div>
@@ -544,8 +596,8 @@ const Trips = () => {
                       </label>
                       <input
                         type="date"
-                        value={formData.returnDate}
-                        onChange={(e) => setFormData({ ...formData, returnDate: e.target.value })}
+                        value={formData.endDate}
+                        onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-zapchat-primary focus:border-zapchat-primary"
                       />
                     </div>
@@ -556,8 +608,8 @@ const Trips = () => {
                       </label>
                       <input
                         type="time"
-                        value={formData.returnTime}
-                        onChange={(e) => setFormData({ ...formData, returnTime: e.target.value })}
+                        value={formData.endTime}
+                        onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-zapchat-primary focus:border-zapchat-primary"
                       />
                     </div>
@@ -576,8 +628,8 @@ const Trips = () => {
                         type="number"
                         step="0.01"
                         min="0"
-                        value={formData.price}
-                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                        value={formData.pricePerPerson}
+                        onChange={(e) => setFormData({ ...formData, pricePerPerson: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-zapchat-primary focus:border-zapchat-primary"
                         placeholder="0.00"
                       />
