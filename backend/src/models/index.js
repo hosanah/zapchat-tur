@@ -128,6 +128,11 @@ Trip.hasMany(Event, {
   as: 'events'
 });
 
+Trip.hasMany(Sale, {
+  foreignKey: 'trip_id',
+  as: 'sales'
+});
+
 // Booking associations
 Booking.belongsTo(Customer, {
   foreignKey: 'customer_id',
@@ -174,6 +179,11 @@ Sale.belongsTo(Customer, {
 Sale.belongsTo(Event, {
   foreignKey: 'event_id',
   as: 'event'
+});
+
+Sale.belongsTo(Trip, {
+  foreignKey: 'trip_id',
+  as: 'trip'
 });
 
 Sale.belongsTo(User, {

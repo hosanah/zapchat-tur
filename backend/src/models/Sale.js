@@ -208,6 +208,17 @@ const Sale = sequelize.define('Sale', {
     allowNull: true,
     comment: 'Notas internas (não visíveis ao cliente)'
   },
+
+  // Passeio relacionado
+  trip_id: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    references: {
+      model: 'trips',
+      key: 'id'
+    },
+    comment: 'Passeio associado à venda'
+  },
   
   // Relacionamentos
   customer_id: {
@@ -279,6 +290,9 @@ const Sale = sequelize.define('Sale', {
     },
     {
       fields: ['due_date']
+    },
+    {
+      fields: ['trip_id']
     },
     {
       fields: ['company_id', 'status']

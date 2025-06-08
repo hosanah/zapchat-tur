@@ -1,4 +1,4 @@
-const { Sale, Customer, Event, Company, User } = require('../models');
+const { Sale, Customer, Event, Company, User, Trip, Vehicle, Booking } = require('../models');
 const { Op } = require('sequelize');
 
 class SaleController {
@@ -12,6 +12,7 @@ class SaleController {
         payment_status,
         customer_id,
         event_id,
+        trip_id,
         start_date,
         end_date,
         search,
@@ -35,6 +36,7 @@ class SaleController {
       if (payment_status) where.payment_status = payment_status;
       if (customer_id) where.customer_id = customer_id;
       if (event_id) where.event_id = event_id;
+      if (trip_id) where.trip_id = trip_id;
 
       // Filtro por período
       if (start_date && end_date) {
@@ -69,6 +71,11 @@ class SaleController {
             as: 'event',
             attributes: ['id', 'title', 'start_date', 'end_date', 'type'],
             required: false
+          },
+          {
+            model: Trip,
+            as: 'trip',
+            attributes: ['id', 'title']
           },
           {
             model: Company,
@@ -146,6 +153,11 @@ class SaleController {
             required: false
           },
           {
+            model: Trip,
+            as: 'trip',
+            attributes: ['id', 'title']
+          },
+          {
             model: Company,
             as: 'company'
           },
@@ -220,6 +232,42 @@ class SaleController {
         }
       }
 
+      const trip = await Trip.findOne({
+        where: {
+          id: saleData.trip_id,
+          company_id: user.company_id
+        },
+        include: [{ model: Vehicle, as: 'vehicle' }]
+      });
+
+      if (!trip) {
+        return res.status(400).json({
+          success: false,
+          message: 'Passeio não encontrado ou não pertence à sua empresa'
+        });
+      }
+
+      if (!trip.vehicleId || !trip.driverId) {
+        return res.status(400).json({
+          success: false,
+          message: 'Passeio deve possuir veículo e motorista vinculados'
+        });
+      }
+
+      const confirmedBookings = await Booking.sum('passengers', {
+        where: { tripId: trip.id, status: { [Op.ne]: 'cancelado' } }
+      });
+
+      const saleCount = await Sale.count({ where: { trip_id: trip.id } });
+      const capacity = trip.vehicle ? trip.vehicle.capacity : trip.maxPassengers;
+
+      if ((saleCount + (confirmedBookings || 0)) >= capacity) {
+        return res.status(400).json({
+          success: false,
+          message: 'Limite de passageiros atingido para este passeio'
+        });
+      }
+
       const sale = await Sale.create(saleData);
 
       // Buscar venda criada com relacionamentos
@@ -235,6 +283,11 @@ class SaleController {
             as: 'event',
             attributes: ['id', 'title', 'start_date', 'end_date', 'type'],
             required: false
+          },
+          {
+            model: Trip,
+            as: 'trip',
+            attributes: ['id', 'title']
           },
           {
             model: Company,
@@ -320,6 +373,41 @@ class SaleController {
         }
       }
 
+      if (req.body.trip_id && req.body.trip_id !== sale.trip_id) {
+        const trip = await Trip.findOne({
+          where: { id: req.body.trip_id, company_id: user.company_id },
+          include: [{ model: Vehicle, as: 'vehicle' }]
+        });
+
+        if (!trip) {
+          return res.status(400).json({
+            success: false,
+            message: 'Passeio não encontrado ou não pertence à sua empresa'
+          });
+        }
+
+        if (!trip.vehicleId || !trip.driverId) {
+          return res.status(400).json({
+            success: false,
+            message: 'Passeio deve possuir veículo e motorista vinculados'
+          });
+        }
+
+        const confirmedBookings = await Booking.sum('passengers', {
+          where: { tripId: trip.id, status: { [Op.ne]: 'cancelado' } }
+        });
+
+        const saleCount = await Sale.count({ where: { trip_id: trip.id } });
+        const capacity = trip.vehicle ? trip.vehicle.capacity : trip.maxPassengers;
+
+        if ((saleCount + (confirmedBookings || 0)) >= capacity) {
+          return res.status(400).json({
+            success: false,
+            message: 'Limite de passageiros atingido para este passeio'
+          });
+        }
+      }
+
       await sale.update(req.body);
 
       // Buscar venda atualizada com relacionamentos
@@ -335,6 +423,11 @@ class SaleController {
             as: 'event',
             attributes: ['id', 'title', 'start_date', 'end_date', 'type'],
             required: false
+          },
+          {
+            model: Trip,
+            as: 'trip',
+            attributes: ['id', 'title']
           },
           {
             model: Company,
@@ -538,6 +631,11 @@ class SaleController {
             required: false
           },
           {
+            model: Trip,
+            as: 'trip',
+            attributes: ['id', 'title']
+          },
+          {
             model: User,
             as: 'creator',
             attributes: ['id', 'name', 'email']
@@ -594,6 +692,11 @@ class SaleController {
             model: Customer,
             as: 'customer',
             attributes: ['id', 'first_name', 'last_name', 'email', 'phone']
+          },
+          {
+            model: Trip,
+            as: 'trip',
+            attributes: ['id', 'title']
           },
           {
             model: User,
