@@ -68,12 +68,12 @@ class TripController {
           },
           {
             model: Vehicle,
-            as: 'Vehicle',
+            as: 'vehicle',
             attributes: ['id', 'plate', 'brand', 'model', 'capacity']
           },
           {
             model: Driver,
-            as: 'Driver',
+            as: 'driver',
             attributes: ['id', 'firstName', 'lastName', 'phone']
           }
         ]
@@ -117,12 +117,12 @@ class TripController {
           },
           {
             model: Vehicle,
-            as: 'Vehicle',
+            as: 'vehicle',
             attributes: ['id', 'plate', 'brand', 'model', 'capacity', 'type']
           },
           {
             model: Driver,
-            as: 'Driver',
+            as: 'driver',
             attributes: ['id', 'firstName', 'lastName', 'phone', 'licenseCategory']
           },
           {
