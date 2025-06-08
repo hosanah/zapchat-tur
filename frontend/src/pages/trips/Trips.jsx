@@ -146,8 +146,15 @@ const Trips = () => {
       fetchTrips();
     } catch (error) {
       console.error('Erro ao salvar passeio:', error);
-      const errorMessage = error.response?.data?.message || 'Erro ao salvar passeio';
-      showError(errorMessage);
+      const response = error.response?.data;
+      if (response?.success === false && Array.isArray(response.details)) {
+        response.details.forEach((detail) => {
+          if (detail.msg) showError(detail.msg);
+        });
+      } else {
+        const errorMessage = response?.message || 'Erro ao salvar passeio';
+        showError(errorMessage);
+      }
     }
   };
 
@@ -668,7 +675,7 @@ const Trips = () => {
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-zapchat-primary focus:border-zapchat-primary"
                       >
                         <option value="">Selecione um veículo</option>
-                        {vehicles.filter(v => v.status === 'ACTIVE').map(vehicle => (
+                        {vehicles.filter(v => v.status === 'ativo').map(vehicle => (
                           <option key={vehicle.id} value={vehicle.id}>
                             {vehicle.plate} - {vehicle.brand} {vehicle.model} (Cap: {vehicle.capacity})
                           </option>
@@ -686,9 +693,9 @@ const Trips = () => {
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-zapchat-primary focus:border-zapchat-primary"
                       >
                         <option value="">Selecione um motorista</option>
-                        {drivers.filter(d => d.status === 'ACTIVE').map(driver => (
+                        {drivers.filter(d => d.status === 'ativo').map(driver => (
                           <option key={driver.id} value={driver.id}>
-                            {driver.name} - CNH: {driver.cnh}
+                            {driver.firstName} - CNH: {driver.licenseNumber}
                           </option>
                         ))}
                       </select>
