@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Search, Edit, Trash2, MapPin, Calendar, Clock, Users, Car, User, DollarSign } from 'lucide-react';
 import api from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Trips = () => {
+  const { isMaster, user } = useAuth();
   const [trips, setTrips] = useState([]);
   const [vehicles, setVehicles] = useState([]);
   const [drivers, setDrivers] = useState([]);
   const [customers, setCustomers] = useState([]);
+  const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -26,6 +29,8 @@ const Trips = () => {
     maxPassengers: '',
     vehicleId: '',
     driverId: '',
+    companyId: '',
+    observations: ''
     status: 'planejado',
     notes: ''
   });
@@ -43,6 +48,9 @@ const Trips = () => {
     fetchVehicles();
     fetchDrivers();
     fetchCustomers();
+    if (isMaster()) {
+      fetchCompanies();
+    }
   }, []);
 
   const fetchTrips = async () => {
@@ -88,6 +96,15 @@ const Trips = () => {
     }
   };
 
+  const fetchCompanies = async () => {
+    try {
+      const response = await api.get('/companies');
+      setCompanies(response.data.companies || []);
+    } catch (error) {
+      console.error('Erro ao carregar empresas:', error);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -110,6 +127,10 @@ const Trips = () => {
         status: formData.status,
         notes: formData.notes
       };
+      if (isMaster()) {
+        submitData.company_id = formData.companyId;
+      }
+      delete submitData.companyId;
 
       if (editingTrip) {
         await api.put(`/trips/${editingTrip.id}`, submitData);
@@ -145,7 +166,9 @@ const Trips = () => {
       maxPassengers: trip.maxPassengers || '',
       vehicleId: trip.vehicleId || '',
       driverId: trip.driverId || '',
-      status: trip.status || 'planejado',
+      companyId: trip.company_id || '',
+      status: trip.status || 'PLANNED',
+      observations: trip.observations || ''
       notes: trip.notes || ''
     });
     setShowModal(true);
@@ -179,6 +202,8 @@ const Trips = () => {
       maxPassengers: '',
       vehicleId: '',
       driverId: '',
+      companyId: '',
+      observations: ''
       status: 'planejado',
       notes: ''
     });
@@ -464,6 +489,24 @@ const Trips = () => {
                 <div>
                   <h4 className="text-md font-medium text-gray-900 mb-3">Informações Básicas</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {isMaster() && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Empresa *
+                        </label>
+                        <select
+                          required
+                          value={formData.companyId}
+                          onChange={(e) => setFormData({ ...formData, companyId: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-zapchat-primary focus:border-zapchat-primary"
+                        >
+                          <option value="">Selecione a empresa</option>
+                          {companies.map((c) => (
+                            <option key={c.id} value={c.id}>{c.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Título do Passeio *
