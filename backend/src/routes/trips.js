@@ -83,7 +83,6 @@ router.get('/:id',
  * @access Private (Master, Admin)
  */
 router.post('/',
-  authorize(['master', 'admin']),
   tripValidations.create,
   TripController.create
 );

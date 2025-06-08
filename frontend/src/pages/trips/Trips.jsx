@@ -5,7 +5,7 @@ import { useToast } from '../../contexts/ToastContext';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Trips = () => {
-  const { isMaster, user } = useAuth();
+  const { isMaster, isAdmin, user } = useAuth();
   const [trips, setTrips] = useState([]);
   const [vehicles, setVehicles] = useState([]);
   const [drivers, setDrivers] = useState([]);
@@ -21,6 +21,7 @@ const Trips = () => {
     description: '',
     origin: '',
     destination: '',
+    type: 'turismo',
     origin: '',
     startDate: '',
     startTime: '',
@@ -42,6 +43,14 @@ const Trips = () => {
     { value: 'em_andamento', label: 'Em Andamento', color: 'bg-yellow-100 text-yellow-800' },
     { value: 'concluido', label: 'Concluído', color: 'bg-purple-100 text-purple-800' },
     { value: 'cancelado', label: 'Cancelado', color: 'bg-red-100 text-red-800' }
+  ];
+
+  const tipoOptions = [
+    { value: 'turismo', label: 'Turismo', color: 'bg-blue-100 text-blue-800' },
+    { value: 'transfer', label: 'Transfer', color: 'bg-green-100 text-green-800' },
+    { value: 'excursao', label: 'Excursão', color: 'bg-yellow-100 text-yellow-800' },
+    { value: 'fretamento', label: 'Fretamento', color: 'bg-purple-100 text-purple-800' },
+    { value: 'outros', label: 'Outros', color: 'bg-red-100 text-red-800' }
   ];
 
   useEffect(() => {
@@ -124,6 +133,7 @@ const Trips = () => {
         title: formData.title,
         description: formData.description,
         destination: formData.destination,
+        type: formData.type,
         origin: formData.origin,
         startDate: combineDateTime(formData.startDate, formData.startTime),
         endDate: combineDateTime(formData.endDate, formData.endTime),
@@ -140,11 +150,6 @@ const Trips = () => {
         notes: formData.notes
       };
       if (isMaster()) {
-        submitData.company_id = formData.companyId;
-      }
-      delete submitData.companyId;
-
-      if (isMaster()) {
         submitData.company_id = formData.company_id;
       }
 
@@ -155,7 +160,7 @@ const Trips = () => {
         await api.post('/trips', submitData);
         showSuccess('Passeio cadastrado com sucesso!');
       }
-      
+
       setShowModal(false);
       setEditingTrip(null);
       resetForm();
@@ -182,10 +187,11 @@ const Trips = () => {
       origin: trip.origin || '',
       destination: trip.destination || '',
       origin: trip.origin || '',
+      type: trip.type || 'turismo',
       startDate: trip.startDate ? trip.startDate.split('T')[0] : '',
-      startTime: trip.startDate ? trip.startDate.split('T')[1]?.slice(0,5) : '',
+      startTime: trip.startDate ? trip.startDate.split('T')[1]?.slice(0, 5) : '',
       endDate: trip.endDate ? trip.endDate.split('T')[0] : '',
-      endTime: trip.endDate ? trip.endDate.split('T')[1]?.slice(0,5) : '',
+      endTime: trip.endDate ? trip.endDate.split('T')[1]?.slice(0, 5) : '',
       pricePerPerson: trip.pricePerPerson || '',
       maxPassengers: trip.maxPassengers || '',
       vehicleId: trip.vehicleId || '',
@@ -218,6 +224,7 @@ const Trips = () => {
       description: '',
       origin: '',
       destination: '',
+      type: 'turismo',
       origin: '',
       startDate: '',
       startTime: '',
@@ -243,6 +250,11 @@ const Trips = () => {
   const getStatusColor = (status) => {
     const statusOption = statusOptions.find(option => option.value === status);
     return statusOption ? statusOption.color : 'bg-gray-100 text-gray-800';
+  };
+
+  const getTipoColor = (status) => {
+    const tipoOptions = tipoOptions.find(option => option.value === status);
+    return tipoOptions ? tipoOptions.color : 'bg-gray-100 text-gray-800';
   };
 
   const formatDate = (dateString) => {
@@ -409,14 +421,14 @@ const Trips = () => {
                       <div className="flex items-center text-sm text-gray-600">
                         <Calendar className="w-4 h-4 mr-2" />
                         Partida: {formatDate(trip.startDate)}
-                        {trip.startDate.split('T')[1] && ` às ${trip.startDate.split('T')[1].slice(0,5)}`}
+                        {trip.startDate.split('T')[1] && ` às ${trip.startDate.split('T')[1].slice(0, 5)}`}
                       </div>
                     )}
                     {trip.endDate && (
                       <div className="flex items-center text-sm text-gray-600">
                         <Calendar className="w-4 h-4 mr-2" />
                         Retorno: {formatDate(trip.endDate)}
-                        {trip.endDate.split('T')[1] && ` às ${trip.endDate.split('T')[1].slice(0,5)}`}
+                        {trip.endDate.split('T')[1] && ` às ${trip.endDate.split('T')[1].slice(0, 5)}`}
                       </div>
                     )}
                     {trip.pricePerPerson && (
@@ -446,16 +458,15 @@ const Trips = () => {
                   </div>
 
                   {daysUntil !== null && trip.status !== 'concluido' && trip.status !== 'cancelado' && (
-                    <div className={`mb-4 p-2 rounded-lg text-sm ${
-                      daysUntil < 0 ? 'bg-red-100 text-red-800' :
-                      daysUntil === 0 ? 'bg-yellow-100 text-yellow-800' :
-                      daysUntil <= 7 ? 'bg-orange-100 text-orange-800' :
-                      'bg-blue-100 text-blue-800'
-                    }`}>
+                    <div className={`mb-4 p-2 rounded-lg text-sm ${daysUntil < 0 ? 'bg-red-100 text-red-800' :
+                        daysUntil === 0 ? 'bg-yellow-100 text-yellow-800' :
+                          daysUntil <= 7 ? 'bg-orange-100 text-orange-800' :
+                            'bg-blue-100 text-blue-800'
+                      }`}>
                       {daysUntil < 0 ? `Atrasado há ${Math.abs(daysUntil)} dias` :
-                       daysUntil === 0 ? 'Hoje!' :
-                       daysUntil === 1 ? 'Amanhã' :
-                       `Em ${daysUntil} dias`}
+                        daysUntil === 0 ? 'Hoje!' :
+                          daysUntil === 1 ? 'Amanhã' :
+                            `Em ${daysUntil} dias`}
                     </div>
                   )}
 
@@ -508,31 +519,14 @@ const Trips = () => {
               <h3 className="text-lg font-medium text-gray-900 mb-4">
                 {editingTrip ? 'Editar Passeio' : 'Novo Passeio'}
               </h3>
-              
+
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Informações Básicas */}
                 <div>
                   <h4 className="text-md font-medium text-gray-900 mb-3">Informações Básicas</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {isMaster() && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Empresa *
-                        </label>
-                        <select
-                          required
-                          value={formData.companyId}
-                          onChange={(e) => setFormData({ ...formData, companyId: e.target.value })}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-zapchat-primary focus:border-zapchat-primary"
-                        >
-                          <option value="">Selecione a empresa</option>
-                          {companies.map((c) => (
-                            <option key={c.id} value={c.id}>{c.name}</option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
-                    <div className="md:col-span-2">
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Título do Passeio *
                       </label>
@@ -546,17 +540,36 @@ const Trips = () => {
                       />
                     </div>
 
-                    <div className="md:col-span-2">
+                    <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Descrição
                       </label>
-                      <textarea
+                      <input
+                        type="text"
+                        required
                         value={formData.description}
                         onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        rows={3}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-zapchat-primary focus:border-zapchat-primary"
-                        placeholder="Descrição detalhada do passeio..."
+                        placeholder="Ex: Breve descrição do passeio"
                       />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Tipo *
+                      </label>
+                      <select
+                        required
+                        value={formData.type}
+                        onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-zapchat-primary focus:border-zapchat-primary"
+                      >
+                        {tipoOptions.map(type => (
+                          <option key={type.value} value={type.value}>
+                            {type.label}
+                          </option>
+                        ))}
+                      </select>
                     </div>
 
                     {isMaster() && (
@@ -607,6 +620,7 @@ const Trips = () => {
                     </div>
                   </div>
                 </div>
+
 
                 {/* Datas e Horários */}
                 <div>

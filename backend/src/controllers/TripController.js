@@ -209,6 +209,10 @@ class TripController {
         if (!tripData.maxPassengers) {
           tripData.maxPassengers = vehicle.capacity;
         }
+
+        if (tripData.maxPassengers > 0) {
+          tripData.currentPassengers = tripData.maxPassengers;
+        }
       }
 
       // Verificar se motorista existe e pertence à empresa (se fornecido)
