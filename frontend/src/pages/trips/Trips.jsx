@@ -16,7 +16,6 @@ const Trips = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingTrip, setEditingTrip] = useState(null);
   const { showSuccess, showError } = useToast();
-  const { isMaster, user } = useAuth();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
