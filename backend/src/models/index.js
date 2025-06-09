@@ -108,15 +108,6 @@ Trip.belongsTo(Company, {
   as: 'company'
 });
 
-Trip.belongsTo(Vehicle, {
-  foreignKey: 'vehicle_id',
-  as: 'vehicle'
-});
-
-Trip.belongsTo(Driver, {
-  foreignKey: 'driver_id',
-  as: 'driver'
-});
 
 Trip.hasMany(Booking, {
   foreignKey: 'trip_id',
