@@ -134,6 +134,15 @@ export const customerService = {
   getStats: (params) => api.get('/customers/stats', { params }),
 };
 
+// Serviços de vendedores
+export const sellerService = {
+  getAll: (params) => api.get('/sellers', { params }),
+  getById: (id) => api.get(`/sellers/${id}`),
+  create: (data) => api.post('/sellers', data),
+  update: (id, data) => api.put(`/sellers/${id}`, data),
+  delete: (id) => api.delete(`/sellers/${id}`),
+};
+
 // Serviços de passeios
 export const tripService = {
   getAll: (params) => api.get('/trips', { params }),
@@ -141,6 +150,7 @@ export const tripService = {
   create: (data) => api.post('/trips', data),
   update: (id, data) => api.put(`/trips/${id}`, data),
   delete: (id) => api.delete(`/trips/${id}`),
+  updateStatus: (id, data) => api.patch(`/trips/${id}/status`, data),
 };
 
 // Serviços de reservas

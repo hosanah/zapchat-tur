@@ -30,13 +30,27 @@ const Trip = sequelize.define('Trip', {
     type: DataTypes.DECIMAL(10, 2),
     allowNull: false,
     validate: {
-      min: { args: 0, msg: 'Preço não pode ser negativo' },
+      min: { 
+        args: [0], 
+        msg: 'Preço não pode ser negativo' 
+      },
     },
   },
   type: {
     type: DataTypes.ENUM('turismo', 'transfer', 'excursao', 'fretamento', 'outros'),
     allowNull: false,
     defaultValue: 'turismo',
+  },
+  status: {
+    type: DataTypes.ENUM('ativo', 'inativo', 'cancelado'),
+    allowNull: false,
+    defaultValue: 'ativo',
+    validate: {
+      isIn: {
+        args: [['ativo', 'inativo', 'cancelado']],
+        msg: 'Status deve ser: planejado, confirmado, em_andamento, concluido ou cancelado'
+      }
+    }
   },
   company_id: {
     type: DataTypes.UUID,
@@ -53,6 +67,7 @@ const Trip = sequelize.define('Trip', {
   indexes: [
     { fields: ['company_id'] },
     { fields: ['type'] },
+    { fields: ['status'] },
   ],
 });
 

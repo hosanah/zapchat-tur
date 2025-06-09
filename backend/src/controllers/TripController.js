@@ -5,7 +5,7 @@ const { Op } = require('sequelize');
 class TripController {
   static async getAll(req, res, next) {
     try {
-      const { page = 1, limit = 10, search, company_id } = req.query;
+      const { page = 1, limit = 10, search, company_id, status } = req.query;
       const offset = (page - 1) * limit;
       const where = {};
 
@@ -17,6 +17,10 @@ class TripController {
 
       if (search) {
         where.title = { [Op.iLike]: `%${search}%` };
+      }
+
+      if (status) {
+        where.status = status;
       }
 
       const { count, rows } = await Trip.findAndCountAll({
@@ -109,29 +113,29 @@ class TripController {
   }
 
   static async updateStatus(req, res, next) {
-  try {
-    const trip = await Trip.findByPk(req.params.id);
-    if (!trip) {
-      return res.status(404).json({ success: false, error: 'Passeio não encontrado' });
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ success: false, error: 'Dados inválidos', details: errors.array() });
+      }
+
+      const trip = await Trip.findByPk(req.params.id);
+      if (!trip) {
+        return res.status(404).json({ success: false, error: 'Passeio não encontrado' });
+      }
+
+      if (!req.user.isMaster() && trip.company_id !== req.user.company_id) {
+        return res.status(403).json({ success: false, error: 'Acesso negado' });
+      }
+
+      const { status } = req.body;
+      await trip.update({ status });
+
+      res.status(200).json({ success: true, data: { trip }, message: 'Status atualizado com sucesso' });
+    } catch (error) {
+      next(error);
     }
-
-    if (!req.user.isMaster() && trip.company_id !== req.user.company_id) {
-      return res.status(403).json({ success: false, error: 'Acesso negado' });
-    }
-
-    const { status } = req.body;
-    if (!status) {
-      return res.status(400).json({ success: false, error: 'Status é obrigatório' });
-    }
-
-    trip.status = status;
-    await trip.save();
-
-    res.status(200).json({ success: true, data: { trip } });
-  } catch (error) {
-    next(error);
   }
-}
 }
 
 module.exports = TripController;
