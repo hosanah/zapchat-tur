@@ -7,8 +7,8 @@ class SellerController {
     try {
       const { page = 1, limit = 10, search } = req.query;
       const offset = (page - 1) * limit;
-
       const where = {};
+
       if (req.user.isMaster() && req.user.company_id) {
         where.company_id = req.user.company_id;
       } else if (!req.user.isMaster()) {
@@ -18,7 +18,8 @@ class SellerController {
       if (search) {
         where[Op.or] = [
           { firstName: { [Op.iLike]: `%${search}%` } },
-          { lastName: { [Op.iLike]: `%${search}%` } }
+          { lastName: { [Op.iLike]: `%${search}%` } },
+          { email: { [Op.iLike]: `%${search}%` } }
         ];
       }
 
@@ -83,6 +84,25 @@ class SellerController {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          error: 'Dados inválidos',
+          details: errors.array()
+        });
+      }
+
+      const sellerData = req.body;
+
+      if (!req.user.isMaster()) {
+        sellerData.company_id = req.user.company_id;
+      }
+
+      const company = await Company.findByPk(sellerData.company_id);
+      if (!company) {
+        return res.status(400).json({
+          success: false,
+          error: 'Empresa não encontrada'
+        });
         return res.status(400).json({ success: false, error: 'Dados inválidos', details: errors.array() });
       }
 
@@ -104,6 +124,11 @@ class SellerController {
 
       const seller = await Seller.create(sellerData);
 
+      res.status(201).json({
+        success: true,
+        message: 'Vendedor criado com sucesso',
+        data: { seller }
+      });
       res.status(201).json({ success: true, message: 'Vendedor criado com sucesso', data: { seller } });
     } catch (error) {
       next(error);

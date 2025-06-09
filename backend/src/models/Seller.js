@@ -9,6 +9,24 @@ const Seller = sequelize.define('Seller', {
   },
   firstName: {
     type: DataTypes.STRING(50),
+    allowNull: false
+  },
+  lastName: {
+    type: DataTypes.STRING(50),
+    allowNull: false
+  },
+  email: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    validate: {
+      isEmail: {
+        msg: 'Email deve ter formato válido'
+      }
+    }
+  },
+  phone: {
+    type: DataTypes.STRING(20),
+  },
     allowNull: false,
     validate: {
       notEmpty: { msg: 'Nome é obrigatório' },
@@ -32,6 +50,16 @@ const Seller = sequelize.define('Seller', {
     },
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE'
+  }
+}, {
+  tableName: 'sellers'
+});
+
+Seller.findByCompany = function(company_id) {
+  return this.findAll({
+    where: { company_id },
+    order: [['firstName', 'ASC'], ['lastName', 'ASC']]
+  });
   },
   created_by: {
     type: DataTypes.UUID,

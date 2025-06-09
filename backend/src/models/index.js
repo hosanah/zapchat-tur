@@ -92,6 +92,11 @@ Driver.belongsTo(Company, {
   as: 'company'
 });
 
+Seller.belongsTo(Company, {
+  foreignKey: 'company_id',
+  as: 'company'
+});
+
 Driver.hasMany(Trip, {
   foreignKey: 'driver_id',
   as: 'trips'
