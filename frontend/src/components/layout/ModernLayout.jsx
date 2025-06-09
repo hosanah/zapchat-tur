@@ -24,7 +24,10 @@ import {
 } from 'lucide-react';
 
 const ModernLayout = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    const saved = localStorage.getItem('sidebarOpen');
+    return saved ? saved === 'true' : false;
+  });
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const { user, logout } = useAuth();
@@ -49,6 +52,11 @@ const ModernLayout = () => {
     }
     localStorage.setItem('darkMode', darkMode);
   }, [darkMode]);
+
+  // Persistir estado do sidebar
+  useEffect(() => {
+    localStorage.setItem('sidebarOpen', sidebarOpen);
+  }, [sidebarOpen]);
 
   const menuItems = [
     { 
