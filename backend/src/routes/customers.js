@@ -73,7 +73,6 @@ router.get('/:id',
  * @access Private (Master, Admin)
  */
 router.post('/',
-  authorize(['master', 'admin']),
   customerValidations.create,
   CustomerController.create
 );
@@ -84,7 +83,6 @@ router.post('/',
  * @access Private (Master, Admin)
  */
 router.put('/:id',
-  authorize(['master', 'admin']),
   customerValidations.validateId,
   customerValidations.update,
   CustomerController.update
@@ -96,7 +94,6 @@ router.put('/:id',
  * @access Private (Master, Admin)
  */
 router.patch('/:id/status',
-  authorize(['master', 'admin']),
   customerValidations.validateId,
   CustomerController.updateStatus
 );
@@ -107,7 +104,6 @@ router.patch('/:id/status',
  * @access Private (Master, Admin)
  */
 router.delete('/:id',
-  authorize(['master', 'admin']),
   customerValidations.validateId,
   CustomerController.delete
 );

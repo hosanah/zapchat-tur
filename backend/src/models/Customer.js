@@ -153,24 +153,12 @@ const Customer = sequelize.define('Customer', {
   totalTrips: {
     type: DataTypes.INTEGER,
     defaultValue: 0,
-    allowNull: false,
-    validate: {
-      min: {
-        args: 0,
-        msg: 'Total de viagens não pode ser negativo'
-      }
-    }
+    allowNull: true
   },
   totalSpent: {
     type: DataTypes.DECIMAL(10, 2),
     defaultValue: 0.00,
-    allowNull: false,
-    validate: {
-      min: {
-        args: 0,
-        msg: 'Total gasto não pode ser negativo'
-      }
-    }
+    allowNull: true
   },
   notes: {
     type: DataTypes.TEXT,

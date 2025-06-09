@@ -24,13 +24,13 @@ const Customers = () => {
     emergencyContact: '',
     emergencyPhone: '',
     observations: '',
-    status: 'ACTIVE'
+    status: 'Ativo'
   });
 
   const statusOptions = [
-    { value: 'ACTIVE', label: 'Ativo', color: 'bg-green-100 text-green-800' },
-    { value: 'INACTIVE', label: 'Inativo', color: 'bg-red-100 text-red-800' },
-    { value: 'BLOCKED', label: 'Bloqueado', color: 'bg-yellow-100 text-yellow-800' }
+    { value: 'ativo', label: 'Ativo', color: 'bg-green-100 text-green-800' },
+    { value: 'inativo', label: 'Inativo', color: 'bg-red-100 text-red-800' },
+    { value: 'bloqueado', label: 'Bloqueado', color: 'bg-yellow-100 text-yellow-800' }
   ];
 
   useEffect(() => {
@@ -50,14 +50,49 @@ const Customers = () => {
     }
   };
 
+  function prepareCustomerPayload(formData) {
+  const [firstName = '', ...lastNameParts] = formData.name.trim().split(' ');
+  const lastName = lastNameParts.join(' ') || '';
+
+    const mapStatus = (frontStatus) => {
+      switch (frontStatus?.toUpperCase()) {
+        case 'ACTIVE':
+          return 'ativo';
+        case 'INACTIVE':
+          return 'inativo';
+        case 'BLOCKED':
+          return 'bloqueado';
+        default:
+          return undefined;
+      }
+    };
+
+    return {
+      firstName,
+      lastName,
+      email: formData.email.trim(),
+      phone: formData.phone.trim(),
+      cpf: formData.cpf || undefined,
+      birthDate: formData.birthDate || undefined,
+      address: formData.address || undefined,
+      city: formData.city || undefined,
+      state: formData.state?.toUpperCase() || undefined,
+      zipCode: formData.zipCode || undefined,
+      emergencyContact: formData.emergencyContact || undefined,
+      emergencyPhone: formData.emergencyPhone || undefined,
+      notes: formData.observations || undefined,
+      status: mapStatus(formData.status),
+    };
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       if (editingCustomer) {
-        await api.put(`/customers/${editingCustomer.id}`, formData);
+        await api.put(`/customers/${editingCustomer.id}`, prepareCustomerPayload(formData));
         showSuccess('Cliente atualizado com sucesso!');
       } else {
-        await api.post('/customers', formData);
+        await api.post('/customers', prepareCustomerPayload(formData));
         showSuccess('Cliente cadastrado com sucesso!');
       }
       
@@ -67,15 +102,25 @@ const Customers = () => {
       fetchCustomers();
     } catch (error) {
       console.error('Erro ao salvar cliente:', error);
-      const errorMessage = error.response?.data?.message || 'Erro ao salvar cliente';
-      showError(errorMessage);
+    
+      const response = error.response?.data;
+    
+      if (response?.success === false && Array.isArray(response.details)) {
+        response.details.forEach((detail) => {
+          if (detail.msg) showError(detail.msg);
+        });
+      } else {
+        const errorMessage = response?.message || 'Erro ao salvar cliente';
+        showError(errorMessage);
+      }
     }
   };
 
   const handleEdit = (customer) => {
     setEditingCustomer(customer);
+    const fullName = `${customer.firstName || ''} ${customer.lastName || ''}`.trim();
     setFormData({
-      name: customer.name || '',
+      name: fullName || '',
       email: customer.email || '',
       phone: customer.phone || '',
       cpf: customer.cpf || '',
@@ -263,7 +308,7 @@ const Customers = () => {
                       <User className="w-5 h-5 text-zapchat-dark" />
                     </div>
                     <div className="ml-3">
-                      <h3 className="text-lg font-semibold text-gray-900">{customer.name}</h3>
+                      <h4 className="text-lg font-semibold text-gray-900">{customer.firstName || ''} {customer.lastName || ''}</h4>
                       {customer.cpf && (
                         <p className="text-sm text-gray-600">CPF: {customer.cpf}</p>
                       )}
