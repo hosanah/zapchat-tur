@@ -125,21 +125,13 @@ const Booking = sequelize.define('Booking', {
   ],
   hooks: {
     beforeCreate: async (booking) => {
-      // Calcular valor total baseado no número de passageiros
       const trip = await sequelize.models.Trip.findByPk(booking.tripId);
       if (trip) {
-        booking.totalAmount = parseFloat(trip.pricePerPerson) * parseInt(booking.passengers);
+        booking.totalAmount = parseFloat(trip.priceTrips) * parseInt(booking.passengers);
       }
     },
-    
-    afterCreate: async (booking) => {
-      // Atualizar contador de passageiros no passeio
-      const trip = await sequelize.models.Trip.findByPk(booking.tripId);
-      if (trip) {
-        await trip.addPassenger(booking.passengers);
-      }
 
-      // Atualizar estatísticas do cliente
+    afterCreate: async (booking) => {
       const customer = await sequelize.models.Customer.findByPk(booking.customerId);
       if (customer && booking.status === 'pago') {
         await customer.updateStats(1, booking.totalAmount);
@@ -157,22 +149,8 @@ const Booking = sequelize.define('Booking', {
         }
       }
 
-      // Se status mudou para cancelado, remover passageiros do passeio
-      if (previousValues.status !== 'cancelado' && booking.status === 'cancelado') {
-        const trip = await sequelize.models.Trip.findByPk(booking.tripId);
-        if (trip) {
-          await trip.removePassenger(booking.passengers);
-        }
-      }
     },
-
-    beforeDestroy: async (booking) => {
-      // Remover passageiros do passeio
-      const trip = await sequelize.models.Trip.findByPk(booking.tripId);
-      if (trip && booking.status !== 'cancelado') {
-        await trip.removePassenger(booking.passengers);
-      }
-    }
+    beforeDestroy: async (booking) => {}
   }
 });
 

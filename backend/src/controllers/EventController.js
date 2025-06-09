@@ -66,7 +66,7 @@ class EventController {
           {
             model: Trip,
             as: 'trip',
-            attributes: ['id', 'title', 'destination', 'start_date']
+            attributes: ['id', 'title']
           },
           {
             model: User,
@@ -123,7 +123,7 @@ class EventController {
           {
             model: Trip,
             as: 'trip',
-            attributes: ['id', 'title', 'destination', 'start_date', 'end_date']
+            attributes: ['id', 'title']
           },
           {
             model: User,
@@ -205,7 +205,7 @@ class EventController {
           {
             model: Trip,
             as: 'trip',
-            attributes: ['id', 'title', 'destination']
+            attributes: ['id', 'title']
           },
           {
             model: User,
@@ -294,7 +294,7 @@ class EventController {
           {
             model: Trip,
             as: 'trip',
-            attributes: ['id', 'title', 'destination']
+            attributes: ['id', 'title']
           },
           {
             model: User,
@@ -408,7 +408,7 @@ class EventController {
           {
             model: Trip,
             as: 'trip',
-            attributes: ['id', 'title', 'destination']
+            attributes: ['id', 'title']
           }
         ],
         order: [['start_date', 'ASC']]

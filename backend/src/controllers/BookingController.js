@@ -59,7 +59,7 @@ class BookingController {
             as: 'Trip',
             where: tripWhere,
             required: true,
-            attributes: ['id', 'title', 'startDate', 'destination', 'pricePerPerson']
+            attributes: ['id', 'title', 'type', 'priceTrips', 'maxPassengers']
           },
           {
             model: Customer,
@@ -231,7 +231,7 @@ class BookingController {
           {
             model: Trip,
             as: 'Trip',
-            attributes: ['id', 'title', 'startDate', 'destination']
+            attributes: ['id', 'title', 'type']
           },
           {
             model: Customer,
@@ -298,20 +298,9 @@ class BookingController {
       delete updateData.tripId;
       delete updateData.customerId;
 
-      // Se alterando número de passageiros, verificar disponibilidade
       if (updateData.passengers && updateData.passengers !== booking.passengers) {
         const trip = booking.Trip;
-        const currentAvailable = trip.getAvailableSeats() + booking.passengers; // Liberar assentos atuais
-        
-        if (currentAvailable < updateData.passengers) {
-          return res.status(400).json({
-            success: false,
-            error: 'Não há assentos suficientes disponíveis'
-          });
-        }
-
-        // Recalcular valor total
-        updateData.totalAmount = parseFloat(trip.pricePerPerson) * parseInt(updateData.passengers);
+        updateData.totalAmount = parseFloat(trip.priceTrips) * parseInt(updateData.passengers);
       }
 
       await booking.update(updateData);

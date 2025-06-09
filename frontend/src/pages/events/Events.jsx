@@ -142,7 +142,7 @@ const Events = () => {
       }
       
       const response = await api.get('/trips', { params });
-      setTrips(response.data.data || []);
+      setTrips(response.data?.trips || response.trips || []);
     } catch (error) {
       console.error('Erro ao carregar passeios:', error);
       showError('Erro ao carregar lista de passeios');
@@ -628,7 +628,6 @@ const Events = () => {
                         Passeio Relacionado
                       </label>
                       <p className="text-gray-900">{selectedEvent.trip.title}</p>
-                      <p className="text-gray-600 text-sm">{selectedEvent.trip.destination}</p>
                     </div>
                   )}
 
@@ -789,7 +788,7 @@ const Events = () => {
                         <option value="">Nenhum passeio</option>
                         {trips.map(trip => (
                           <option key={trip.id} value={trip.id}>
-                            {trip.title} - {trip.destination}
+                            {trip.title}
                           </option>
                         ))}
                       </select>

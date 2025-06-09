@@ -141,12 +141,6 @@ export const tripService = {
   create: (data) => api.post('/trips', data),
   update: (id, data) => api.put(`/trips/${id}`, data),
   delete: (id) => api.delete(`/trips/${id}`),
-  updateStatus: (id, status) => api.patch(`/trips/${id}/status`, { status }),
-  getActive: (params) => api.get('/trips/active', { params }),
-  getUpcoming: (params) => api.get('/trips/upcoming', { params }),
-  getAvailable: (params) => api.get('/trips/available', { params }),
-  getStats: (params) => api.get('/trips/stats', { params }),
-  getRevenue: (params) => api.get('/trips/revenue', { params }),
 };
 
 // Serviços de reservas

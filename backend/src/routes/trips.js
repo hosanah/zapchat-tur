@@ -17,55 +17,6 @@ router.get('/',
   TripController.getAll
 );
 
-/**
- * @route GET /api/trips/active
- * @desc Obter passeios ativos
- * @access Private (Master, Admin, User)
- */
-router.get('/active',
-  tripValidations.validateQuery,
-  TripController.getActive
-);
-
-/**
- * @route GET /api/trips/upcoming
- * @desc Obter passeios próximos
- * @access Private (Master, Admin, User)
- */
-router.get('/upcoming',
-  tripValidations.validateQuery,
-  TripController.getUpcoming
-);
-
-/**
- * @route GET /api/trips/available
- * @desc Obter passeios disponíveis
- * @access Private (Master, Admin, User)
- */
-router.get('/available',
-  tripValidations.validateQuery,
-  TripController.getAvailable
-);
-
-/**
- * @route GET /api/trips/stats
- * @desc Obter estatísticas dos passeios
- * @access Private (Master, Admin, User)
- */
-router.get('/stats',
-  tripValidations.validateQuery,
-  TripController.getStats
-);
-
-/**
- * @route GET /api/trips/revenue
- * @desc Obter receita por período
- * @access Private (Master, Admin, User)
- */
-router.get('/revenue',
-  tripValidations.validateQuery,
-  TripController.getRevenue
-);
 
 /**
  * @route GET /api/trips/:id
@@ -99,16 +50,6 @@ router.put('/:id',
   TripController.update
 );
 
-/**
- * @route PATCH /api/trips/:id/status
- * @desc Alterar status do passeio
- * @access Private (Master, Admin)
- */
-router.patch('/:id/status',
-  authorize(['master', 'admin']),
-  tripValidations.validateId,
-  TripController.updateStatus
-);
 
 /**
  * @route DELETE /api/trips/:id
