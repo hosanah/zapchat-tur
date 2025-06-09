@@ -121,7 +121,7 @@ const Trip = sequelize.define('Trip', {
     allowNull: false,
     validate: {
       min: {
-        args: 0,
+        args: [0],
         msg: 'Número atual de passageiros não pode ser negativo'
       }
     }
@@ -131,7 +131,7 @@ const Trip = sequelize.define('Trip', {
     allowNull: false,
     validate: {
       min: {
-        args: 0,
+        args: [0],
         msg: 'Preço por pessoa não pode ser negativo'
       }
     }
@@ -141,7 +141,7 @@ const Trip = sequelize.define('Trip', {
     allowNull: true,
     validate: {
       min: {
-        args: 0,
+        args: [0],
         msg: 'Preço total não pode ser negativo'
       }
     }
