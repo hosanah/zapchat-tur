@@ -99,6 +99,12 @@ const createSaleValidation = [
     .isUUID()
     .withMessage('ID do evento deve ser um UUID válido'),
 
+  body('trip_id')
+    .notEmpty()
+    .withMessage('ID do passeio é obrigatório')
+    .isUUID()
+    .withMessage('ID do passeio deve ser um UUID válido'),
+
   // Validação customizada para verificar se due_date é posterior a sale_date
   body('due_date').custom((value, { req }) => {
     if (value && req.body.sale_date) {
@@ -247,7 +253,11 @@ const updateSaleValidation = [
   body('event_id')
     .optional()
     .isUUID()
-    .withMessage('ID do evento deve ser um UUID válido')
+    .withMessage('ID do evento deve ser um UUID válido'),
+  body('trip_id')
+    .optional()
+    .isUUID()
+    .withMessage('ID do passeio deve ser um UUID válido')
 ];
 
 // Validações para busca de venda por ID
@@ -295,6 +305,11 @@ const listSalesValidation = [
     .optional()
     .isUUID()
     .withMessage('ID do evento deve ser um UUID válido'),
+
+  query('trip_id')
+    .optional()
+    .isUUID()
+    .withMessage('ID do passeio deve ser um UUID válido'),
 
   query('start_date')
     .optional()
