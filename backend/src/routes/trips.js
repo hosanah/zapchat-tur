@@ -93,7 +93,6 @@ router.post('/',
  * @access Private (Master, Admin)
  */
 router.put('/:id',
-  authorize(['master', 'admin']),
   tripValidations.validateId,
   tripValidations.update,
   TripController.update
@@ -105,7 +104,6 @@ router.put('/:id',
  * @access Private (Master, Admin)
  */
 router.patch('/:id/status',
-  authorize(['master', 'admin']),
   tripValidations.validateId,
   TripController.updateStatus
 );
@@ -116,7 +114,6 @@ router.patch('/:id/status',
  * @access Private (Master, Admin)
  */
 router.delete('/:id',
-  authorize(['master', 'admin']),
   tripValidations.validateId,
   TripController.delete
 );

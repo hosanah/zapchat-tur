@@ -179,6 +179,7 @@ const Trips = () => {
       title: trip.title || '',
       description: trip.description || '',
       origin: trip.origin || '',
+      destination: trip.destination || '',
       type: trip.type || 'turismo',
       startDate: trip.startDate ? trip.startDate.split('T')[0] : '',
       startTime: trip.startDate ? trip.startDate.split('T')[1]?.slice(0, 5) : '',
