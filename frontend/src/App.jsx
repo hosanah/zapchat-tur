@@ -19,6 +19,7 @@ import Customers from './pages/customers/Customers';
 import Trips from './pages/trips/Trips';
 import Events from './pages/events/Events';
 import Sales from './pages/sales/Sales';
+import Sellers from './pages/sellers/Sellers';
 import UsersPage from './pages/users/Users';
 
 // Placeholder components for other pages
@@ -78,6 +79,7 @@ function App() {
                 <Route path="trips" element={<Trips />} />
                 <Route path="events" element={<Events />} />
                 <Route path="sales" element={<Sales />} />
+                <Route path="sellers" element={<Sellers />} />
                 <Route path="bookings" element={<Bookings />} />
               </Route>
               
