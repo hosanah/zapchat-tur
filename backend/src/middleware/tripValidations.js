@@ -17,7 +17,11 @@ const tripValidations = {
     body('type')
       .notEmpty().withMessage('Tipo é obrigatório')
       .isIn(['turismo', 'transfer', 'excursao', 'fretamento', 'outros'])
-      .withMessage('Tipo inválido')
+      .withMessage('Tipo inválido'),
+    body('status')
+      .optional()
+      .isIn(['ativo', 'inativo','cancelado'])
+      .withMessage('Status inválido')
   ],
   update: [
     body('title')
@@ -36,6 +40,16 @@ const tripValidations = {
       .optional()
       .isIn(['turismo', 'transfer', 'excursao', 'fretamento', 'outros'])
       .withMessage('Tipo inválido'),
+    body('status')
+      .optional()
+      .isIn(['planejado', 'confirmado', 'em_andamento', 'concluido', 'cancelado'])
+      .withMessage('Status inválido')
+  ],
+  updateStatus: [
+    body('status')
+      .notEmpty().withMessage('Status é obrigatório')
+      .isIn(['planejado', 'confirmado', 'em_andamento', 'concluido', 'cancelado'])
+      .withMessage('Status inválido')
   ],
   validateId: [
     param('id').isUUID().withMessage('ID deve ser um UUID válido'),
@@ -44,6 +58,7 @@ const tripValidations = {
     query('page').optional().isInt({ min: 1 }).withMessage('Página deve ser maior que 0'),
     query('limit').optional().isInt({ min: 1, max: 100 }).withMessage('Limite inválido'),
     query('search').optional().isLength({ min: 1, max: 100 }).withMessage('Busca inválida'),
+    query('status').optional().isIn(['planejado', 'confirmado', 'em_andamento', 'concluido', 'cancelado']).withMessage('Status inválido'),
   ],
 };
 

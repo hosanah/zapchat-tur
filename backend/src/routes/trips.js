@@ -56,6 +56,7 @@ router.put('/:id',
  */
 router.patch('/:id/status',
   tripValidations.validateId,
+  tripValidations.updateStatus,
   TripController.updateStatus
 );
 

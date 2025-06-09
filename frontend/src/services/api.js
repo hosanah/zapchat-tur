@@ -141,6 +141,7 @@ export const tripService = {
   create: (data) => api.post('/trips', data),
   update: (id, data) => api.put(`/trips/${id}`, data),
   delete: (id) => api.delete(`/trips/${id}`),
+  updateStatus: (id, data) => api.patch(`/trips/${id}/status`, data),
 };
 
 // Serviços de reservas

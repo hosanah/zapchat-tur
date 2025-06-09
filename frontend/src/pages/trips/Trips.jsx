@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Filter } from 'lucide-react';
 import { tripService, companyService } from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -12,6 +12,12 @@ const TYPES = [
   { value: 'outros', label: 'Outros' },
 ];
 
+const STATUS_OPTIONS = [
+  { value: 'ativo', label: 'Ativo', color: 'bg-blue-100 text-blue-800' },
+  { value: 'inativo', label: 'Inativo', color: 'bg-green-100 text-green-800' },
+  { value: 'cancelado', label: 'Cancelado', color: 'bg-red-100 text-red-800' }
+];
+
 const Trips = () => {
   const { isMaster } = useAuth();
   const { showSuccess, showError } = useToast();
@@ -20,19 +26,24 @@ const Trips = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     maxPassengers: '',
     priceTrips: '',
     type: 'turismo',
+    status: 'ativo',
     company_id: '',
   });
 
   const fetchTrips = async () => {
     try {
       setLoading(true);
-      const response = await tripService.getAll();
+      const params = {};
+      if (statusFilter) params.status = statusFilter;
+      
+      const response = await tripService.getAll(params);
       setTrips(response.data?.trips || response.trips || []);
     } catch (err) {
       showError('Erro ao carregar passeios');
@@ -53,7 +64,7 @@ const Trips = () => {
   useEffect(() => {
     fetchTrips();
     if (isMaster()) fetchCompanies();
-  }, []);
+  }, [statusFilter]);
 
   const resetForm = () => {
     setFormData({
@@ -62,6 +73,7 @@ const Trips = () => {
       maxPassengers: '',
       priceTrips: '',
       type: 'turismo',
+      status: 'ativo',
       company_id: '',
     });
   };
@@ -80,8 +92,19 @@ const Trips = () => {
       setEditing(null);
       resetForm();
       fetchTrips();
-    } catch (err) {
-      showError('Erro ao salvar passeio');
+    } catch (error) {
+      console.error('Erro ao salvar passeio:', error);
+    
+      const response = error.response?.data;
+    
+      if (response?.success === false && Array.isArray(response.details)) {
+        response.details.forEach((detail) => {
+          if (detail.msg) showError(detail.msg);
+        });
+      } else {
+        const errorMessage = response?.message || 'Erro ao salvar passeio';
+        showError(errorMessage);
+      }
     }
   };
 
@@ -90,17 +113,10 @@ const Trips = () => {
     setFormData({
       title: trip.title || '',
       description: trip.description || '',
-      origin: trip.origin || '',
-      destination: trip.destination || '',
-      type: trip.type || 'turismo',
-      startDate: trip.startDate ? trip.startDate.split('T')[0] : '',
-      startTime: trip.startDate ? trip.startDate.split('T')[1]?.slice(0, 5) : '',
-      endDate: trip.endDate ? trip.endDate.split('T')[0] : '',
-      endTime: trip.endDate ? trip.endDate.split('T')[1]?.slice(0, 5) : '',
-      pricePerPerson: trip.pricePerPerson || '',
       maxPassengers: trip.maxPassengers || '',
       priceTrips: trip.priceTrips || '',
       type: trip.type || 'turismo',
+      status: trip.status || 'ativo',
       company_id: trip.company_id || '',
     });
     setShowModal(true);
@@ -117,16 +133,51 @@ const Trips = () => {
     }
   };
 
+  const handleStatusChange = async (tripId, newStatus) => {
+    try {
+      await tripService.updateStatus(tripId, { status: newStatus });
+      showSuccess('Status atualizado com sucesso');
+      fetchTrips();
+    } catch (err) {
+      showError('Erro ao atualizar status');
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    const statusOption = STATUS_OPTIONS.find(s => s.value === status);
+    if (!statusOption) return null;
+    
+    return (
+      <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusOption.color}`}>
+        {statusOption.label}
+      </span>
+    );
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Passeios</h1>
-        <button
-          onClick={() => { resetForm(); setEditing(null); setShowModal(true); }}
-          className="inline-flex items-center px-4 py-2 bg-zapchat-primary text-white rounded-lg hover:bg-zapchat-medium">
-          <Plus className="w-4 h-4 mr-2" />
-          Novo
-        </button>
+        <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2">
+            <Filter className="w-4 h-4 text-gray-500" />
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="border px-3 py-2 rounded-md text-sm">
+              <option value="">Todos os status</option>
+              {STATUS_OPTIONS.map(status => (
+                <option key={status.value} value={status.value}>{status.label}</option>
+              ))}
+            </select>
+          </div>
+          <button
+            onClick={() => { resetForm(); setEditing(null); setShowModal(true); }}
+            className="inline-flex items-center px-4 py-2 bg-zapchat-primary text-white rounded-lg hover:bg-zapchat-medium">
+            <Plus className="w-4 h-4 mr-2" />
+            Novo
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -137,6 +188,7 @@ const Trips = () => {
             <tr className="bg-gray-100">
               <th className="px-3 py-2 text-left text-sm font-semibold">Título</th>
               <th className="px-3 py-2 text-left text-sm font-semibold">Tipo</th>
+              <th className="px-3 py-2 text-left text-sm font-semibold">Status</th>
               <th className="px-3 py-2 text-left text-sm font-semibold">Preço</th>
               <th className="px-3 py-2 text-left text-sm font-semibold">Máx. passageiros</th>
               <th className="px-3 py-2"></th>
@@ -147,6 +199,16 @@ const Trips = () => {
               <tr key={trip.id} className="border-t">
                 <td className="px-3 py-2">{trip.title}</td>
                 <td className="px-3 py-2 capitalize">{trip.type}</td>
+                <td className="px-3 py-2">
+                  <select
+                    value={trip.status || 'ativo'}
+                    onChange={(e) => handleStatusChange(trip.id, e.target.value)}
+                    className="text-xs border rounded px-2 py-1">
+                    {STATUS_OPTIONS.map(status => (
+                      <option key={status.value} value={status.value}>{status.label}</option>
+                    ))}
+                  </select>
+                </td>
                 <td className="px-3 py-2">
                   {Number(trip.priceTrips).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                 </td>
@@ -216,6 +278,18 @@ const Trips = () => {
                   value={formData.priceTrips}
                   onChange={(e) => setFormData({ ...formData, priceTrips: e.target.value })}
                   className="w-full border px-3 py-2 rounded-md" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Status *</label>
+                <select
+                  required
+                  value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                  className="w-full border px-3 py-2 rounded-md">
+                  {STATUS_OPTIONS.map(status => (
+                    <option key={status.value} value={status.value}>{status.label}</option>
+                  ))}
+                </select>
               </div>
               {isMaster() && (
                 <div>
