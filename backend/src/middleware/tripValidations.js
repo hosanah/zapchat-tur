@@ -17,10 +17,7 @@ const tripValidations = {
     body('type')
       .notEmpty().withMessage('Tipo é obrigatório')
       .isIn(['turismo', 'transfer', 'excursao', 'fretamento', 'outros'])
-      .withMessage('Tipo inválido'),
-    body('company_id')
-      .optional()
-      .isUUID().withMessage('ID da empresa deve ser um UUID válido'),
+      .withMessage('Tipo inválido')
   ],
   update: [
     body('title')

@@ -107,6 +107,31 @@ class TripController {
       next(error);
     }
   }
+
+  static async updateStatus(req, res, next) {
+  try {
+    const trip = await Trip.findByPk(req.params.id);
+    if (!trip) {
+      return res.status(404).json({ success: false, error: 'Passeio não encontrado' });
+    }
+
+    if (!req.user.isMaster() && trip.company_id !== req.user.company_id) {
+      return res.status(403).json({ success: false, error: 'Acesso negado' });
+    }
+
+    const { status } = req.body;
+    if (!status) {
+      return res.status(400).json({ success: false, error: 'Status é obrigatório' });
+    }
+
+    trip.status = status;
+    await trip.save();
+
+    res.status(200).json({ success: true, data: { trip } });
+  } catch (error) {
+    next(error);
+  }
+}
 }
 
 module.exports = TripController;
