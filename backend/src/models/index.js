@@ -10,6 +10,7 @@ const Trip = require('./Trip');
 const Booking = require('./Booking');
 const Event = require('./Event');
 const Sale = require('./Sale');
+const Seller = require('./Seller');
 
 // Definir associações
 // Company associations
@@ -48,6 +49,11 @@ Company.hasMany(Sale, {
   as: 'sales'
 });
 
+Company.hasMany(Seller, {
+  foreignKey: 'company_id',
+  as: 'sellers'
+});
+
 // User associations
 User.belongsTo(Company, {
   foreignKey: 'company_id',
@@ -77,6 +83,11 @@ Vehicle.hasMany(Trip, {
 
 // Driver associations
 Driver.belongsTo(Company, {
+  foreignKey: 'company_id',
+  as: 'company'
+});
+
+Seller.belongsTo(Company, {
   foreignKey: 'company_id',
   as: 'company'
 });
@@ -192,6 +203,7 @@ module.exports = {
   Trip,
   Booking,
   Event,
-  Sale
+  Sale,
+  Seller
 };
 
