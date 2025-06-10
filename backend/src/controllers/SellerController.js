@@ -110,18 +110,6 @@ class SellerController {
         return res.status(400).json({ success: false, error: 'Usuário sem empresa associada' });
       }
 
-      const sellerData = {
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        company_id: req.user.company_id,
-        created_by: req.user.id
-      };
-
-      const company = await Company.findByPk(sellerData.company_id);
-      if (!company) {
-        return res.status(400).json({ success: false, error: 'Empresa não encontrada' });
-      }
-
       const seller = await Seller.create(sellerData);
 
       res.status(201).json({

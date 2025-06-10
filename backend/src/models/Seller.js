@@ -9,24 +9,6 @@ const Seller = sequelize.define('Seller', {
   },
   firstName: {
     type: DataTypes.STRING(50),
-    allowNull: false
-  },
-  lastName: {
-    type: DataTypes.STRING(50),
-    allowNull: false
-  },
-  email: {
-    type: DataTypes.STRING,
-    allowNull: true,
-    validate: {
-      isEmail: {
-        msg: 'Email deve ter formato válido'
-      }
-    }
-  },
-  phone: {
-    type: DataTypes.STRING(20),
-  },
     allowNull: false,
     validate: {
       notEmpty: { msg: 'Nome é obrigatório' },
@@ -41,6 +23,18 @@ const Seller = sequelize.define('Seller', {
       len: { args: [2, 50], msg: 'Sobrenome deve ter entre 2 e 50 caracteres' }
     }
   },
+  email: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    validate: {
+      isEmail: {
+        msg: 'Email deve ter formato válido'
+      }
+    }
+  },
+  phone: {
+    type: DataTypes.STRING(20),
+  },
   company_id: {
     type: DataTypes.UUID,
     allowNull: false,
@@ -50,16 +44,6 @@ const Seller = sequelize.define('Seller', {
     },
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE'
-  }
-}, {
-  tableName: 'sellers'
-});
-
-Seller.findByCompany = function(company_id) {
-  return this.findAll({
-    where: { company_id },
-    order: [['firstName', 'ASC'], ['lastName', 'ASC']]
-  });
   },
   created_by: {
     type: DataTypes.UUID,
@@ -75,11 +59,18 @@ Seller.findByCompany = function(company_id) {
   tableName: 'sellers',
   indexes: [
     { fields: ['company_id'] },
-    { fields: ['created_by'] }
+    { fields: ['created_by'] },
   ]
 });
 
-Seller.prototype.toJSON = function() {
+Seller.findByCompany = function (company_id) {
+  return this.findAll({
+    where: { company_id },
+    order: [['firstName', 'ASC'], ['lastName', 'ASC']]
+  });
+};
+
+Seller.prototype.toJSON = function () {
   return { ...this.get() };
 };
 

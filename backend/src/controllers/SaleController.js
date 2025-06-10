@@ -24,7 +24,6 @@ class SaleController {
       const offset = (page - 1) * limit;
 
       // Construir filtros
-      const where = { is_active: true };
       
       // Filtro por empresa (usuários comuns só veem da própria empresa)
       if (user.role !== 'master') {
@@ -126,7 +125,6 @@ class SaleController {
       const { id } = req.params;
       const user = req.user;
 
-      const where = { id, is_active: true };
       
       // Usuários comuns só veem vendas da própria empresa
       if (user.role !== 'master') {
@@ -323,7 +321,6 @@ class SaleController {
       const { id } = req.params;
       const user = req.user;
 
-      const where = { id, is_active: true };
       
       // Usuários comuns só podem editar vendas da própria empresa
       if (user.role !== 'master') {
@@ -463,7 +460,6 @@ class SaleController {
       const { id } = req.params;
       const user = req.user;
 
-      const where = { id, is_active: true };
       
       // Usuários comuns só podem excluir vendas da própria empresa
       if (user.role !== 'master') {
@@ -480,7 +476,7 @@ class SaleController {
       }
 
       // Soft delete
-      await sale.update({ is_active: false });
+      await sale.destroy();
 
       res.json({
         success: true,
@@ -499,7 +495,6 @@ class SaleController {
   // Obter estatísticas de vendas
   async getSalesStats(user) {
     try {
-      const where = { is_active: true };
       
       if (user.role !== 'master') {
         where.company_id = user.company_id;
@@ -619,10 +614,6 @@ class SaleController {
       }
 
       const sales = await Sale.findAll({
-        where: {
-          customer_id,
-          is_active: true
-        },
         include: [
           {
             model: Event,
@@ -683,10 +674,6 @@ class SaleController {
       }
 
       const sales = await Sale.findAll({
-        where: {
-          event_id,
-          is_active: true
-        },
         include: [
           {
             model: Customer,

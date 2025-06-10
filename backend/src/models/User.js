@@ -138,9 +138,6 @@ const User = sequelize.define('User', {
       fields: ['role']
     },
     {
-      fields: ['is_active']
-    },
-    {
       fields: ['email_verification_token']
     },
     {

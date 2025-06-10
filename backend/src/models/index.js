@@ -173,11 +173,6 @@ Event.hasMany(Sale, {
 });
 
 // Seller associations
-Seller.belongsTo(Company, {
-  foreignKey: 'company_id',
-  as: 'company'
-});
-
 Seller.belongsTo(User, {
   foreignKey: 'created_by',
   as: 'creator'
