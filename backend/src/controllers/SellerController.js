@@ -30,7 +30,7 @@ class SellerController {
         order: [['firstName', 'ASC'], ['lastName', 'ASC']],
         include: [
           { model: Company, as: 'company', attributes: ['id', 'name'] },
-          { model: User, as: 'creator', attributes: ['id', 'firstName', 'lastName'] }
+          { model: User, as: 'users', attributes: ['id', 'firstName', 'lastName'] }
         ]
       });
 
@@ -62,7 +62,7 @@ class SellerController {
       const seller = await Seller.findByPk(id, {
         include: [
           { model: Company, as: 'company', attributes: ['id', 'name'] },
-          { model: User, as: 'creator', attributes: ['id', 'firstName', 'lastName'] }
+          { model: User, as: 'users', attributes: ['id', 'firstName', 'lastName'] }
         ]
       });
 

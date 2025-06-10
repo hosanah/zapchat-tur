@@ -164,7 +164,7 @@ Event.belongsTo(Trip, {
 
 Event.belongsTo(User, {
   foreignKey: 'created_by',
-  as: 'creator'
+  as: 'users'
 });
 
 Event.hasMany(Sale, {
@@ -175,7 +175,7 @@ Event.hasMany(Sale, {
 // Seller associations
 Seller.belongsTo(User, {
   foreignKey: 'created_by',
-  as: 'creator'
+  as: 'users'
 });
 
 // Sale associations
@@ -201,7 +201,7 @@ Sale.belongsTo(Trip, {
 
 Sale.belongsTo(User, {
   foreignKey: 'created_by',
-  as: 'creator'
+  as: 'users'
 });
 
 module.exports = {

@@ -5,6 +5,7 @@ class SaleController {
   // Listar vendas com filtros e paginação
   async index(req, res) {
     try {
+      
       const {
         page = 1,
         limit = 10,
@@ -22,6 +23,7 @@ class SaleController {
 
       const user = req.user;
       const offset = (page - 1) * limit;
+      const where = {};
 
       // Construir filtros
       
@@ -58,7 +60,6 @@ class SaleController {
 
       // Buscar vendas
       const { count, rows: sales } = await Sale.findAndCountAll({
-        where,
         include: [
           {
             model: Customer,
@@ -83,8 +84,8 @@ class SaleController {
           },
           {
             model: User,
-            as: 'creator',
-            attributes: ['id', 'name', 'email']
+            as: 'users',
+            attributes: ['id', 'first_name', 'email']
           }
         ],
         limit: parseInt(limit),
@@ -161,8 +162,8 @@ class SaleController {
           },
           {
             model: User,
-            as: 'creator',
-            attributes: ['id', 'name', 'email']
+            as: 'users',
+            attributes: ['id', 'first_name', 'email']
           }
         ]
       });
@@ -294,8 +295,8 @@ class SaleController {
           },
           {
             model: User,
-            as: 'creator',
-            attributes: ['id', 'name', 'email']
+            as: 'users',
+            attributes: ['id', 'first_name', 'email']
           }
         ]
       });
@@ -433,8 +434,8 @@ class SaleController {
           },
           {
             model: User,
-            as: 'creator',
-            attributes: ['id', 'name', 'email']
+            as: 'users',
+            attributes: ['id', 'first_name', 'email']
           }
         ]
       });
@@ -628,8 +629,8 @@ class SaleController {
           },
           {
             model: User,
-            as: 'creator',
-            attributes: ['id', 'name', 'email']
+            as: 'users',
+            attributes: ['id', 'first_name', 'email']
           }
         ],
         order: [['sale_date', 'DESC']]
@@ -687,8 +688,8 @@ class SaleController {
           },
           {
             model: User,
-            as: 'creator',
-            attributes: ['id', 'name', 'email']
+            as: 'users',
+            attributes: ['id', 'first_name', 'email']
           }
         ],
         order: [['sale_date', 'DESC']]

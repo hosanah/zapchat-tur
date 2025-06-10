@@ -70,7 +70,7 @@ class EventController {
           },
           {
             model: User,
-            as: 'creator',
+            as: 'users',
             attributes: ['id', 'first_name', 'last_name', 'email']
           },
           {
@@ -127,7 +127,7 @@ class EventController {
           },
           {
             model: User,
-            as: 'creator',
+            as: 'users',
             attributes: ['id', 'first_name', 'last_name', 'email']
           },
           {
@@ -209,7 +209,7 @@ class EventController {
           },
           {
             model: User,
-            as: 'creator',
+            as: 'users',
             attributes: ['id', 'first_name', 'last_name', 'email']
           },
           {
@@ -298,7 +298,7 @@ class EventController {
           },
           {
             model: User,
-            as: 'creator',
+            as: 'users',
             attributes: ['id', 'first_name', 'last_name', 'email']
           },
           {
