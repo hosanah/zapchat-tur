@@ -23,7 +23,9 @@ import {
   Save,
   FileText,
   Users,
-  CalendarCheck
+  CalendarCheck,
+  Car,
+  UserCheck
 } from 'lucide-react';
 
 const Sales = () => {
@@ -32,6 +34,10 @@ const Sales = () => {
   const [sales, setSales] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [events, setEvents] = useState([]);
+  const [trips, setTrips] = useState([]);
+  const [drivers, setDrivers] = useState([]);
+  const [vehicles, setVehicles] = useState([]);
+  const [sellers, setSellers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState('create');
@@ -42,8 +48,14 @@ const Sales = () => {
   const [stats, setStats] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [selectedCustomers, setSelectedCustomers] = useState([]);
+  const [responsibleCustomer, setResponsibleCustomer] = useState('');
 
   const [formData, setFormData] = useState({
+    trip_id: '',
+    driver_id: '',
+    vehicle_id: '',
+    seller_id: '',
     customer_id: '',
     event_id: '',
     description: '',
@@ -104,8 +116,48 @@ const Sales = () => {
     fetchSales();
     fetchCustomers();
     fetchEvents();
+    fetchTrips();
+    fetchDrivers();
+    fetchVehicles();
+    fetchSellers();
     fetchStats();
   }, [currentPage, searchTerm, statusFilter, paymentStatusFilter]);
+
+  const fetchTrips = async () => {
+    try {
+      const response = await api.get('/trips');
+      setTrips(response.data.trips || []);
+    } catch (error) {
+      console.error('Erro ao buscar passeios:', error);
+    }
+  };
+
+  const fetchDrivers = async () => {
+    try {
+      const response = await api.get('/drivers');
+      setDrivers(response.data.drivers || []);
+    } catch (error) {
+      console.error('Erro ao buscar motoristas:', error);
+    }
+  };
+
+  const fetchVehicles = async () => {
+    try {
+      const response = await api.get('/vehicles');
+      setVehicles(response.data.vehicles || []);
+    } catch (error) {
+      console.error('Erro ao buscar veículos:', error);
+    }
+  };
+
+  const fetchSellers = async () => {
+    try {
+      const response = await api.get('/sellers');
+      setSellers(response.data.sellers || []);
+    } catch (error) {
+      console.error('Erro ao buscar vendedores:', error);
+    }
+  };
 
   const fetchSales = async () => {
     try {
@@ -120,8 +172,8 @@ const Sales = () => {
       if (paymentStatusFilter) params.append('payment_status', paymentStatusFilter);
 
       const response = await api.get(`/sales?${params}`);
-      setSales(response.data.data.sales);
-      setTotalPages(response.data.data.pagination.total_pages);
+      setSales(response.data.sales);
+      setTotalPages(response.data.pagination.total_pages);
     } catch (error) {
       console.error('Erro ao buscar vendas:', error);
     } finally {
@@ -132,7 +184,7 @@ const Sales = () => {
   const fetchCustomers = async () => {
     try {
       const response = await api.get('/customers');
-      setCustomers(response.data.data.customers || []);
+      setCustomers(response.data.customers || []);
     } catch (error) {
       console.error('Erro ao buscar clientes:', error);
     }
@@ -141,7 +193,7 @@ const Sales = () => {
   const fetchEvents = async () => {
     try {
       const response = await api.get('/events');
-      setEvents(response.data.data.events || []);
+      setEvents(response.data.events || []);
     } catch (error) {
       console.error('Erro ao buscar eventos:', error);
     }
@@ -150,7 +202,7 @@ const Sales = () => {
   const fetchStats = async () => {
     try {
       const response = await api.get('/sales/stats');
-      setStats(response.data.data);
+      setStats(response.data);
     } catch (error) {
       console.error('Erro ao buscar estatísticas:', error);
     }

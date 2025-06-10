@@ -209,7 +209,7 @@ const Sale = sequelize.define('Sale', {
     comment: 'Notas internas (não visíveis ao cliente)'
   },
 
-  // Passeio relacionado
+  // Relacionamentos obrigatórios
   trip_id: {
     type: DataTypes.UUID,
     allowNull: false,
@@ -217,10 +217,48 @@ const Sale = sequelize.define('Sale', {
       model: 'trips',
       key: 'id'
     },
-    comment: 'Passeio associado à venda'
+    onUpdate: 'CASCADE',
+    onDelete: 'RESTRICT',
+    comment: 'Passeio associado à venda (obrigatório)'
   },
-  
-  // Relacionamentos
+
+  driver_id: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    references: {
+      model: 'drivers',
+      key: 'id'
+    },
+    onUpdate: 'CASCADE',
+    onDelete: 'SET NULL',
+    comment: 'Motorista responsável pelo passeio'
+  },
+
+  vehicle_id: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    references: {
+      model: 'vehicles',
+      key: 'id'
+    },
+    onUpdate: 'CASCADE',
+    onDelete: 'SET NULL',
+    comment: 'Veículo utilizado no passeio'
+  },
+
+  seller_id: {
+    type: DataTypes.UUID,
+    allowNull: true,
+    references: {
+      model: 'sellers',
+      key: 'id'
+    },
+    onUpdate: 'CASCADE',
+    onDelete: 'SET NULL',
+    comment: 'Vendedor responsável pela venda'
+  },
+
+  // Cliente responsável pela venda
   customer_id: {
     type: DataTypes.UUID,
     allowNull: false,
@@ -228,7 +266,9 @@ const Sale = sequelize.define('Sale', {
       model: 'customers',
       key: 'id'
     },
-    comment: 'Cliente da venda'
+    onUpdate: 'CASCADE',
+    onDelete: 'RESTRICT',
+    comment: 'Cliente responsável pela venda'
   },
   
   event_id: {
@@ -293,6 +333,15 @@ const Sale = sequelize.define('Sale', {
     },
     {
       fields: ['trip_id']
+    },
+    {
+      fields: ['driver_id']
+    },
+    {
+      fields: ['vehicle_id']
+    },
+    {
+      fields: ['seller_id']
     },
     {
       fields: ['company_id', 'status']

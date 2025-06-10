@@ -11,6 +11,7 @@ const Booking = require('./Booking');
 const Event = require('./Event');
 const Sale = require('./Sale');
 const Seller = require('./Seller');
+const SaleCustomer = require('./SaleCustomer');
 
 // Definir associações
 // Company associations
@@ -199,9 +200,76 @@ Sale.belongsTo(Trip, {
   as: 'trip'
 });
 
+Sale.belongsTo(Driver, {
+  foreignKey: 'driver_id',
+  as: 'driver'
+});
+
+Sale.belongsTo(Vehicle, {
+  foreignKey: 'vehicle_id',
+  as: 'vehicle'
+});
+
+Sale.belongsTo(Seller, {
+  foreignKey: 'seller_id',
+  as: 'seller'
+});
+
 Sale.belongsTo(User, {
   foreignKey: 'created_by',
   as: 'users'
+});
+
+// Relacionamento N:N entre Sale e Customer através de SaleCustomer
+Sale.belongsToMany(Customer, {
+  through: SaleCustomer,
+  foreignKey: 'sale_id',
+  otherKey: 'customer_id',
+  as: 'customers'
+});
+
+Customer.belongsToMany(Sale, {
+  through: SaleCustomer,
+  foreignKey: 'customer_id',
+  otherKey: 'sale_id',
+  as: 'sales_as_participant'
+});
+
+// Relacionamentos diretos com SaleCustomer
+Sale.hasMany(SaleCustomer, {
+  foreignKey: 'sale_id',
+  as: 'sale_customers'
+});
+
+SaleCustomer.belongsTo(Sale, {
+  foreignKey: 'sale_id',
+  as: 'sale'
+});
+
+SaleCustomer.belongsTo(Customer, {
+  foreignKey: 'customer_id',
+  as: 'customer'
+});
+
+Customer.hasMany(SaleCustomer, {
+  foreignKey: 'customer_id',
+  as: 'sale_customers'
+});
+
+// Relacionamentos adicionais para os novos campos
+Driver.hasMany(Sale, {
+  foreignKey: 'driver_id',
+  as: 'sales'
+});
+
+Vehicle.hasMany(Sale, {
+  foreignKey: 'vehicle_id',
+  as: 'sales'
+});
+
+Seller.hasMany(Sale, {
+  foreignKey: 'seller_id',
+  as: 'sales'
 });
 
 module.exports = {
@@ -215,6 +283,7 @@ module.exports = {
   Booking,
   Event,
   Sale,
-  Seller
+  Seller,
+  SaleCustomer
 };
 

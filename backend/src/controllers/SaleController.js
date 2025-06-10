@@ -1,4 +1,4 @@
-const { Sale, Customer, Event, Company, User, Trip, Vehicle, Booking } = require('../models');
+const { Sale, Customer, Event, Company, User, Trip, Vehicle, Booking, Driver, Seller, SaleCustomer } = require('../models');
 const { Op } = require('sequelize');
 
 class SaleController {
@@ -60,6 +60,7 @@ class SaleController {
 
       // Buscar vendas
       const { count, rows: sales } = await Sale.findAndCountAll({
+        where,
         include: [
           {
             model: Customer,
@@ -75,7 +76,25 @@ class SaleController {
           {
             model: Trip,
             as: 'trip',
-            attributes: ['id', 'title']
+            attributes: ['id', 'title', 'type', 'maxPassengers']
+          },
+          {
+            model: Driver,
+            as: 'driver',
+            attributes: ['id', 'first_name', 'last_name', 'license_number'],
+            required: false
+          },
+          {
+            model: Vehicle,
+            as: 'vehicle',
+            attributes: ['id', 'plate', 'model', 'brand', 'capacity'],
+            required: false
+          },
+          {
+            model: Seller,
+            as: 'seller',
+            attributes: ['id', 'firstName', 'lastName', 'email'],
+            required: false
           },
           {
             model: Company,
@@ -86,6 +105,17 @@ class SaleController {
             model: User,
             as: 'users',
             attributes: ['id', 'first_name', 'email']
+          },
+          {
+            model: SaleCustomer,
+            as: 'sale_customers',
+            include: [
+              {
+                model: Customer,
+                as: 'customer',
+                attributes: ['id', 'first_name', 'last_name', 'email']
+              }
+            ]
           }
         ],
         limit: parseInt(limit),
