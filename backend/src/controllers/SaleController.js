@@ -3,7 +3,7 @@ const { Op } = require('sequelize');
 
 class SaleController {
   // Listar vendas com filtros e paginação
-  async index(req, res) {
+  static async index(req, res) {
     try {
       
       const {
@@ -121,12 +121,13 @@ class SaleController {
   }
 
   // Buscar venda específica
-  async show(req, res) {
+  static async show(req, res) {
     try {
       const { id } = req.params;
       const user = req.user;
 
-      
+      const where = { id };
+
       // Usuários comuns só veem vendas da própria empresa
       if (user.role !== 'master') {
         where.company_id = user.company_id;
@@ -190,7 +191,7 @@ class SaleController {
   }
 
   // Criar nova venda
-  async store(req, res) {
+  static async store(req, res) {
     try {
       const user = req.user;
       const saleData = {
@@ -317,12 +318,13 @@ class SaleController {
   }
 
   // Atualizar venda
-  async update(req, res) {
+  static async update(req, res) {
     try {
       const { id } = req.params;
       const user = req.user;
 
-      
+      const where = { id };
+
       // Usuários comuns só podem editar vendas da própria empresa
       if (user.role !== 'master') {
         where.company_id = user.company_id;
@@ -456,12 +458,13 @@ class SaleController {
   }
 
   // Excluir venda (soft delete)
-  async destroy(req, res) {
+  static async destroy(req, res) {
     try {
       const { id } = req.params;
       const user = req.user;
 
-      
+      const where = { id };
+
       // Usuários comuns só podem excluir vendas da própria empresa
       if (user.role !== 'master') {
         where.company_id = user.company_id;
@@ -494,9 +497,11 @@ class SaleController {
   }
 
   // Obter estatísticas de vendas
-  async getSalesStats(user) {
+  static async getSalesStats(user) {
     try {
-      
+
+      const where = {};
+
       if (user.role !== 'master') {
         where.company_id = user.company_id;
       }
@@ -574,10 +579,10 @@ class SaleController {
   }
 
   // Endpoint para estatísticas
-  async stats(req, res) {
+  static async stats(req, res) {
     try {
       const user = req.user;
-      const stats = await this.getSalesStats(user);
+      const stats = await SaleController.getSalesStats(user);
 
       res.json({
         success: true,
@@ -594,7 +599,7 @@ class SaleController {
   }
 
   // Buscar vendas por cliente
-  async byCustomer(req, res) {
+  static async byCustomer(req, res) {
     try {
       const { customer_id } = req.params;
       const user = req.user;
@@ -654,7 +659,7 @@ class SaleController {
   }
 
   // Buscar vendas por evento
-  async byEvent(req, res) {
+  static async byEvent(req, res) {
     try {
       const { event_id } = req.params;
       const user = req.user;
@@ -713,5 +718,5 @@ class SaleController {
   }
 }
 
-module.exports = new SaleController();
+module.exports = SaleController;
 
