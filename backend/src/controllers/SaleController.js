@@ -95,7 +95,7 @@ class SaleController {
       });
 
       // Calcular estatísticas
-      const stats = await this.getSalesStats(user);
+      //const stats = await this.getSalesStats(user);
 
       res.json({
         success: true,
@@ -107,7 +107,7 @@ class SaleController {
             total: count,
             total_pages: Math.ceil(count / limit)
           },
-          stats
+          //stats
         }
       });
     } catch (error) {
@@ -582,7 +582,7 @@ class SaleController {
   static async stats(req, res) {
     try {
       const user = req.user;
-      const stats = await SaleController.getSalesStats(user);
+      //const stats = await SaleController.getSalesStats(user);
 
       res.json({
         success: true,
