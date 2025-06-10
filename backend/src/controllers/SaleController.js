@@ -1,4 +1,4 @@
-const { Sale, Customer, Event, Company, User, Trip, Vehicle, Booking, Driver, Seller, SaleCustomer } = require('../models');
+const { Sale, Customer, Company, User, Trip, Vehicle, Booking, Driver, SaleCustomer } = require('../models');
 const { Op } = require('sequelize');
 
 class SaleController {
@@ -12,7 +12,6 @@ class SaleController {
         status,
         payment_status,
         customer_id,
-        event_id,
         trip_id,
         start_date,
         end_date,
@@ -36,7 +35,6 @@ class SaleController {
       if (status) where.status = status;
       if (payment_status) where.payment_status = payment_status;
       if (customer_id) where.customer_id = customer_id;
-      if (event_id) where.event_id = event_id;
       if (trip_id) where.trip_id = trip_id;
 
       // Filtro por período
@@ -68,12 +66,6 @@ class SaleController {
             attributes: ['id', 'first_name', 'last_name', 'email', 'phone']
           },
           {
-            model: Event,
-            as: 'event',
-            attributes: ['id', 'title', 'start_date', 'end_date', 'type'],
-            required: false
-          },
-          {
             model: Trip,
             as: 'trip',
             attributes: ['id', 'title', 'type', 'maxPassengers']
@@ -88,12 +80,6 @@ class SaleController {
             model: Vehicle,
             as: 'vehicle',
             attributes: ['id', 'plate', 'model', 'brand', 'capacity'],
-            required: false
-          },
-          {
-            model: Seller,
-            as: 'seller',
-            attributes: ['id', 'firstName', 'lastName', 'email'],
             required: false
           },
           {
@@ -178,11 +164,6 @@ class SaleController {
             ]
           },
           {
-            model: Event,
-            as: 'event',
-            required: false
-          },
-          {
             model: Trip,
             as: 'trip',
             attributes: ['id', 'title']
@@ -245,22 +226,6 @@ class SaleController {
         });
       }
 
-      // Validar evento se fornecido
-      if (saleData.event_id) {
-        const event = await Event.findOne({
-          where: {
-            id: saleData.event_id,
-            company_id: user.company_id
-          }
-        });
-
-        if (!event) {
-          return res.status(400).json({
-            success: false,
-            message: 'Evento não encontrado ou não pertence à sua empresa'
-          });
-        }
-      }
 
       const trip = await Trip.findOne({
         where: {
@@ -307,12 +272,6 @@ class SaleController {
             model: Customer,
             as: 'customer',
             attributes: ['id', 'first_name', 'last_name', 'email', 'phone']
-          },
-          {
-            model: Event,
-            as: 'event',
-            attributes: ['id', 'title', 'start_date', 'end_date', 'type'],
-            required: false
           },
           {
             model: Trip,
@@ -386,22 +345,6 @@ class SaleController {
         }
       }
 
-      // Validar evento se foi alterado
-      if (req.body.event_id && req.body.event_id !== sale.event_id) {
-        const event = await Event.findOne({
-          where: {
-            id: req.body.event_id,
-            company_id: user.company_id
-          }
-        });
-
-        if (!event) {
-          return res.status(400).json({
-            success: false,
-            message: 'Evento não encontrado ou não pertence à sua empresa'
-          });
-        }
-      }
 
       if (req.body.trip_id && req.body.trip_id !== sale.trip_id) {
         const trip = await Trip.findOne({
@@ -447,12 +390,6 @@ class SaleController {
             model: Customer,
             as: 'customer',
             attributes: ['id', 'first_name', 'last_name', 'email', 'phone']
-          },
-          {
-            model: Event,
-            as: 'event',
-            attributes: ['id', 'title', 'start_date', 'end_date', 'type'],
-            required: false
           },
           {
             model: Trip,
@@ -652,12 +589,6 @@ class SaleController {
       const sales = await Sale.findAll({
         include: [
           {
-            model: Event,
-            as: 'event',
-            attributes: ['id', 'title', 'start_date', 'end_date', 'type'],
-            required: false
-          },
-          {
             model: Trip,
             as: 'trip',
             attributes: ['id', 'title']
@@ -688,64 +619,6 @@ class SaleController {
     }
   }
 
-  // Buscar vendas por evento
-  static async byEvent(req, res) {
-    try {
-      const { event_id } = req.params;
-      const user = req.user;
-
-      // Verificar se o evento pertence à empresa do usuário
-      const event = await Event.findOne({
-        where: {
-          id: event_id,
-          company_id: user.company_id
-        }
-      });
-
-      if (!event) {
-        return res.status(404).json({
-          success: false,
-          message: 'Evento não encontrado'
-        });
-      }
-
-      const sales = await Sale.findAll({
-        include: [
-          {
-            model: Customer,
-            as: 'customer',
-            attributes: ['id', 'first_name', 'last_name', 'email', 'phone']
-          },
-          {
-            model: Trip,
-            as: 'trip',
-            attributes: ['id', 'title']
-          },
-          {
-            model: User,
-            as: 'users',
-            attributes: ['id', 'first_name', 'email']
-          }
-        ],
-        order: [['sale_date', 'DESC']]
-      });
-
-      res.json({
-        success: true,
-        data: {
-          event,
-          sales
-        }
-      });
-    } catch (error) {
-      console.error('Erro ao buscar vendas do evento:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Erro interno do servidor',
-        error: error.message
-      });
-    }
-  }
 }
 
 module.exports = SaleController;

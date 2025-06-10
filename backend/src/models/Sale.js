@@ -246,17 +246,6 @@ const Sale = sequelize.define('Sale', {
     comment: 'Veículo utilizado no passeio'
   },
 
-  seller_id: {
-    type: DataTypes.UUID,
-    allowNull: true,
-    references: {
-      model: 'sellers',
-      key: 'id'
-    },
-    onUpdate: 'CASCADE',
-    onDelete: 'SET NULL',
-    comment: 'Vendedor responsável pela venda'
-  },
 
   // Cliente responsável pela venda
   customer_id: {
@@ -271,15 +260,6 @@ const Sale = sequelize.define('Sale', {
     comment: 'Cliente responsável pela venda'
   },
   
-  event_id: {
-    type: DataTypes.UUID,
-    allowNull: true,
-    references: {
-      model: 'events',
-      key: 'id'
-    },
-    comment: 'Evento relacionado à venda (opcional)'
-  },
   
   company_id: {
     type: DataTypes.UUID,
@@ -314,9 +294,6 @@ const Sale = sequelize.define('Sale', {
       fields: ['customer_id']
     },
     {
-      fields: ['event_id']
-    },
-    {
       fields: ['created_by']
     },
     {
@@ -339,9 +316,6 @@ const Sale = sequelize.define('Sale', {
     },
     {
       fields: ['vehicle_id']
-    },
-    {
-      fields: ['seller_id']
     },
     {
       fields: ['company_id', 'status']

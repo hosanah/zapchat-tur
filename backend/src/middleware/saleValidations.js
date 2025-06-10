@@ -94,10 +94,6 @@ const createSaleValidation = [
     .isLength({ max: 2000 })
     .withMessage('Notas internas devem ter no máximo 2000 caracteres'),
 
-  body('event_id')
-    .optional()
-    .isUUID()
-    .withMessage('ID do evento deve ser um UUID válido'),
 
   body('trip_id')
     .notEmpty()
@@ -250,10 +246,6 @@ const updateSaleValidation = [
     .isLength({ max: 2000 })
     .withMessage('Notas internas devem ter no máximo 2000 caracteres'),
 
-  body('event_id')
-    .optional()
-    .isUUID()
-    .withMessage('ID do evento deve ser um UUID válido'),
   body('trip_id')
     .optional()
     .isUUID()
@@ -301,10 +293,6 @@ const listSalesValidation = [
     .isUUID()
     .withMessage('ID do cliente deve ser um UUID válido'),
 
-  query('event_id')
-    .optional()
-    .isUUID()
-    .withMessage('ID do evento deve ser um UUID válido'),
 
   query('trip_id')
     .optional()
@@ -357,12 +345,6 @@ const getSalesByCustomerValidation = [
     .withMessage('ID do cliente deve ser um UUID válido')
 ];
 
-// Validações para busca por evento
-const getSalesByEventValidation = [
-  param('event_id')
-    .isUUID()
-    .withMessage('ID do evento deve ser um UUID válido')
-];
 
 module.exports = {
   createSaleValidation,
@@ -371,6 +353,6 @@ module.exports = {
   deleteSaleValidation,
   listSalesValidation,
   getSalesByCustomerValidation,
-  getSalesByEventValidation
+  
 };
 
