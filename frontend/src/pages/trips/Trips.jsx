@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Filter } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Filter, User, Phone, Mail, MapPin, Calendar, Users} from 'lucide-react';
 import { tripService, companyService } from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -21,6 +21,7 @@ const STATUS_OPTIONS = [
 const Trips = () => {
   const { isMaster } = useAuth();
   const { showSuccess, showError } = useToast();
+  const [searchTerm, setSearchTerm] = useState('');
   const [trips, setTrips] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -60,6 +61,11 @@ const Trips = () => {
       showError('Erro ao carregar empresas');
     }
   };
+
+  const filteredCustomers = trips.filter(trip =>
+    trip.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    trip.description?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   useEffect(() => {
     fetchTrips();
@@ -177,6 +183,46 @@ const Trips = () => {
             <Plus className="w-4 h-4 mr-2" />
             Novo
           </button>
+        </div>
+      </div>
+
+      {/* Search */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+        <input
+          type="text"
+          placeholder="Buscar por nome, email, telefone ou CPF..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent"
+        />
+      </div>
+      
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-white p-4 rounded-lg shadow-sm border">
+          <div className="flex items-center">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <Users className="w-5 h-5 text-blue-600" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-600">Total</p>
+              <p className="text-lg font-semibold text-gray-900">{trips.length}</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow-sm border">
+          <div className="flex items-center">
+            <div className="p-2 bg-green-100 rounded-lg">
+              <User className="w-5 h-5 text-green-600" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium text-gray-600">Ativos</p>
+              <p className="text-lg font-semibold text-gray-900">
+                {trips.filter(c => c.status === 'ACTIVE').length}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
