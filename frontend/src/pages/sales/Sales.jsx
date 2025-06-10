@@ -261,6 +261,10 @@ const Sales = () => {
       resetForm();
     } else if (mode === 'edit' && sale) {
       setFormData({
+        trip_id: sale.trip_id || '',
+        driver_id: sale.driver_id || '',
+        vehicle_id: sale.vehicle_id || '',
+        seller_id: sale.seller_id || '',
         customer_id: sale.customer_id || '',
         event_id: sale.event_id || '',
         description: sale.description || '',
@@ -288,6 +292,10 @@ const Sales = () => {
 
   const resetForm = () => {
     setFormData({
+      trip_id: '',
+      driver_id: '',
+      vehicle_id: '',
+      seller_id: '',
       customer_id: '',
       event_id: '',
       description: '',
@@ -670,10 +678,95 @@ const Sales = () => {
 
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Passeio */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <CalendarCheck className="inline h-4 w-4 mr-1" />
+                    Passeio *
+                  </label>
+                  <select
+                    value={formData.trip_id}
+                    onChange={(e) => setFormData({ ...formData, trip_id: e.target.value })}
+                    required
+                    disabled={modalMode === 'view'}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
+                  >
+                    <option value="">Selecione um passeio</option>
+                    {trips.map(trip => (
+                      <option key={trip.id} value={trip.id}>
+                        {trip.title} - {trip.type}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Motorista */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <UserCheck className="inline h-4 w-4 mr-1" />
+                    Motorista
+                  </label>
+                  <select
+                    value={formData.driver_id}
+                    onChange={(e) => setFormData({ ...formData, driver_id: e.target.value })}
+                    disabled={modalMode === 'view'}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
+                  >
+                    <option value="">Selecione um motorista</option>
+                    {drivers.map(driver => (
+                      <option key={driver.id} value={driver.id}>
+                        {driver.first_name} {driver.last_name} - {driver.license_number}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Veículo */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <Car className="inline h-4 w-4 mr-1" />
+                    Veículo
+                  </label>
+                  <select
+                    value={formData.vehicle_id}
+                    onChange={(e) => setFormData({ ...formData, vehicle_id: e.target.value })}
+                    disabled={modalMode === 'view'}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
+                  >
+                    <option value="">Selecione um veículo</option>
+                    {vehicles.map(vehicle => (
+                      <option key={vehicle.id} value={vehicle.id}>
+                        {vehicle.plate} - {vehicle.brand} {vehicle.model}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Vendedor */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <User className="inline h-4 w-4 mr-1" />
+                    Vendedor
+                  </label>
+                  <select
+                    value={formData.seller_id}
+                    onChange={(e) => setFormData({ ...formData, seller_id: e.target.value })}
+                    disabled={modalMode === 'view'}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
+                  >
+                    <option value="">Selecione um vendedor</option>
+                    {sellers.map(seller => (
+                      <option key={seller.id} value={seller.id}>
+                        {seller.firstName} {seller.lastName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 {/* Cliente */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Cliente *
+                    Cliente Responsável *
                   </label>
                   <select
                     value={formData.customer_id}
