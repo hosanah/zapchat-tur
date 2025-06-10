@@ -126,7 +126,8 @@ class SaleController {
       const { id } = req.params;
       const user = req.user;
 
-      
+      const where = { id };
+
       // Usuários comuns só veem vendas da própria empresa
       if (user.role !== 'master') {
         where.company_id = user.company_id;
@@ -322,7 +323,8 @@ class SaleController {
       const { id } = req.params;
       const user = req.user;
 
-      
+      const where = { id };
+
       // Usuários comuns só podem editar vendas da própria empresa
       if (user.role !== 'master') {
         where.company_id = user.company_id;
@@ -461,7 +463,8 @@ class SaleController {
       const { id } = req.params;
       const user = req.user;
 
-      
+      const where = { id };
+
       // Usuários comuns só podem excluir vendas da própria empresa
       if (user.role !== 'master') {
         where.company_id = user.company_id;
@@ -496,7 +499,9 @@ class SaleController {
   // Obter estatísticas de vendas
   static async getSalesStats(user) {
     try {
-      
+
+      const where = {};
+
       if (user.role !== 'master') {
         where.company_id = user.company_id;
       }
@@ -577,7 +582,7 @@ class SaleController {
   static async stats(req, res) {
     try {
       const user = req.user;
-      const stats = await this.getSalesStats(user);
+      const stats = await SaleController.getSalesStats(user);
 
       res.json({
         success: true,
