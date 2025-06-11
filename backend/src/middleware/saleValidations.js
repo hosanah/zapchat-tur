@@ -1,4 +1,5 @@
 const { body, param, query } = require('express-validator');
+const { User } = require('../models');
 
 // Validações para criação de venda
 const createSaleValidation = [
@@ -93,6 +94,25 @@ const createSaleValidation = [
     .optional()
     .isLength({ max: 2000 })
     .withMessage('Notas internas devem ter no máximo 2000 caracteres'),
+
+  body('seller_id')
+    .notEmpty()
+    .withMessage('ID do vendedor é obrigatório')
+    .isUUID()
+    .withMessage('ID do vendedor deve ser um UUID válido')
+    .custom(async (value, { req }) => {
+      const seller = await User.findByPk(value);
+      if (!seller) {
+        throw new Error('Vendedor não encontrado');
+      }
+      if (!['admin', 'user'].includes(seller.role)) {
+        throw new Error('Usuário informado não é um vendedor');
+      }
+      if (req.user.role !== 'master' && seller.company_id !== req.user.company_id) {
+        throw new Error('Vendedor deve pertencer à mesma empresa que o usuário autenticado');
+      }
+      return true;
+    }),
 
 
   body('trip_id')
@@ -245,6 +265,25 @@ const updateSaleValidation = [
     .optional()
     .isLength({ max: 2000 })
     .withMessage('Notas internas devem ter no máximo 2000 caracteres'),
+
+  body('seller_id')
+    .notEmpty()
+    .withMessage('ID do vendedor é obrigatório')
+    .isUUID()
+    .withMessage('ID do vendedor deve ser um UUID válido')
+    .custom(async (value, { req }) => {
+      const seller = await User.findByPk(value);
+      if (!seller) {
+        throw new Error('Vendedor não encontrado');
+      }
+      if (!['admin', 'user'].includes(seller.role)) {
+        throw new Error('Usuário informado não é um vendedor');
+      }
+      if (req.user.role !== 'master' && seller.company_id !== req.user.company_id) {
+        throw new Error('Vendedor deve pertencer à mesma empresa que o usuário autenticado');
+      }
+      return true;
+    }),
 
   body('trip_id')
     .optional()
