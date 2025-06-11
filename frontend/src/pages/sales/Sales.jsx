@@ -37,7 +37,6 @@ const Sales = () => {
   const [trips, setTrips] = useState([]);
   const [drivers, setDrivers] = useState([]);
   const [vehicles, setVehicles] = useState([]);
-  const [sellers, setSellers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState('create');
@@ -119,7 +118,6 @@ const Sales = () => {
     fetchTrips();
     fetchDrivers();
     fetchVehicles();
-    fetchSellers();
     fetchStats();
   }, [currentPage, searchTerm, statusFilter, paymentStatusFilter]);
 
@@ -147,15 +145,6 @@ const Sales = () => {
       setVehicles(response.data.vehicles || []);
     } catch (error) {
       console.error('Erro ao buscar veículos:', error);
-    }
-  };
-
-  const fetchSellers = async () => {
-    try {
-      const response = await api.get('/sellers');
-      setSellers(response.data.sellers || []);
-    } catch (error) {
-      console.error('Erro ao buscar vendedores:', error);
     }
   };
 

@@ -77,6 +77,14 @@ const ModernLayout = () => {
       badge: '2'
     },
     { 
+      id: 'sales', 
+      label: 'Vendas', 
+      icon: CalendarCheck, 
+      path: '/sales',
+      color: 'from-emerald-500 to-emerald-600',
+      badge: '9'
+    },
+    { 
       id: 'users', 
       label: 'Usuários', 
       icon: Users, 
@@ -115,23 +123,7 @@ const ModernLayout = () => {
       path: '/trips',
       color: 'from-emerald-500 to-emerald-600',
       badge: '7'
-    },
-    { 
-      id: 'sellers', 
-      label: 'Vendedores', 
-      icon: DollarSign, 
-      path: '/sellers',
-      color: 'from-indigo-500 to-indigo-600',
-      badge: '8'
-    },
-    { 
-      id: 'sales', 
-      label: 'Vendas', 
-      icon: CalendarCheck, 
-      path: '/sales',
-      color: 'from-emerald-500 to-emerald-600',
-      badge: '9'
-    },
+    },    
     { 
       id: 'bookings',
       label: 'Reservas', 
