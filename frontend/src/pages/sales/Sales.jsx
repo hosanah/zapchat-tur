@@ -37,6 +37,7 @@ const Sales = () => {
   const [trips, setTrips] = useState([]);
   const [drivers, setDrivers] = useState([]);
   const [vehicles, setVehicles] = useState([]);
+  const [sellers, setSellers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState('create');
@@ -118,6 +119,7 @@ const Sales = () => {
     fetchTrips();
     fetchDrivers();
     fetchVehicles();
+    fetchSellers();
     fetchStats();
   }, [currentPage, searchTerm, statusFilter, paymentStatusFilter]);
 
@@ -145,6 +147,20 @@ const Sales = () => {
       setVehicles(response.data.vehicles || []);
     } catch (error) {
       console.error('Erro ao buscar veículos:', error);
+    }
+  };
+
+  const fetchSellers = async () => {
+    try {
+      const [adminsRes, usersRes] = await Promise.all([
+        api.get('/users', { params: { role: 'admin' } }),
+        api.get('/users', { params: { role: 'user' } })
+      ]);
+      const admins = adminsRes.data?.users || [];
+      const normalUsers = usersRes.data?.users || [];
+      setSellers([...admins, ...normalUsers]);
+    } catch (error) {
+      console.error('Erro ao buscar vendedores:', error);
     }
   };
 
@@ -478,6 +494,9 @@ const Sales = () => {
                   Cliente
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Vendedor
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Evento
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -524,6 +543,20 @@ const Sales = () => {
                         </div>
                       </div>
                     </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {sale.seller || sale.users ? (
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {sale.seller?.firstName || sale.users?.firstName} {sale.seller?.lastName || sale.users?.lastName}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {sale.seller?.email || sale.users?.email}
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {sale.event ? (
