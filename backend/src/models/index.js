@@ -61,11 +61,6 @@ User.hasMany(Sale, {
   as: 'sales_as_seller'
 });
 
-User.hasMany(Sale, {
-  foreignKey: 'seller_id',
-  as: 'sales_as_seller'
-});
-
 
 // Vehicle associations
 Vehicle.belongsTo(Company, {
@@ -178,10 +173,6 @@ Sale.belongsTo(User, {
   as: 'users'
 });
 
-Sale.belongsTo(User, {
-  foreignKey: 'seller_id',
-  as: 'seller'
-});
 
 // Relacionamento N:N entre Sale e Customer através de SaleCustomer
 Sale.belongsToMany(Customer, {
