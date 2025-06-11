@@ -83,6 +83,12 @@ class SaleController {
             required: false
           },
           {
+            model: User,
+            as: 'seller',
+            attributes: ['id', 'first_name', 'last_name', 'email'],
+            required: false
+          },
+          {
             model: Company,
             as: 'company',
             attributes: ['id', 'name']
@@ -177,6 +183,12 @@ class SaleController {
             as: 'users',
             attributes: ['id', 'first_name', 'email']
           }
+          ,{
+            model: User,
+            as: 'seller',
+            attributes: ['id', 'first_name', 'last_name', 'email'],
+            required: false
+          }
         ]
       });
 
@@ -210,6 +222,20 @@ class SaleController {
         company_id: user.company_id,
         created_by: user.id
       };
+
+      // Validar se o vendedor informado é válido
+      if (saleData.seller_id) {
+        const seller = await User.findOne({ where: { id: saleData.seller_id } });
+        if (
+          !seller ||
+          (user.role !== 'master' && seller.company_id !== user.company_id)
+        ) {
+          return res.status(400).json({
+            success: false,
+            message: 'Vendedor não encontrado ou não pertence à sua empresa'
+          });
+        }
+      }
 
       // Validar se o cliente pertence à mesma empresa
       const customer = await Customer.findOne({
@@ -287,6 +313,12 @@ class SaleController {
             model: User,
             as: 'users',
             attributes: ['id', 'first_name', 'email']
+          }
+          ,{
+            model: User,
+            as: 'seller',
+            attributes: ['id', 'first_name', 'last_name', 'email'],
+            required: false
           }
         ]
       });
@@ -381,6 +413,19 @@ class SaleController {
         }
       }
 
+      if (req.body.seller_id && req.body.seller_id !== sale.seller_id) {
+        const seller = await User.findOne({ where: { id: req.body.seller_id } });
+        if (
+          !seller ||
+          (user.role !== 'master' && seller.company_id !== user.company_id)
+        ) {
+          return res.status(400).json({
+            success: false,
+            message: 'Vendedor não encontrado ou não pertence à sua empresa'
+          });
+        }
+      }
+
       await sale.update(req.body);
 
       // Buscar venda atualizada com relacionamentos
@@ -405,6 +450,12 @@ class SaleController {
             model: User,
             as: 'users',
             attributes: ['id', 'first_name', 'email']
+          }
+          ,{
+            model: User,
+            as: 'seller',
+            attributes: ['id', 'first_name', 'last_name', 'email'],
+            required: false
           }
         ]
       });
