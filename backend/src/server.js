@@ -6,6 +6,7 @@ const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const { sequelize } = require('./config/database');
+const { runMigrations } = require('./database/migrate');
 const errorHandler = require('./middleware/errorHandler');
 const notFound = require('./middleware/notFound');
 
@@ -88,6 +89,9 @@ async function startServer() {
       await sequelize.sync({ force: true });
       console.log('✅ Modelos sincronizados com o banco de dados.');
     }
+
+    // Executar migrations pendentes
+    await runMigrations();
 
     // Iniciar servidor
     const server = app.listen(PORT, '0.0.0.0', () => {
