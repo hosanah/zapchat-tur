@@ -270,6 +270,18 @@ const Sale = sequelize.define('Sale', {
     },
     comment: 'Empresa responsável pela venda'
   },
+
+  seller_id: {
+    type: DataTypes.UUID,
+    allowNull: false,
+    references: {
+      model: 'users',
+      key: 'id'
+    },
+    onUpdate: 'CASCADE',
+    onDelete: 'RESTRICT',
+    comment: 'Usuário vendedor da venda'
+  },
   
   created_by: {
     type: DataTypes.UUID,
@@ -316,6 +328,9 @@ const Sale = sequelize.define('Sale', {
     },
     {
       fields: ['vehicle_id']
+    },
+    {
+      fields: ['seller_id']
     },
     {
       fields: ['company_id', 'status']

@@ -56,6 +56,10 @@ User.hasMany(Sale, {
   foreignKey: 'created_by',
   as: 'created_sales'
 });
+User.hasMany(Sale, {
+  foreignKey: 'seller_id',
+  as: 'sales_as_seller'
+});
 
 
 // Vehicle associations
@@ -158,6 +162,11 @@ Sale.belongsTo(Vehicle, {
   as: 'vehicle'
 });
 
+
+Sale.belongsTo(User, {
+  foreignKey: 'seller_id',
+  as: 'seller'
+});
 
 Sale.belongsTo(User, {
   foreignKey: 'created_by',
