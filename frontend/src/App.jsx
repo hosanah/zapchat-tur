@@ -17,7 +17,6 @@ import Vehicles from './pages/vehicles/Vehicles';
 import Drivers from './pages/drivers/Drivers';
 import Customers from './pages/customers/Customers';
 import Trips from './pages/trips/Trips';
-import Events from './pages/events/Events';
 import Sales from './pages/sales/Sales';
 import UsersPage from './pages/users/Users';
 
@@ -76,7 +75,6 @@ function App() {
                 <Route path="drivers" element={<Drivers />} />
                 <Route path="customers" element={<Customers />} />
                 <Route path="trips" element={<Trips />} />
-                <Route path="events" element={<Events />} />
                 <Route path="sales" element={<Sales />} />
                 <Route path="bookings" element={<Bookings />} />
               </Route>

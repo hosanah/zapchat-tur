@@ -33,7 +33,6 @@ const Sales = () => {
   const { showSuccess, showError } = useToast();
   const [sales, setSales] = useState([]);
   const [customers, setCustomers] = useState([]);
-  const [events, setEvents] = useState([]);
   const [trips, setTrips] = useState([]);
   const [drivers, setDrivers] = useState([]);
   const [vehicles, setVehicles] = useState([]);
@@ -115,7 +114,6 @@ const Sales = () => {
   useEffect(() => {
     fetchSales();
     fetchCustomers();
-    fetchEvents();
     fetchTrips();
     fetchDrivers();
     fetchVehicles();
@@ -192,15 +190,6 @@ const Sales = () => {
       setCustomers(response.data.customers || []);
     } catch (error) {
       console.error('Erro ao buscar clientes:', error);
-    }
-  };
-
-  const fetchEvents = async () => {
-    try {
-      const response = await api.get('/events');
-      setEvents(response.data.events || []);
-    } catch (error) {
-      console.error('Erro ao buscar eventos:', error);
     }
   };
 
@@ -807,7 +796,7 @@ const Sales = () => {
                 </div>
 
                 {/* Evento */}
-                <div>
+                {/* <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Evento (Opcional)
                   </label>
@@ -824,7 +813,7 @@ const Sales = () => {
                       </option>
                     ))}
                   </select>
-                </div>
+                </div> */}
 
                 {/* Descrição */}
                 <div className="md:col-span-2">
