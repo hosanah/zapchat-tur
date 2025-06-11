@@ -9,8 +9,7 @@ const {
   getSaleValidation,
   deleteSaleValidation,
   listSalesValidation,
-  getSalesByCustomerValidation,
-  getSalesByEventValidation
+  getSalesByCustomerValidation
 } = require('../middleware/saleValidations');
 
 // Middleware para verificar erros de validação
@@ -46,12 +45,6 @@ router.get('/customer/:customer_id',
   SaleController.byCustomer
 );
 
-// GET /api/sales/event/:event_id - Buscar vendas por evento
-router.get('/event/:event_id',
-  getSalesByEventValidation,
-  checkValidationErrors,
-  SaleController.byEvent
-);
 
 // GET /api/sales/:id - Buscar venda específica
 router.get('/:id',
