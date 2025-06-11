@@ -8,9 +8,7 @@ const Driver = require('./Driver');
 const Customer = require('./Customer');
 const Trip = require('./Trip');
 const Booking = require('./Booking');
-const Event = require('./Event');
 const Sale = require('./Sale');
-const Seller = require('./Seller');
 const SaleCustomer = require('./SaleCustomer');
 
 // Definir associações
@@ -40,20 +38,12 @@ Company.hasMany(Trip, {
   as: 'trips'
 });
 
-Company.hasMany(Event, {
-  foreignKey: 'company_id',
-  as: 'events'
-});
 
 Company.hasMany(Sale, {
   foreignKey: 'company_id',
   as: 'sales'
 });
 
-Company.hasMany(Seller, {
-  foreignKey: 'company_id',
-  as: 'sellers'
-});
 
 // User associations
 User.belongsTo(Company, {
@@ -61,20 +51,12 @@ User.belongsTo(Company, {
   as: 'company'
 });
 
-User.hasMany(Event, {
-  foreignKey: 'created_by',
-  as: 'created_events'
-});
 
 User.hasMany(Sale, {
   foreignKey: 'created_by',
   as: 'created_sales'
 });
 
-User.hasMany(Seller, {
-  foreignKey: 'created_by',
-  as: 'created_sellers'
-});
 
 // Vehicle associations
 Vehicle.belongsTo(Company, {
@@ -93,10 +75,6 @@ Driver.belongsTo(Company, {
   as: 'company'
 });
 
-Seller.belongsTo(Company, {
-  foreignKey: 'company_id',
-  as: 'company'
-});
 
 Driver.hasMany(Trip, {
   foreignKey: 'driver_id',
@@ -131,10 +109,6 @@ Trip.hasMany(Booking, {
   as: 'bookings'
 });
 
-Trip.hasMany(Event, {
-  foreignKey: 'trip_id',
-  as: 'events'
-});
 
 Trip.hasMany(Sale, {
   foreignKey: 'trip_id',
@@ -152,32 +126,10 @@ Booking.belongsTo(Trip, {
   as: 'trip'
 });
 
-// Event associations
-Event.belongsTo(Company, {
-  foreignKey: 'company_id',
-  as: 'company'
-});
 
-Event.belongsTo(Trip, {
-  foreignKey: 'trip_id',
-  as: 'trip'
-});
 
-Event.belongsTo(User, {
-  foreignKey: 'created_by',
-  as: 'users'
-});
 
-Event.hasMany(Sale, {
-  foreignKey: 'event_id',
-  as: 'sales'
-});
 
-// Seller associations
-Seller.belongsTo(User, {
-  foreignKey: 'created_by',
-  as: 'users'
-});
 
 // Sale associations
 Sale.belongsTo(Company, {
@@ -190,10 +142,6 @@ Sale.belongsTo(Customer, {
   as: 'customer'
 });
 
-Sale.belongsTo(Event, {
-  foreignKey: 'event_id',
-  as: 'event'
-});
 
 Sale.belongsTo(Trip, {
   foreignKey: 'trip_id',
@@ -210,10 +158,6 @@ Sale.belongsTo(Vehicle, {
   as: 'vehicle'
 });
 
-Sale.belongsTo(Seller, {
-  foreignKey: 'seller_id',
-  as: 'seller'
-});
 
 Sale.belongsTo(User, {
   foreignKey: 'created_by',
@@ -267,10 +211,6 @@ Vehicle.hasMany(Sale, {
   as: 'sales'
 });
 
-Seller.hasMany(Sale, {
-  foreignKey: 'seller_id',
-  as: 'sales'
-});
 
 module.exports = {
   sequelize,
@@ -281,9 +221,7 @@ module.exports = {
   Customer,
   Trip,
   Booking,
-  Event,
   Sale,
-  Seller,
   SaleCustomer
 };
 

@@ -18,9 +18,7 @@ const driverRoutes = require('./routes/drivers');
 const customerRoutes = require('./routes/customers');
 const tripRoutes = require('./routes/trips');
 const bookingRoutes = require('./routes/bookings');
-const eventRoutes = require('./routes/events');
 const saleRoutes = require('./routes/sales');
-const sellerRoutes = require('./routes/sellers');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -72,9 +70,7 @@ app.use('/api/drivers', driverRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/trips', tripRoutes);
 app.use('/api/bookings', bookingRoutes);
-app.use('/api/events', eventRoutes);
 app.use('/api/sales', saleRoutes);
-app.use('/api/sellers', sellerRoutes);
 
 // Middleware de tratamento de erros
 app.use(notFound);
