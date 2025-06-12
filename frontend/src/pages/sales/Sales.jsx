@@ -227,8 +227,17 @@ const Sales = () => {
       fetchStats();
     } catch (error) {
       console.error('Erro ao salvar venda:', error);
-      const errorMessage = error.response?.data?.message || 'Erro ao salvar venda';
-      showError(errorMessage);
+    
+      const response = error.response?.data;
+    
+      if (response?.success === false && Array.isArray(response.errors)) {
+        response.errors.forEach((detail) => {
+          if (detail.msg) showError(detail.msg);
+        });
+      } else {
+        const errorMessage = response?.message || 'Erro ao salvar venda';
+        showError(errorMessage);
+      }
     }
   };
 
@@ -243,6 +252,7 @@ const Sales = () => {
         console.error('Erro ao excluir venda:', error);
         const errorMessage = error.response?.data?.message || 'Erro ao excluir venda';
         showError(errorMessage);
+        
       }
     }
   };
@@ -726,7 +736,7 @@ const Sales = () => {
                     <option value="">Selecione um motorista</option>
                     {drivers.map(driver => (
                       <option key={driver.id} value={driver.id}>
-                        {driver.first_name} {driver.last_name} - {driver.license_number}
+                        {driver.firstName} {driver.lastName} - {driver.licenseNumber}
                       </option>
                     ))}
                   </select>
@@ -789,7 +799,7 @@ const Sales = () => {
                     <option value="">Selecione um cliente</option>
                     {customers.map(customer => (
                       <option key={customer.id} value={customer.id}>
-                        {customer.first_name} {customer.last_name}
+                        {customer.firstName} {customer.lastName}
                       </option>
                     ))}
                   </select>
