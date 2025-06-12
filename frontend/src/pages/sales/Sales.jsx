@@ -493,6 +493,9 @@ const Sales = () => {
                   Vendedor
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Criado Por
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Valor
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -541,10 +544,18 @@ const Sales = () => {
                     {sale.seller || sale.users ? (
                       <div>
                         <div className="text-sm font-medium text-gray-900">
-                          {sale.seller?.firstName || sale.users?.firstName} {sale.seller?.lastName || sale.users?.lastName}
+                          {sale.seller?.first_name || sale.users?.first_name} {sale.seller?.last_name || sale.users?.last_name}
                         </div>
-                        <div className="text-sm text-gray-500">
-                          {sale.seller?.email || sale.users?.email}
+                      </div>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {sale.users || sale.users ? (
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {sale.users?.first_name || sale.users?.first_name} {sale.users?.last_name || sale.users?.last_name}
                         </div>
                       </div>
                     ) : (
