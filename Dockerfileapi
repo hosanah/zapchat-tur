@@ -1,28 +1,26 @@
 # Estágio de construção
 FROM node:20-alpine AS builder
 
-# Instala dependências do sistema necessárias para o Prisma
+# Dependências do sistema
 RUN apk add --no-cache openssl openssl-dev lz4-libs lz4-dev musl-dev
 
 WORKDIR /app
 
 # Copiar arquivos de configuração
-COPY server/package*.json ./
-COPY server/prisma ./prisma/
+COPY backend/package*.json ./
 
 # Instalar dependências
-RUN npm install
+RUN npm ci
 
-# Copiar o restante da aplicação
-COPY server .
+# Copiar código-fonte e variáveis de ambiente
+COPY backend/src ./src
+COPY backend/.env ./
 
-# Gerar cliente do Prisma
-RUN npx prisma generate
 
 # Estágio de produção
 FROM node:20-alpine
 
-# Instala dependências do sistema necessárias para o Prisma
+# Dependências do sistema
 RUN apk add --no-cache openssl lz4-libs
 
 WORKDIR /app
@@ -30,8 +28,8 @@ WORKDIR /app
 # Copiar o necessário do estágio builder
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/src ./src
+COPY --from=builder /app/.env ./
 
 # Criar diretório para o banco de dados
 RUN mkdir -p ./database && \
@@ -47,7 +45,5 @@ USER node
 
 EXPOSE 3001
 
-# Executar migrations e iniciar o servidor diretamente no CMD
-#CMD npx prisma migrate dev --name add_cart_tables && npm start
-CMD npm start 
-#CMD npx prisma migrate deploy && npx prisma db seed && npm start
+# Comando para iniciar o servidor
+CMD npm start
