@@ -33,13 +33,14 @@ const customerValidations = {
       .isLength({ min: 10, max: 20 })
       .withMessage('Telefone deve ter entre 10 e 20 caracteres'),
     
-    body('cpf')
-      .optional()
-      .matches(/^\d{3}\.\d{3}\.\d{3}-\d{2}$|^\d{11}$/)
-      .withMessage('CPF deve estar no formato XXX.XXX.XXX-XX ou conter 11 dígitos'),
+    // body('cpf')
+    //   .optional()
+    //   .matches(/^\d{3}\.\d{3}\.\d{3}-\d{2}$|^\d{11}$/)
+    //   .withMessage('CPF deve estar no formato XXX.XXX.XXX-XX ou conter 11 dígitos'),
     
     body('birthDate')
-      .optional()
+      .notEmpty()
+      .withMessage('Data de nascimento é obrigatória')
       .isISO8601()
       .withMessage('Data de nascimento deve ser uma data válida')
       .custom((value) => {
@@ -55,59 +56,59 @@ const customerValidations = {
         return true;
       }),
     
-    body('address')
-      .optional()
-      .isLength({ max: 500 })
-      .withMessage('Endereço deve ter no máximo 500 caracteres'),
+    // body('address')
+    //   .optional()
+    //   .isLength({ max: 500 })
+    //   .withMessage('Endereço deve ter no máximo 500 caracteres'),
     
-    body('city')
-      .optional()
-      .isLength({ min: 2, max: 100 })
-      .withMessage('Cidade deve ter entre 2 e 100 caracteres')
-      .trim(),
+    // body('city')
+    //   .optional()
+    //   .isLength({ min: 2, max: 100 })
+    //   .withMessage('Cidade deve ter entre 2 e 100 caracteres')
+    //   .trim(),
     
-    body('state')
-      .optional()
-      .isLength({ min: 2, max: 2 })
-      .withMessage('Estado deve ter 2 caracteres')
-      .isAlpha()
-      .withMessage('Estado deve conter apenas letras'),
+    // body('state')
+    //   .optional()
+    //   .isLength({ min: 2, max: 2 })
+    //   .withMessage('Estado deve ter 2 caracteres')
+    //   .isAlpha()
+    //   .withMessage('Estado deve conter apenas letras'),
     
-    body('zipCode')
-      .optional()
-      .matches(/^\d{5}-?\d{3}$/)
-      .withMessage('CEP deve estar no formato XXXXX-XXX'),
+    // body('zipCode')
+    //   .optional()
+    //   .matches(/^\d{5}-?\d{3}$/)
+    //   .withMessage('CEP deve estar no formato XXXXX-XXX'),
     
-    body('emergencyContact')
-      .optional()
-      .isLength({ min: 2, max: 100 })
-      .withMessage('Contato de emergência deve ter entre 2 e 100 caracteres')
-      .trim(),
+    // body('emergencyContact')
+    //   .optional()
+    //   .isLength({ min: 2, max: 100 })
+    //   .withMessage('Contato de emergência deve ter entre 2 e 100 caracteres')
+    //   .trim(),
     
-    body('emergencyPhone')
-      .optional()
-      .isLength({ min: 10, max: 20 })
-      .withMessage('Telefone de emergência deve ter entre 10 e 20 caracteres'),
+    // body('emergencyPhone')
+    //   .optional()
+    //   .isLength({ min: 10, max: 20 })
+    //   .withMessage('Telefone de emergência deve ter entre 10 e 20 caracteres'),
     
-    body('preferences')
-      .optional()
-      .isObject()
-      .withMessage('Preferências devem ser um objeto JSON'),
+    // body('preferences')
+    //   .optional()
+    //   .isObject()
+    //   .withMessage('Preferências devem ser um objeto JSON'),
     
-    body('status')
-      .optional()
-      .isIn(['ativo', 'inativo', 'bloqueado'])
-      .withMessage('Status deve ser ativo, inativo ou bloqueado'),
+    // body('status')
+    //   .optional()
+    //   .isIn(['ativo', 'inativo', 'bloqueado'])
+    //   .withMessage('Status deve ser ativo, inativo ou bloqueado'),
     
-    body('customerSince')
-      .optional()
-      .isISO8601()
-      .withMessage('Data de cadastro deve ser uma data válida'),
+    // body('customerSince')
+    //   .optional()
+    //   .isISO8601()
+    //   .withMessage('Data de cadastro deve ser uma data válida'),
     
-    body('notes')
-      .optional()
-      .isLength({ max: 1000 })
-      .withMessage('Observações devem ter no máximo 1000 caracteres'),
+    // body('notes')
+    //   .optional()
+    //   .isLength({ max: 1000 })
+    //   .withMessage('Observações devem ter no máximo 1000 caracteres'),
     
     body('company_id')
       .optional()
