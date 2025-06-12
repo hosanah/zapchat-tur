@@ -384,6 +384,44 @@ const getSalesByCustomerValidation = [
     .withMessage('ID do cliente deve ser um UUID válido')
 ];
 
+// Validação para adicionar cliente em venda
+const addSaleCustomerValidation = [
+  param('id')
+    .isUUID()
+    .withMessage('ID da venda deve ser um UUID válido'),
+  body('firstName')
+    .notEmpty()
+    .withMessage('Nome é obrigatório')
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Nome deve ter entre 2 e 50 caracteres'),
+  body('lastName')
+    .notEmpty()
+    .withMessage('Sobrenome é obrigatório')
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Sobrenome deve ter entre 2 e 50 caracteres'),
+  body('email')
+    .notEmpty()
+    .withMessage('Email é obrigatório')
+    .isEmail()
+    .withMessage('Email deve ser válido'),
+  body('phone')
+    .notEmpty()
+    .withMessage('Telefone é obrigatório')
+    .isLength({ min: 10, max: 20 })
+    .withMessage('Telefone deve ter entre 10 e 20 caracteres'),
+  body('birthDate')
+    .optional()
+    .isISO8601()
+    .withMessage('Data de nascimento inválida'),
+];
+
+// Validação para listagem de clientes da venda
+const listSaleCustomersValidation = [
+  param('id')
+    .isUUID()
+    .withMessage('ID da venda deve ser um UUID válido'),
+];
+
 
 module.exports = {
   createSaleValidation,
@@ -392,6 +430,8 @@ module.exports = {
   deleteSaleValidation,
   listSalesValidation,
   getSalesByCustomerValidation,
-  
+  addSaleCustomerValidation,
+  listSaleCustomersValidation,
+
 };
 
