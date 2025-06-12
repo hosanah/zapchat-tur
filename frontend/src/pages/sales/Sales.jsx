@@ -56,22 +56,21 @@ const Sales = () => {
     vehicle_id: '',
     seller_id: '',
     customer_id: '',
-    event_id: '',
     description: '',
     subtotal: '',
-    discount_amount: '',
-    discount_percentage: '',
-    tax_amount: '',
+    discount_amount: 0,
+    discount_percentage: 0,
+    tax_amount: 0,
     status: 'orcamento',
     priority: 'media',
     payment_method: '',
     payment_status: 'pendente',
-    payment_date: '',
-    due_date: '',
+    payment_date: new Date().toISOString().split('T')[0],
+    due_date: new Date().toISOString().split('T')[0],
     installments: 1,
     sale_date: new Date().toISOString().split('T')[0],
-    delivery_date: '',
-    commission_percentage: '',
+    delivery_date: new Date().toISOString().split('T')[0],
+    commission_percentage: 0,
     notes: '',
     internal_notes: ''
   });
@@ -270,12 +269,11 @@ const Sales = () => {
         vehicle_id: sale.vehicle_id || '',
         seller_id: sale.seller_id || '',
         customer_id: sale.customer_id || '',
-        event_id: sale.event_id || '',
         description: sale.description || '',
         subtotal: sale.subtotal || '',
-        discount_amount: sale.discount_amount || '',
-        discount_percentage: sale.discount_percentage || '',
-        tax_amount: sale.tax_amount || '',
+        discount_amount: sale.discount_amount || 0,
+        discount_percentage: sale.discount_percentage || 0,
+        tax_amount: sale.tax_amount || 0,
         status: sale.status || 'orcamento',
         priority: sale.priority || 'media',
         payment_method: sale.payment_method || '',
@@ -285,7 +283,7 @@ const Sales = () => {
         installments: sale.installments || 1,
         sale_date: sale.sale_date ? sale.sale_date.split('T')[0] : '',
         delivery_date: sale.delivery_date ? sale.delivery_date.split('T')[0] : '',
-        commission_percentage: sale.commission_percentage || '',
+        commission_percentage: sale.commission_percentage || 0,
         notes: sale.notes || '',
         internal_notes: sale.internal_notes || ''
       });
@@ -301,22 +299,21 @@ const Sales = () => {
       vehicle_id: '',
       seller_id: '',
       customer_id: '',
-      event_id: '',
       description: '',
       subtotal: '',
-      discount_amount: '',
-      discount_percentage: '',
-      tax_amount: '',
+      discount_amount: 0,
+      discount_percentage: 0,
+      tax_amount: 0,
       status: 'orcamento',
       priority: 'media',
       payment_method: '',
       payment_status: 'pendente',
-      payment_date: '',
-      due_date: '',
+      payment_date: new Date().toISOString().split('T')[0],
+      due_date: new Date().toISOString().split('T')[0],
       installments: 1,
       sale_date: new Date().toISOString().split('T')[0],
-      delivery_date: '',
-      commission_percentage: '',
+      delivery_date: new Date().toISOString().split('T')[0],
+      commission_percentage: 0,
       notes: '',
       internal_notes: ''
     });
@@ -496,9 +493,6 @@ const Sales = () => {
                   Vendedor
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Evento
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Valor
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -551,23 +545,6 @@ const Sales = () => {
                         </div>
                         <div className="text-sm text-gray-500">
                           {sale.seller?.email || sale.users?.email}
-                        </div>
-                      </div>
-                    ) : (
-                      <span className="text-gray-400">-</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {sale.event ? (
-                      <div className="flex items-center">
-                        <CalendarCheck className="h-4 w-4 text-zapchat-primary mr-2" />
-                        <div>
-                          <div className="text-sm font-medium text-gray-900">
-                            {sale.event.title}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {formatDate(sale.event.start_date)}
-                          </div>
                         </div>
                       </div>
                     ) : (
@@ -804,26 +781,6 @@ const Sales = () => {
                     ))}
                   </select>
                 </div>
-
-                {/* Evento */}
-                {/* <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Evento (Opcional)
-                  </label>
-                  <select
-                    value={formData.event_id}
-                    onChange={(e) => setFormData({ ...formData, event_id: e.target.value })}
-                    disabled={modalMode === 'view'}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                  >
-                    <option value="">Selecione um evento</option>
-                    {events.map(event => (
-                      <option key={event.id} value={event.id}>
-                        {event.title}
-                      </option>
-                    ))}
-                  </select>
-                </div> */}
 
                 {/* Descrição */}
                 <div className="md:col-span-2">

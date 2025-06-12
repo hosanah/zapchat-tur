@@ -257,8 +257,7 @@ class SaleController {
         where: {
           id: saleData.trip_id,
           company_id: user.company_id
-        },
-        include: [{ model: Vehicle, as: 'vehicle' }]
+        }
       });
 
       if (!trip) {
@@ -268,7 +267,7 @@ class SaleController {
         });
       }
 
-      if (!trip.vehicleId || !trip.driverId) {
+      if (!saleData.vehicle_id || !saleData.driver_id) {
         return res.status(400).json({
           success: false,
           message: 'Passeio deve possuir veículo e motorista vinculados'
