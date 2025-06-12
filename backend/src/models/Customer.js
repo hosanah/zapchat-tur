@@ -61,13 +61,7 @@ const Customer = sequelize.define('Customer', {
   },
   cpf: {
     type: DataTypes.STRING(14),
-    allowNull: true,
-    validate: {
-      is: {
-        args: /^\d{3}\.\d{3}\.\d{3}-\d{2}$/,
-        msg: 'CPF deve estar no formato XXX.XXX.XXX-XX'
-      }
-    }
+    allowNull: true
   },
   birthDate: {
     type: DataTypes.DATEONLY,
@@ -92,23 +86,11 @@ const Customer = sequelize.define('Customer', {
   },
   state: {
     type: DataTypes.STRING(2),
-    allowNull: true,
-    validate: {
-      len: {
-        args: [2, 2],
-        msg: 'Estado deve ter 2 caracteres'
-      }
-    }
+    allowNull: true
   },
   zipCode: {
     type: DataTypes.STRING(10),
-    allowNull: true,
-    validate: {
-      is: {
-        args: /^\d{5}-?\d{3}$/,
-        msg: 'CEP deve estar no formato XXXXX-XXX'
-      }
-    }
+    allowNull: true
   },
   emergencyContact: {
     type: DataTypes.STRING(100),
@@ -116,39 +98,22 @@ const Customer = sequelize.define('Customer', {
   },
   emergencyPhone: {
     type: DataTypes.STRING(20),
-    allowNull: true,
-    validate: {
-      len: {
-        args: [10, 20],
-        msg: 'Telefone de emergência deve ter entre 10 e 20 caracteres'
-      }
-    }
+    allowNull: true
   },
   preferences: {
     type: DataTypes.JSON,
     defaultValue: {},
-    allowNull: false
+    allowNull: true
   },
   status: {
     type: DataTypes.ENUM('ativo', 'inativo', 'bloqueado'),
     defaultValue: 'ativo',
-    allowNull: false,
-    validate: {
-      isIn: {
-        args: [['ativo', 'inativo', 'bloqueado']],
-        msg: 'Status deve ser ativo, inativo ou bloqueado'
-      }
-    }
+    allowNull: true
   },
   customerSince: {
     type: DataTypes.DATEONLY,
-    allowNull: false,
-    defaultValue: DataTypes.NOW,
-    validate: {
-      isDate: {
-        msg: 'Data de cadastro deve ser uma data válida'
-      }
-    }
+    allowNull: true,
+    defaultValue: DataTypes.NOW
   },
   totalTrips: {
     type: DataTypes.INTEGER,
@@ -188,7 +153,7 @@ const Customer = sequelize.define('Customer', {
       name: 'customers_cpf_company_unique',
       where: {
         cpf: {
-          [Op.ne]: null
+          [Op.notIn]: [null, '']
         }
       }
     },
