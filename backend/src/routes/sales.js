@@ -9,7 +9,9 @@ const {
   getSaleValidation,
   deleteSaleValidation,
   listSalesValidation,
-  getSalesByCustomerValidation
+  getSalesByCustomerValidation,
+  addSaleCustomerValidation,
+  listSaleCustomersValidation
 } = require('../middleware/saleValidations');
 
 // Middleware para verificar erros de validação
@@ -51,6 +53,20 @@ router.get('/:id',
   getSaleValidation,
   checkValidationErrors,
   SaleController.show
+);
+
+// GET /api/sales/:id/customers - Listar clientes da venda
+router.get('/:id/customers',
+  listSaleCustomersValidation,
+  checkValidationErrors,
+  SaleController.listCustomers
+);
+
+// POST /api/sales/:id/customers - Adicionar cliente à venda
+router.post('/:id/customers',
+  addSaleCustomerValidation,
+  checkValidationErrors,
+  SaleController.addCustomer
 );
 
 // POST /api/sales - Criar nova venda

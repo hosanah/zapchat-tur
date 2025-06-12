@@ -271,6 +271,12 @@ export const tripService = {
   updateStatus: (id, data) => api.patch(`/trips/${id}/status`, data),
 };
 
+// Serviços de vendas
+export const saleService = {
+  getCustomers: (saleId) => api.get(`/sales/${saleId}/customers`),
+  addCustomer: (saleId, data) => api.post(`/sales/${saleId}/customers`, data),
+};
+
 // Serviços de reservas
 export const bookingService = {
   getAll: (params) => api.get('/bookings', { params }),

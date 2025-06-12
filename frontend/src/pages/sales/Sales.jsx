@@ -49,6 +49,15 @@ const Sales = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [selectedCustomers, setSelectedCustomers] = useState([]);
   const [responsibleCustomer, setResponsibleCustomer] = useState('');
+  const [saleCustomers, setSaleCustomers] = useState([]);
+  const [showAddCustomerModal, setShowAddCustomerModal] = useState(false);
+  const [newCustomer, setNewCustomer] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    birthDate: ''
+  });
 
   const [formData, setFormData] = useState({
     trip_id: '',
@@ -192,6 +201,15 @@ const Sales = () => {
     }
   };
 
+  const fetchSaleCustomers = async (saleId) => {
+    try {
+      const response = await api.get(`/sales/${saleId}/customers`);
+      setSaleCustomers(response.data.data || []);
+    } catch (error) {
+      console.error('Erro ao buscar clientes da venda:', error);
+    }
+  };
+
   const fetchStats = async () => {
     try {
       const response = await api.get('/sales/stats');
@@ -251,8 +269,23 @@ const Sales = () => {
         console.error('Erro ao excluir venda:', error);
         const errorMessage = error.response?.data?.message || 'Erro ao excluir venda';
         showError(errorMessage);
-        
+
       }
+    }
+  };
+
+  const handleAddCustomer = async (e) => {
+    e.preventDefault();
+    if (!selectedSale) return;
+    try {
+      await api.post(`/sales/${selectedSale.id}/customers`, newCustomer);
+      showSuccess('Cliente adicionado com sucesso');
+      setNewCustomer({ firstName: '', lastName: '', email: '', phone: '', birthDate: '' });
+      fetchSaleCustomers(selectedSale.id);
+    } catch (error) {
+      console.error('Erro ao adicionar cliente:', error);
+      const msg = error.response?.data?.message || 'Erro ao adicionar cliente';
+      showError(msg);
     }
   };
 
@@ -262,7 +295,8 @@ const Sales = () => {
     
     if (mode === 'create') {
       resetForm();
-    } else if (mode === 'edit' && sale) {
+      setSaleCustomers([]);
+    } else if ((mode === 'edit' || mode === 'view') && sale) {
       setFormData({
         trip_id: sale.trip_id || '',
         driver_id: sale.driver_id || '',
@@ -287,8 +321,9 @@ const Sales = () => {
         notes: sale.notes || '',
         internal_notes: sale.internal_notes || ''
       });
+      fetchSaleCustomers(sale.id);
     }
-    
+
     setShowModal(true);
   };
 
@@ -793,6 +828,33 @@ const Sales = () => {
                   </select>
                 </div>
 
+                {modalMode !== 'create' && (
+                  <div className="md:col-span-2">
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-sm font-medium text-gray-700">Clientes da Venda</label>
+                      {modalMode === 'edit' && (
+                        <button
+                          type="button"
+                          onClick={() => setShowAddCustomerModal(true)}
+                          className="btn-primary px-3 py-1 text-sm"
+                        >
+                          Adicionar Cliente
+                        </button>
+                      )}
+                    </div>
+                    <ul className="space-y-1">
+                      {saleCustomers.map(sc => (
+                        <li key={sc.id} className="text-sm text-gray-700">
+                          {sc.customer.first_name} {sc.customer.last_name} - {sc.customer.email}
+                        </li>
+                      ))}
+                      {saleCustomers.length === 0 && (
+                        <li className="text-sm text-gray-500">Nenhum cliente adicionado</li>
+                      )}
+                    </ul>
+                  </div>
+                )}
+
                 {/* Descrição */}
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1082,6 +1144,83 @@ const Sales = () => {
                 </div>
               )}
             </form>
+          </div>
+        </div>
+      )}
+      {showAddCustomerModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 px-4 py-6">
+          <div className="w-full max-w-md bg-white rounded-lg shadow-xl p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-medium text-gray-900">Adicionar Cliente</h3>
+              <button onClick={() => setShowAddCustomerModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <form onSubmit={handleAddCustomer} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                <input
+                  type="text"
+                  value={newCustomer.firstName}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, firstName: e.target.value })}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-zapchat-primary focus:border-zapchat-primary"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Sobrenome</label>
+                <input
+                  type="text"
+                  value={newCustomer.lastName}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, lastName: e.target.value })}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-zapchat-primary focus:border-zapchat-primary"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={newCustomer.email}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-zapchat-primary focus:border-zapchat-primary"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                <input
+                  type="tel"
+                  value={newCustomer.phone}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-zapchat-primary focus:border-zapchat-primary"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Data de Nascimento</label>
+                <input
+                  type="date"
+                  value={newCustomer.birthDate}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, birthDate: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-zapchat-primary focus:border-zapchat-primary"
+                />
+              </div>
+              <div className="flex justify-end pt-2 border-t border-gray-200">
+                <button type="submit" className="btn-primary px-4 py-2">Salvar</button>
+              </div>
+            </form>
+            <div>
+              <h4 className="text-sm font-medium text-gray-700 mb-2">Clientes Cadastrados</h4>
+              <ul className="max-h-40 overflow-y-auto space-y-1">
+                {saleCustomers.map(sc => (
+                  <li key={sc.id} className="text-sm text-gray-700">
+                    {sc.customer.first_name} {sc.customer.last_name} - {sc.customer.email}
+                  </li>
+                ))}
+                {saleCustomers.length === 0 && <li className="text-sm text-gray-500">Nenhum cliente</li>}
+              </ul>
+            </div>
           </div>
         </div>
       )}

@@ -669,6 +669,82 @@ class SaleController {
     }
   }
 
+  // Listar clientes vinculados a uma venda
+  static async listCustomers(req, res) {
+    try {
+      const { id } = req.params;
+      const user = req.user;
+
+      const sale = await Sale.findByPk(id);
+      if (!sale || (user.role !== 'master' && sale.company_id !== user.company_id)) {
+        return res.status(404).json({
+          success: false,
+          message: 'Venda não encontrada'
+        });
+      }
+
+      const saleCustomers = await SaleCustomer.findAll({
+        where: { sale_id: id },
+        include: [{ model: Customer, as: 'customer', attributes: ['id','first_name','last_name','email','phone','birthDate'] }]
+      });
+
+      res.json({ success: true, data: saleCustomers });
+    } catch (error) {
+      console.error('Erro ao listar clientes da venda:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Erro interno do servidor',
+        error: error.message
+      });
+    }
+  }
+
+  // Adicionar cliente a uma venda
+  static async addCustomer(req, res) {
+    try {
+      const { id } = req.params;
+      const user = req.user;
+      const { firstName, lastName, email, phone, birthDate } = req.body;
+
+      const sale = await Sale.findByPk(id);
+      if (!sale || (user.role !== 'master' && sale.company_id !== user.company_id)) {
+        return res.status(404).json({
+          success: false,
+          message: 'Venda não encontrada'
+        });
+      }
+
+      const customer = await Customer.create({
+        firstName,
+        lastName,
+        email,
+        phone,
+        birthDate,
+        company_id: sale.company_id
+      });
+
+      await SaleCustomer.create({ sale_id: id, customer_id: customer.id });
+
+      const saleCustomers = await SaleCustomer.findAll({
+        where: { sale_id: id },
+        include: [{ model: Customer, as: 'customer', attributes: ['id','first_name','last_name','email','phone','birthDate'] }]
+      });
+
+      res.status(201).json({
+        success: true,
+        message: 'Cliente adicionado com sucesso',
+        data: { customer, sale_customers: saleCustomers }
+      });
+    } catch (error) {
+      console.error('Erro ao adicionar cliente na venda:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Erro interno do servidor',
+        error: error.message
+      });
+    }
+  }
+
 }
 
 module.exports = SaleController;
