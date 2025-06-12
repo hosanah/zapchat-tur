@@ -237,18 +237,32 @@ class SaleController {
         }
       }
 
-      // Validar se o cliente pertence à mesma empresa
-      const customer = await Customer.findOne({
-        where: {
-          id: saleData.customer_id,
-          company_id: user.company_id
-        }
-      });
+      let customer;
+      if (saleData.customer_id) {
+        customer = await Customer.findOne({
+          where: {
+            id: saleData.customer_id,
+            company_id: user.company_id
+          }
+        });
 
-      if (!customer) {
+        if (!customer) {
+          return res.status(400).json({
+            success: false,
+            message: 'Cliente não encontrado ou não pertence à sua empresa'
+          });
+        }
+      } else if (req.body.new_customer) {
+        const newCustomerData = {
+          ...req.body.new_customer,
+          company_id: user.company_id
+        };
+        customer = await Customer.create(newCustomerData);
+        saleData.customer_id = customer.id;
+      } else {
         return res.status(400).json({
           success: false,
-          message: 'Cliente não encontrado ou não pertence à sua empresa'
+          message: 'Cliente não informado'
         });
       }
 

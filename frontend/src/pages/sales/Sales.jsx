@@ -58,6 +58,14 @@ const Sales = () => {
     phone: '',
     birthDate: ''
   });
+  const [isNewMainCustomer, setIsNewMainCustomer] = useState(false);
+  const [newMainCustomer, setNewMainCustomer] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    birthDate: ''
+  });
 
   const [formData, setFormData] = useState({
     trip_id: '',
@@ -223,6 +231,11 @@ const Sales = () => {
     e.preventDefault();
     try {
       const dataToSend = { ...formData };
+
+      if (isNewMainCustomer) {
+        dataToSend.new_customer = { ...newMainCustomer };
+        delete dataToSend.customer_id;
+      }
       
       // Calcular total_amount
       const subtotal = parseFloat(dataToSend.subtotal) || 0;
@@ -292,6 +305,8 @@ const Sales = () => {
   const openModal = (mode, sale = null) => {
     setModalMode(mode);
     setSelectedSale(sale);
+    setIsNewMainCustomer(false);
+    setNewMainCustomer({ firstName: '', lastName: '', email: '', phone: '', birthDate: '' });
     
     if (mode === 'create') {
       resetForm();
@@ -352,6 +367,8 @@ const Sales = () => {
       notes: '',
       internal_notes: ''
     });
+    setIsNewMainCustomer(false);
+    setNewMainCustomer({ firstName: '', lastName: '', email: '', phone: '', birthDate: '' });
   };
 
   const formatCurrency = (value) => {
@@ -813,9 +830,17 @@ const Sales = () => {
                     Cliente Responsável *
                   </label>
                   <select
-                    value={formData.customer_id}
-                    onChange={(e) => setFormData({ ...formData, customer_id: e.target.value })}
-                    required
+                    value={isNewMainCustomer ? 'new' : formData.customer_id}
+                    onChange={(e) => {
+                      if (e.target.value === 'new') {
+                        setIsNewMainCustomer(true);
+                        setFormData({ ...formData, customer_id: '' });
+                      } else {
+                        setIsNewMainCustomer(false);
+                        setFormData({ ...formData, customer_id: e.target.value });
+                      }
+                    }}
+                    required={!isNewMainCustomer}
                     disabled={modalMode === 'view'}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
                   >
@@ -825,8 +850,63 @@ const Sales = () => {
                         {customer.firstName} {customer.lastName}
                       </option>
                     ))}
+                    <option value="new">Cadastrar novo cliente</option>
                   </select>
                 </div>
+
+                {isNewMainCustomer && (
+                  <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
+                      <input
+                        type="text"
+                        value={newMainCustomer.firstName}
+                        onChange={(e) => setNewMainCustomer({ ...newMainCustomer, firstName: e.target.value })}
+                        required
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-zapchat-primary focus:border-zapchat-primary"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Sobrenome</label>
+                      <input
+                        type="text"
+                        value={newMainCustomer.lastName}
+                        onChange={(e) => setNewMainCustomer({ ...newMainCustomer, lastName: e.target.value })}
+                        required
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-zapchat-primary focus:border-zapchat-primary"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                      <input
+                        type="email"
+                        value={newMainCustomer.email}
+                        onChange={(e) => setNewMainCustomer({ ...newMainCustomer, email: e.target.value })}
+                        required
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-zapchat-primary focus:border-zapchat-primary"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                      <input
+                        type="tel"
+                        value={newMainCustomer.phone}
+                        onChange={(e) => setNewMainCustomer({ ...newMainCustomer, phone: e.target.value })}
+                        required
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-zapchat-primary focus:border-zapchat-primary"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Data de Nascimento</label>
+                      <input
+                        type="date"
+                        value={newMainCustomer.birthDate}
+                        onChange={(e) => setNewMainCustomer({ ...newMainCustomer, birthDate: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-zapchat-primary focus:border-zapchat-primary"
+                      />
+                    </div>
+                  </div>
+                )}
 
                 {modalMode !== 'create' && (
                   <div className="md:col-span-2">
