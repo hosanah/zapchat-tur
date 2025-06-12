@@ -6,20 +6,21 @@ FROM node:18-alpine AS base
 WORKDIR /app
 
 # Copiar arquivos de configuração
-COPY client/package*.json ./
+COPY frontend/package.json ./
+COPY frontend/pnpm-lock.yaml ./
 
-# Instalar dependências
-RUN npm ci
+# Instalar pnpm e dependências
+RUN npm install -g pnpm && pnpm install --frozen-lockfile
 
 # Estágio de build
 FROM base AS build
 WORKDIR /app
 
 # Copiar todo o código fonte
-COPY client/ ./
+COPY frontend/ ./
 
 # Construir a aplicação
-RUN npm run build
+RUN pnpm run build
 
 # Estágio de produção
 FROM nginx:alpine AS production
