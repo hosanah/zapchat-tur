@@ -67,22 +67,28 @@ const Customers = () => {
       }
     };
 
-    return {
+    const payload = {
       firstName,
       lastName,
       email: formData.email.trim(),
       phone: formData.phone.trim(),
-      cpf: formData.cpf || undefined,
-      birthDate: formData.birthDate || undefined,
-      address: formData.address || undefined,
-      city: formData.city || undefined,
-      state: formData.state?.toUpperCase() || undefined,
-      zipCode: formData.zipCode || undefined,
-      emergencyContact: formData.emergencyContact || undefined,
-      emergencyPhone: formData.emergencyPhone || undefined,
-      notes: formData.observations || undefined,
-      status: mapStatus(formData.status),
+      birthDate: formData.birthDate,
     };
+
+    if (formData.cpf.trim()) payload.cpf = formData.cpf.trim();
+    if (formData.rg?.trim()) payload.rg = formData.rg.trim();
+    if (formData.address.trim()) payload.address = formData.address.trim();
+    if (formData.city.trim()) payload.city = formData.city.trim();
+    if (formData.state.trim()) payload.state = formData.state.trim().toUpperCase();
+    if (formData.zipCode.trim()) payload.zipCode = formData.zipCode.trim();
+    if (formData.emergencyContact.trim()) payload.emergencyContact = formData.emergencyContact.trim();
+    if (formData.emergencyPhone.trim()) payload.emergencyPhone = formData.emergencyPhone.trim();
+    if (formData.observations.trim()) payload.notes = formData.observations.trim();
+
+    const mappedStatus = mapStatus(formData.status);
+    if (mappedStatus) payload.status = mappedStatus;
+
+    return payload;
   }
 
   const handleSubmit = async (e) => {
@@ -429,10 +435,11 @@ const Customers = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Email
+                        Email *
                       </label>
                       <input
                         type="email"
+                        required
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-zapchat-primary focus:border-zapchat-primary"
@@ -442,10 +449,11 @@ const Customers = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Telefone
+                        Telefone *
                       </label>
                       <input
                         type="tel"
+                        required
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-zapchat-primary focus:border-zapchat-primary"
@@ -455,10 +463,11 @@ const Customers = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Data de Nascimento
+                        Data de Nascimento *
                       </label>
                       <input
                         type="date"
+                        required
                         value={formData.birthDate}
                         onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-zapchat-primary focus:border-zapchat-primary"
@@ -590,10 +599,9 @@ const Customers = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Status *
+                        Status
                       </label>
                       <select
-                        required
                         value={formData.status}
                         onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-zapchat-primary focus:border-zapchat-primary"
