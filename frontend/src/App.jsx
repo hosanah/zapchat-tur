@@ -1,9 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import ModernLayout from './components/layout/ModernLayout';
+import InactivityWarning from './components/InactivityWarning';
 
 // Auth Pages
 import Login from './pages/auth/Login';
@@ -28,7 +29,6 @@ const Companies = () => (
   </div>
 );
 
-
 const Bookings = () => (
   <div className="bg-white rounded-lg shadow-card p-6">
     <h2 className="text-2xl font-bold text-gray-900 mb-4">Reservas</h2>
@@ -36,58 +36,73 @@ const Bookings = () => (
   </div>
 );
 
+// Componente de aviso de inatividade com acesso ao contexto de autenticação
+const InactivityWarningWithAuth = () => {
+  const { logout } = useAuth();
+  return <InactivityWarning onLogout={logout} />;
+};
+
+// Componente interno para usar hooks
+const AppContent = () => {
+  return (
+    <Router>
+      <div className="min-h-screen bg-gray-50">
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          
+          {/* Protected Routes */}
+          <Route path="/" element={
+            <ProtectedRoute>
+              <ModernLayout />
+            </ProtectedRoute>
+          }>
+            <Route index element={<Navigate to="/dashboard" replace />} />
+            <Route path="dashboard" element={<ModernDashboard />} />
+            
+            {/* Master only routes */}
+            <Route path="companies" element={
+              <ProtectedRoute requiredRole="master">
+                <Companies />
+              </ProtectedRoute>
+            } />
+            
+            {/* Admin and Master routes */}
+            <Route path="users" element={
+              <ProtectedRoute requiredRole={["admin", "master"]}>
+                <UsersPage />
+              </ProtectedRoute>
+            } />
+            
+            {/* All authenticated users */}
+            <Route path="vehicles" element={<Vehicles />} />
+            <Route path="drivers" element={<Drivers />} />
+            <Route path="customers" element={<Customers />} />
+            <Route path="trips" element={<Trips />} />
+            <Route path="sales" element={<Sales />} />
+            <Route path="bookings" element={<Bookings />} />
+          </Route>
+          
+          {/* Catch all route */}
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+        
+        {/* Componente de aviso de inatividade com acesso ao contexto */}
+        <InactivityWarningWithAuth />
+      </div>
+    </Router>
+  );
+};
+
 function App() {
   return (
     <AuthProvider>
       <ToastProvider>
-        <Router>
-          <div className="min-h-screen bg-gray-50">
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              
-              {/* Protected Routes */}
-              <Route path="/" element={
-                <ProtectedRoute>
-                  <ModernLayout />
-                </ProtectedRoute>
-              }>
-                <Route index element={<Navigate to="/dashboard" replace />} />
-                <Route path="dashboard" element={<ModernDashboard />} />
-                
-                {/* Master only routes */}
-                <Route path="companies" element={
-                  <ProtectedRoute requiredRole="master">
-                    <Companies />
-                  </ProtectedRoute>
-                } />
-                
-                {/* Admin and Master routes */}
-                <Route path="users" element={
-                  <ProtectedRoute requiredRole={["admin", "master"]}>
-                    <UsersPage />
-                  </ProtectedRoute>
-                } />
-                
-                {/* All authenticated users */}
-                <Route path="vehicles" element={<Vehicles />} />
-                <Route path="drivers" element={<Drivers />} />
-                <Route path="customers" element={<Customers />} />
-                <Route path="trips" element={<Trips />} />
-                <Route path="sales" element={<Sales />} />
-                <Route path="bookings" element={<Bookings />} />
-              </Route>
-              
-              {/* Catch all route */}
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
-            </Routes>
-          </div>
-        </Router>
+        <AppContent />
       </ToastProvider>
     </AuthProvider>
   );
 }
 
 export default App;
-

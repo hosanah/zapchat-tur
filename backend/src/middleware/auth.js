@@ -22,9 +22,19 @@ const authenticate = async (req, res, next) => {
     try {
       decoded = JWTUtils.verifyAccessToken(token);
     } catch (error) {
+      // Verificar se é erro de token expirado
+      if (error.message.includes('jwt expired')) {
+        return res.status(401).json({
+          success: false,
+          error: 'Token expirado',
+          code: 'TOKEN_EXPIRED'
+        });
+      }
+      
       return res.status(401).json({
         success: false,
-        error: 'Token inválido ou expirado'
+        error: 'Token inválido ou expirado',
+        code: 'TOKEN_INVALID'
       });
     }
 
@@ -55,6 +65,9 @@ const authenticate = async (req, res, next) => {
         error: 'Empresa inativa'
       });
     }
+
+    // Atualizar último acesso do usuário
+    await user.updateLastActivity();
 
     // Adicionar usuário ao request
     req.user = user;
@@ -205,6 +218,9 @@ const optionalAuth = async (req, res, next) => {
       });
 
       if (user && user.isActive) {
+        // Atualizar último acesso do usuário
+        await user.updateLastActivity();
+        
         req.user = user;
         req.token = token;
       }
@@ -226,4 +242,3 @@ module.exports = {
   requireUserAccess,
   optionalAuth
 };
-

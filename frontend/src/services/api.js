@@ -11,6 +11,23 @@ const api = axios.create({
   },
 });
 
+// Variável para controlar se já está fazendo refresh
+let isRefreshing = false;
+let failedQueue = [];
+
+// Função para processar fila de requisições
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(({ resolve, reject }) => {
+    if (error) {
+      reject(error);
+    } else {
+      resolve(token);
+    }
+  });
+  
+  failedQueue = [];
+};
+
 // Interceptor para adicionar token de autenticação
 api.interceptors.request.use(
   (config) => {
@@ -33,30 +50,140 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Se o token expirou, tentar renovar
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Se o token expirou ou é inválido (401)
+    if (error.response?.status === 401 && 
+        (error.response?.data?.code === 'TOKEN_EXPIRED' || 
+         error.response?.data?.error?.includes('Token expirado') ||
+         error.response?.data?.code === 'TOKEN_INVALID') &&
+        !originalRequest._retry) {
+      
+      if (isRefreshing) {
+        // Se já está fazendo refresh, adicionar à fila
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then(token => {
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return api(originalRequest);
+        }).catch(err => {
+          return Promise.reject(err);
+        });
+      }
+
       originalRequest._retry = true;
+      isRefreshing = true;
 
       try {
         const refreshToken = localStorage.getItem('refreshToken');
-        if (refreshToken) {
+        if (!refreshToken) {
+          throw new Error('No refresh token available');
+        }
+
+        const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
+          refreshToken,
+        });
+
+        const { accessToken, refreshToken: newRefreshToken } = response.data.data.tokens;
+        
+        // Atualizar tokens no localStorage
+        localStorage.setItem('accessToken', accessToken);
+        if (newRefreshToken) {
+          localStorage.setItem('refreshToken', newRefreshToken);
+        }
+
+        // Resetar timer de inatividade
+        window.dispatchEvent(new CustomEvent('auth:activity'));
+
+        // Processar fila de requisições pendentes
+        processQueue(null, accessToken);
+
+        // Repetir a requisição original com o novo token
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        return api(originalRequest);
+
+      } catch (refreshError) {
+        // Verificar se o erro é por inatividade
+        const isInactivityError = 
+          refreshError.response?.data?.code === 'SESSION_INACTIVE' ||
+          refreshError.response?.data?.error?.includes('inatividade');
+
+        // Processar fila com erro
+        processQueue(refreshError, null);
+        
+        // Limpar dados de autenticação
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        
+        // Disparar evento customizado para logout com razão específica
+        window.dispatchEvent(new CustomEvent('auth:logout', { 
+          detail: { 
+            reason: isInactivityError ? 'inactivity' : 'refresh_failed',
+            message: isInactivityError ? 
+              'Sua sessão expirou por inatividade' : 
+              'Não foi possível renovar sua sessão'
+          } 
+        }));
+        
+        // Redirecionar para login se não estiver já lá
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
+        
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    // Para outros erros 401 (token inválido, usuário inativo, etc.)
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      
+      window.dispatchEvent(new CustomEvent('auth:logout', { 
+        detail: { reason: 'unauthorized' } 
+      }));
+      
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+    }
+
+    // Para erros 404 em requisições autenticadas (API indisponível)
+    if (error.response?.status === 404 && localStorage.getItem('accessToken')) {
+      // Tentar refresh token uma vez
+      if (!originalRequest._retry404) {
+        originalRequest._retry404 = true;
+        
+        try {
+          const refreshToken = localStorage.getItem('refreshToken');
+          if (!refreshToken) {
+            throw new Error('No refresh token available');
+          }
+
+          // Tentar renovar o token
           const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
             refreshToken,
           });
 
-          const { accessToken } = response.data.data.tokens;
+          const { accessToken, refreshToken: newRefreshToken } = response.data.data.tokens;
+          
+          // Atualizar tokens no localStorage
           localStorage.setItem('accessToken', accessToken);
+          if (newRefreshToken) {
+            localStorage.setItem('refreshToken', newRefreshToken);
+          }
+
+          // Resetar timer de inatividade
+          window.dispatchEvent(new CustomEvent('auth:activity'));
 
           // Repetir a requisição original com o novo token
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
           return api(originalRequest);
+        } catch (refreshError) {
+          // Se falhar, tratar como erro normal
         }
-      } catch (refreshError) {
-        // Se não conseguir renovar, fazer logout
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
       }
     }
 
@@ -157,4 +284,3 @@ export const bookingService = {
 };
 
 export default api;
-

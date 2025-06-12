@@ -92,6 +92,10 @@ const User = sequelize.define('User', {
     type: DataTypes.DATE,
     allowNull: true
   },
+  lastActivity: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
   emailVerified: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
@@ -138,10 +142,16 @@ const User = sequelize.define('User', {
       fields: ['role']
     },
     {
+      fields: ['is_active']
+    },
+    {
       fields: ['email_verification_token']
     },
     {
       fields: ['password_reset_token']
+    },
+    {
+      fields: ['last_activity']
     }
   ],
   hooks: {
@@ -166,6 +176,9 @@ const User = sequelize.define('User', {
         const saltRounds = parseInt(process.env.BCRYPT_ROUNDS) || 12;
         user.password = await bcrypt.hash(user.password, saltRounds);
       }
+      
+      // Inicializar lastActivity no momento da criação
+      user.lastActivity = new Date();
     },
     beforeUpdate: async (user) => {
       if (user.changed('password')) {
@@ -214,7 +227,22 @@ User.prototype.canAccessCompany = function(company_id) {
 
 User.prototype.updateLastLogin = function() {
   this.lastLogin = new Date();
-  return this.save({ fields: ['lastLogin'] });
+  this.lastActivity = new Date();
+  return this.save({ fields: ['lastLogin', 'lastActivity'] });
+};
+
+User.prototype.updateLastActivity = function() {
+  this.lastActivity = new Date();
+  return this.save({ fields: ['lastActivity'] });
+};
+
+User.prototype.isInactive = function(minutes = 10) {
+  if (!this.lastActivity) {
+    return true;
+  }
+  
+  const inactivityThreshold = new Date(Date.now() - (minutes * 60 * 1000));
+  return this.lastActivity < inactivityThreshold;
 };
 
 // Métodos estáticos
@@ -254,4 +282,3 @@ User.findActive = function() {
 };
 
 module.exports = User;
-

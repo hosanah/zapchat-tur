@@ -188,7 +188,8 @@ class AuthController {
       } catch (error) {
         return res.status(401).json({
           success: false,
-          error: 'Refresh token inválido ou expirado'
+          error: 'Refresh token inválido ou expirado',
+          code: 'REFRESH_TOKEN_INVALID'
         });
       }
 
@@ -200,7 +201,8 @@ class AuthController {
       if (!user || !user.isActive) {
         return res.status(401).json({
           success: false,
-          error: 'Usuário não encontrado ou inativo'
+          error: 'Usuário não encontrado ou inativo',
+          code: 'USER_INACTIVE'
         });
       }
 
@@ -208,12 +210,25 @@ class AuthController {
       if (user.company_id && (!user.Company || !user.Company.isActive)) {
         return res.status(401).json({
           success: false,
-          error: 'Empresa inativa'
+          error: 'Empresa inativa',
+          code: 'COMPANY_INACTIVE'
+        });
+      }
+
+      // Verificar inatividade do usuário (10 minutos)
+      if (user.isInactive(10)) {
+        return res.status(401).json({
+          success: false,
+          error: 'Sessão expirada por inatividade',
+          code: 'SESSION_INACTIVE'
         });
       }
 
       // Gerar novos tokens
       const tokens = JWTUtils.generateTokenPair(user);
+
+      // Atualizar último acesso
+      await user.updateLastActivity();
 
       res.status(200).json({
         success: true,
@@ -420,4 +435,3 @@ class AuthController {
 }
 
 module.exports = AuthController;
-
