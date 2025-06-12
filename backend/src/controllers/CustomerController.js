@@ -157,13 +157,16 @@ class CustomerController {
         });
       }
 
-      // Verificar se CPF já existe na empresa (se fornecido)
-      if (customerData.cpf) {
-        const existingCustomerByCpf = await Customer.findByCpf(customerData.cpf, customerData.company_id);
+      // Verificar se CPF já existe na empresa (caso informado)
+      if (customerData.cpf && customerData.cpf.trim()) {
+        const existingCustomerByCpf = await Customer.findByCpf(
+          customerData.cpf,
+          customerData.company_id
+        );
         if (existingCustomerByCpf) {
           return res.status(409).json({
             success: false,
-            error: 'Já existe um cliente com este CPF nesta empresa'
+            error: 'CPF já cadastrado para outro cliente nesta empresa'
           });
         }
       }
@@ -226,13 +229,13 @@ class CustomerController {
         }
       }
 
-      // Verificar se CPF já existe (exceto para o cliente atual)
-      if (updateData.cpf && updateData.cpf !== customer.cpf) {
+      // Verificar se CPF já existe (exceto para o cliente atual, caso informado)
+      if (updateData.cpf && updateData.cpf.trim() && updateData.cpf !== customer.cpf) {
         const existingCustomer = await Customer.findByCpf(updateData.cpf, customer.company_id);
         if (existingCustomer && existingCustomer.id !== id) {
           return res.status(409).json({
             success: false,
-            error: 'Já existe um cliente com este CPF nesta empresa'
+            error: 'CPF já cadastrado para outro cliente nesta empresa'
           });
         }
       }
