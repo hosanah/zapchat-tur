@@ -60,6 +60,12 @@ const Sales = () => {
   });
   const [useExistingCustomer, setUseExistingCustomer] = useState(true);
   const [newResponsibleCustomer, setNewResponsibleCustomer] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    birthDate: ''
+  });
   const [isNewMainCustomer, setIsNewMainCustomer] = useState(false);
   const [newMainCustomer, setNewMainCustomer] = useState({
     firstName: '',
@@ -483,7 +489,7 @@ const Sales = () => {
               <p className="text-2xl font-bold text-zapchat-darker">{formatCurrency(stats.total_commission)}</p>
             </div>
             <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <DollarSign className="h-6 w-6 text-blue-600" />
+              <CreditCard className="h-6 w-6 text-blue-600" />
             </div>
           </div>
         </div>
@@ -491,72 +497,80 @@ const Sales = () => {
         <div className="card p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Últimos 30 dias</p>
-              <p className="text-2xl font-bold text-zapchat-darker">{stats.recent_sales || 0}</p>
+              <p className="text-sm font-medium text-gray-600">Média por Venda</p>
+              <p className="text-2xl font-bold text-zapchat-darker">{formatCurrency(stats.average_sale)}</p>
             </div>
-            <div className="h-12 w-12 bg-orange-100 rounded-lg flex items-center justify-center">
-              <Calendar className="h-6 w-6 text-orange-600" />
+            <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
+              <TrendingUp className="h-6 w-6 text-purple-600" />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Filtros */}
+      {/* Filtros e Busca */}
       <div className="card p-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-            <input
-              type="text"
-              placeholder="Buscar vendas..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent"
-            />
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Buscar vendas..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent"
+              />
+            </div>
           </div>
-
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent"
-          >
-            <option value="">Todos os Status</option>
-            {statusOptions.map(option => (
-              <option key={option.value} value={option.value}>{option.label}</option>
-            ))}
-          </select>
-
-          <select
-            value={paymentStatusFilter}
-            onChange={(e) => setPaymentStatusFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent"
-          >
-            <option value="">Todos os Pagamentos</option>
-            {paymentStatusOptions.map(option => (
-              <option key={option.value} value={option.value}>{option.label}</option>
-            ))}
-          </select>
-
-          <button
-            onClick={() => {
-              setSearchTerm('');
-              setStatusFilter('');
-              setPaymentStatusFilter('');
-              setCurrentPage(1);
-            }}
-            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2"
-          >
-            <X className="h-4 w-4" />
-            Limpar
-          </button>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="w-full sm:w-48">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent"
+              >
+                <option value="">Status</option>
+                {statusOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="w-full sm:w-48">
+              <select
+                value={paymentStatusFilter}
+                onChange={(e) => setPaymentStatusFilter(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent"
+              >
+                <option value="">Pagamento</option>
+                {paymentStatusOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button
+              onClick={() => {
+                setSearchTerm('');
+                setStatusFilter('');
+                setPaymentStatusFilter('');
+              }}
+              className="btn-secondary flex items-center gap-2"
+            >
+              <Filter className="h-5 w-5" />
+              Limpar
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Lista de Vendas */}
+      {/* Tabela de Vendas */}
       <div className="card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Venda
@@ -588,10 +602,11 @@ const Sales = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {sales.map((sale) => (
-                <tr key={sale.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div>
+              {sales.length > 0 ? (
+                sales.map((sale) => (
+                  <tr key={sale.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <div>
                       <div className="text-sm font-medium text-gray-900">
                         {sale.sale_number}
                       </div>
@@ -599,9 +614,9 @@ const Sales = () => {
                         {getStatusBadge(sale.priority, priorityOptions)}
                       </div>
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <div className="flex items-center">
                       <div className="h-10 w-10 bg-zapchat-light rounded-full flex items-center justify-center">
                         <User className="h-5 w-5 text-zapchat-primary" />
                       </div>
@@ -614,9 +629,9 @@ const Sales = () => {
                         </div>
                       </div>
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {sale.seller || sale.users ? (
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {sale.seller || sale.users ? (
                       <div>
                         <div className="text-sm font-medium text-gray-900">
                           {sale.seller?.first_name || sale.users?.first_name} {sale.seller?.last_name || sale.users?.last_name}
@@ -636,774 +651,682 @@ const Sales = () => {
                     ) : (
                       <span className="text-gray-400">-</span>
                     )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      {formatCurrency(sale.total_amount)}
-                    </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <div className="text-sm font-medium text-gray-900">
+                        {formatCurrency(sale.total_amount)}
+                      </div>
                     {sale.commission_amount > 0 && (
                       <div className="text-sm text-gray-500">
                         Comissão: {formatCurrency(sale.commission_amount)}
                       </div>
                     )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {getStatusBadge(sale.status, statusOptions)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {getStatusBadge(sale.payment_status, paymentStatusOptions)}
-                    {sale.payment_method && (
-                      <div className="text-sm text-gray-500 mt-1">
-                        {paymentMethodOptions.find(opt => opt.value === sale.payment_method)?.label}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {getStatusBadge(sale.status, statusOptions)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {getStatusBadge(sale.payment_status, paymentStatusOptions)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {formatDate(sale.sale_date)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex justify-end space-x-2">
+                        <button
+                          onClick={() => openModal('view', sale)}
+                          className="text-blue-600 hover:text-blue-900"
+                          title="Visualizar"
+                        >
+                          <Eye className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={() => openModal('edit', sale)}
+                          className="text-yellow-600 hover:text-yellow-900"
+                          title="Editar"
+                        >
+                          <Edit className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(sale.id)}
+                          className="text-red-600 hover:text-red-900"
+                          title="Excluir"
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </button>
                       </div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {formatDate(sale.sale_date)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <div className="flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => openModal('view', sale)}
-                        className="text-zapchat-primary hover:text-zapchat-dark p-1 rounded"
-                        title="Visualizar"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => openModal('edit', sale)}
-                        className="text-blue-600 hover:text-blue-900 p-1 rounded"
-                        title="Editar"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(sale.id)}
-                        className="text-red-600 hover:text-red-900 p-1 rounded"
-                        title="Excluir"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="8" className="px-6 py-4 text-center text-sm text-gray-500">
+                    Nenhuma venda encontrada
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
-
-        {/* Paginação */}
-        {totalPages > 1 && (
-          <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-            <div className="flex-1 flex justify-between sm:hidden">
-              <button
-                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                disabled={currentPage === 1}
-                className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-              >
-                Anterior
-              </button>
-              <button
-                onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                disabled={currentPage === totalPages}
-                className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
-              >
-                Próximo
-              </button>
-            </div>
-            <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-              <div>
-                <p className="text-sm text-gray-700">
-                  Página <span className="font-medium">{currentPage}</span> de{' '}
-                  <span className="font-medium">{totalPages}</span>
-                </p>
-              </div>
-              <div>
-                <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                  <button
-                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                    disabled={currentPage === 1}
-                    className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
-                  >
-                    Anterior
-                  </button>
-                  <button
-                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                    disabled={currentPage === totalPages}
-                    className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
-                  >
-                    Próximo
-                  </button>
-                </nav>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Modal */}
+      {/* Paginação */}
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-6">
+          <nav className="flex items-center space-x-2">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 rounded-md ${
+                currentPage === 1
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              } border border-gray-300`}
+            >
+              Anterior
+            </button>
+            {[...Array(totalPages)].map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentPage(i + 1)}
+                className={`px-3 py-1 rounded-md ${
+                  currentPage === i + 1
+                    ? 'bg-zapchat-primary text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                } border border-gray-300`}
+              >
+                {i + 1}
+              </button>
+            ))}
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 rounded-md ${
+                currentPage === totalPages
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              } border border-gray-300`}
+            >
+              Próxima
+            </button>
+          </nav>
+        </div>
+      )}
+
+      {/* Modal de Venda */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  {modalMode === 'create' ? 'Nova Venda' : 
-                   modalMode === 'edit' ? 'Editar Venda' : 'Detalhes da Venda'}
-                </h2>
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <X className="h-6 w-6" />
-                </button>
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-5xl sm:w-full">
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="flex justify-between items-center pb-4 mb-4 border-b border-gray-200">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900">
+                    {modalMode === 'create' && 'Nova Venda'}
+                    {modalMode === 'edit' && 'Editar Venda'}
+                    {modalMode === 'view' && 'Detalhes da Venda'}
+                  </h3>
+                  <button
+                    onClick={() => setShowModal(false)}
+                    className="text-gray-400 hover:text-gray-500"
+                  >
+                    <X className="h-6 w-6" />
+                  </button>
+                </div>
+
+                <form onSubmit={handleSubmit}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Coluna 1 */}
+                    <div className="space-y-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Cliente Responsável
+                        </label>
+                        {isNewMainCustomer ? (
+                          <div className="space-y-4">
+                            <div className="flex justify-between">
+                              <span className="text-sm text-zapchat-primary">Novo Cliente</span>
+                              <button
+                                type="button"
+                                onClick={() => setIsNewMainCustomer(false)}
+                                className="text-xs text-gray-500 hover:text-gray-700"
+                              >
+                                Usar cliente existente
+                              </button>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">
+                                  Nome
+                                </label>
+                                <input
+                                  type="text"
+                                  value={newMainCustomer.firstName}
+                                  onChange={(e) =>
+                                    setNewMainCustomer({
+                                      ...newMainCustomer,
+                                      firstName: e.target.value
+                                    })
+                                  }
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                                  required
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">
+                                  Sobrenome
+                                </label>
+                                <input
+                                  type="text"
+                                  value={newMainCustomer.lastName}
+                                  onChange={(e) =>
+                                    setNewMainCustomer({
+                                      ...newMainCustomer,
+                                      lastName: e.target.value
+                                    })
+                                  }
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                                  required
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-gray-700 mb-1">
+                                Email
+                              </label>
+                              <input
+                                type="email"
+                                value={newMainCustomer.email}
+                                onChange={(e) =>
+                                  setNewMainCustomer({
+                                    ...newMainCustomer,
+                                    email: e.target.value
+                                  })
+                                }
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                              />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">
+                                  Telefone
+                                </label>
+                                <input
+                                  type="text"
+                                  value={newMainCustomer.phone}
+                                  onChange={(e) =>
+                                    setNewMainCustomer({
+                                      ...newMainCustomer,
+                                      phone: e.target.value
+                                    })
+                                  }
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">
+                                  Data de Nascimento
+                                </label>
+                                <input
+                                  type="date"
+                                  value={newMainCustomer.birthDate}
+                                  onChange={(e) =>
+                                    setNewMainCustomer({
+                                      ...newMainCustomer,
+                                      birthDate: e.target.value
+                                    })
+                                  }
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            <div className="flex justify-between">
+                              <span className="text-sm text-zapchat-primary">Cliente Existente</span>
+                              <button
+                                type="button"
+                                onClick={() => setIsNewMainCustomer(true)}
+                                className="text-xs text-gray-500 hover:text-gray-700"
+                              >
+                                Cadastrar novo cliente
+                              </button>
+                            </div>
+                            <select
+                              value={formData.customer_id}
+                              onChange={(e) => setFormData({ ...formData, customer_id: e.target.value })}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                              required={!isNewMainCustomer}
+                            >
+                              <option value="">Selecione um cliente</option>
+                              {customers.map((customer) => (
+                                <option key={customer.id} value={customer.id}>
+                                  {customer.firstName} {customer.lastName} - {customer.email || customer.phone}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Passeio
+                        </label>
+                        <select
+                          value={formData.trip_id}
+                          onChange={(e) => setFormData({ ...formData, trip_id: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                        >
+                          <option value="">Selecione um passeio</option>
+                          {trips.map((trip) => (
+                            <option key={trip.id} value={trip.id}>
+                              {trip.title} - {formatCurrency(trip.priceTrips)}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Motorista
+                        </label>
+                        <select
+                          value={formData.driver_id}
+                          onChange={(e) => setFormData({ ...formData, driver_id: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                        >
+                          <option value="">Selecione um motorista</option>
+                          {drivers.map((driver) => (
+                            <option key={driver.id} value={driver.id}>
+                              {driver.firstName} {driver.lastName} - CNH: {driver.licenseNumber}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Veículo
+                        </label>
+                        <select
+                          value={formData.vehicle_id}
+                          onChange={(e) => setFormData({ ...formData, vehicle_id: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                        >
+                          <option value="">Selecione um veículo</option>
+                          {vehicles.map((vehicle) => (
+                            <option key={vehicle.id} value={vehicle.id}>
+                              {vehicle.model} - {vehicle.plate}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Vendedor
+                        </label>
+                        <select
+                          value={formData.seller_id}
+                          onChange={(e) => setFormData({ ...formData, seller_id: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                        >
+                          <option value="">Selecione um vendedor</option>
+                          {sellers.map((seller) => (
+                            <option key={seller.id} value={seller.id}>
+                              {seller.firstName} {seller.lastName} - ({seller.role})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Descrição
+                        </label>
+                        <textarea
+                          value={formData.description}
+                          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                          rows="3"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                        ></textarea>
+                      </div>
+                    </div>
+
+                    {/* Coluna 2 */}
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Status
+                          </label>
+                          <select
+                            value={formData.status}
+                            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                          >
+                            {statusOptions.map((option) => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Prioridade
+                          </label>
+                          <select
+                            value={formData.priority}
+                            onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                          >
+                            {priorityOptions.map((option) => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Data da Venda
+                          </label>
+                          <input
+                            type="date"
+                            value={formData.sale_date}
+                            onChange={(e) => setFormData({ ...formData, sale_date: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Data de Entrega
+                          </label>
+                          <input
+                            type="date"
+                            value={formData.delivery_date}
+                            onChange={(e) => setFormData({ ...formData, delivery_date: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Subtotal
+                        </label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={formData.subtotal}
+                          onChange={(e) => setFormData({ ...formData, subtotal: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                          required
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Desconto (R$)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={formData.discount_amount}
+                            onChange={(e) => setFormData({ ...formData, discount_amount: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Taxa (R$)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={formData.tax_amount}
+                            onChange={(e) => setFormData({ ...formData, tax_amount: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <div className="flex justify-between items-center">
+                          <span className="text-lg font-medium text-gray-700">Total:</span>
+                          <span className="text-xl font-bold text-zapchat-primary">
+                            {formatCurrency(calculateTotal())}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Método de Pagamento
+                          </label>
+                          <select
+                            value={formData.payment_method}
+                            onChange={(e) => setFormData({ ...formData, payment_method: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                          >
+                            <option value="">Selecione</option>
+                            {paymentMethodOptions.map((option) => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Status do Pagamento
+                          </label>
+                          <select
+                            value={formData.payment_status}
+                            onChange={(e) => setFormData({ ...formData, payment_status: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                          >
+                            {paymentStatusOptions.map((option) => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Data de Pagamento
+                          </label>
+                          <input
+                            type="date"
+                            value={formData.payment_date}
+                            onChange={(e) => setFormData({ ...formData, payment_date: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Data de Vencimento
+                          </label>
+                          <input
+                            type="date"
+                            value={formData.due_date}
+                            onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Botões */}
+                  <div className="mt-8 flex justify-end space-x-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowModal(false)}
+                      className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                      Cancelar
+                    </button>
+                    {modalMode !== 'view' && (
+                      <button
+                        type="submit"
+                        className="px-4 py-2 bg-zapchat-primary border border-transparent rounded-md text-sm font-medium text-white hover:bg-zapchat-medium"
+                      >
+                        {modalMode === 'create' ? 'Criar Venda' : 'Atualizar Venda'}
+                      </button>
+                    )}
+                  </div>
+                </form>
               </div>
             </div>
-
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Passeio */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <CalendarCheck className="inline h-4 w-4 mr-1" />
-                    Passeio *
-                  </label>
-                  <select
-                    value={formData.trip_id}
-                    onChange={(e) => setFormData({ ...formData, trip_id: e.target.value })}
-                    required
-                    disabled={modalMode === 'view'}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                  >
-                    <option value="">Selecione um passeio</option>
-                    {trips.map(trip => (
-                      <option key={trip.id} value={trip.id}>
-                        {trip.title} - {trip.type}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Motorista */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <UserCheck className="inline h-4 w-4 mr-1" />
-                    Motorista
-                  </label>
-                  <select
-                    value={formData.driver_id}
-                    onChange={(e) => setFormData({ ...formData, driver_id: e.target.value })}
-                    disabled={modalMode === 'view'}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                  >
-                    <option value="">Selecione um motorista</option>
-                    {drivers.map(driver => (
-                      <option key={driver.id} value={driver.id}>
-                        {driver.firstName} {driver.lastName} - {driver.licenseNumber}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Veículo */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <Car className="inline h-4 w-4 mr-1" />
-                    Veículo
-                  </label>
-                  <select
-                    value={formData.vehicle_id}
-                    onChange={(e) => setFormData({ ...formData, vehicle_id: e.target.value })}
-                    disabled={modalMode === 'view'}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                  >
-                    <option value="">Selecione um veículo</option>
-                    {vehicles.map(vehicle => (
-                      <option key={vehicle.id} value={vehicle.id}>
-                        {vehicle.plate} - {vehicle.brand} {vehicle.model}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Vendedor */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <User className="inline h-4 w-4 mr-1" />
-                    Vendedor
-                  </label>
-                  <select
-                    value={formData.seller_id}
-                    onChange={(e) => setFormData({ ...formData, seller_id: e.target.value })}
-                    disabled={modalMode === 'view'}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                  >
-                    <option value="">Selecione um vendedor</option>
-                    {sellers.map(seller => (
-                      <option key={seller.id} value={seller.id}>
-                        {seller.firstName} {seller.lastName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Cliente */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Cliente Responsável *
-                  </label>
-                  <div className="flex gap-2 mb-2">
-                    <button
-                      type="button"
-                      onClick={() => setUseExistingCustomer(true)}
-                      className={`px-3 py-1 rounded-md border ${useExistingCustomer ? 'bg-zapchat-primary text-white' : 'bg-white text-gray-700'}`}
-                    >
-                      Selecionar
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setUseExistingCustomer(false);
-                        setFormData({ ...formData, customer_id: '' });
-                      }}
-                      className={`px-3 py-1 rounded-md border ${!useExistingCustomer ? 'bg-zapchat-primary text-white' : 'bg-white text-gray-700'}`}
-                    >
-                      Cadastrar Novo
-                    </button>
-                  </div>
-                  {useExistingCustomer ? (
-                    <select
-                      value={formData.customer_id}
-                      onChange={(e) => setFormData({ ...formData, customer_id: e.target.value })}
-                      required
-                      disabled={modalMode === 'view'}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                    >
-                      <option value="">Selecione um cliente</option>
-                      {customers.map(customer => (
-                        <option key={customer.id} value={customer.id}>
-                          {customer.firstName} {customer.lastName}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <div className="space-y-2">
-                      <input
-                        type="text"
-                        placeholder="Nome"
-                        value={newResponsibleCustomer.firstName}
-                        onChange={(e) => setNewResponsibleCustomer({ ...newResponsibleCustomer, firstName: e.target.value })}
-                        required
-                        disabled={modalMode === 'view'}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                      />
-                      <input
-                        type="text"
-                        placeholder="Sobrenome"
-                        value={newResponsibleCustomer.lastName}
-                        onChange={(e) => setNewResponsibleCustomer({ ...newResponsibleCustomer, lastName: e.target.value })}
-                        required
-                        disabled={modalMode === 'view'}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                      />
-                      <input
-                        type="email"
-                        placeholder="Email"
-                        value={newResponsibleCustomer.email}
-                        onChange={(e) => setNewResponsibleCustomer({ ...newResponsibleCustomer, email: e.target.value })}
-                        required
-                        disabled={modalMode === 'view'}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                      />
-                      <input
-                        type="tel"
-                        placeholder="Telefone"
-                        value={newResponsibleCustomer.phone}
-                        onChange={(e) => setNewResponsibleCustomer({ ...newResponsibleCustomer, phone: e.target.value })}
-                        required
-                        disabled={modalMode === 'view'}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                      />
-                      <input
-                        type="date"
-                        value={newResponsibleCustomer.birthDate}
-                        onChange={(e) => setNewResponsibleCustomer({ ...newResponsibleCustomer, birthDate: e.target.value })}
-                        disabled={modalMode === 'view'}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                      />
-                    </div>
-                  )}
-                  <select
-                    value={isNewMainCustomer ? 'new' : formData.customer_id}
-                    onChange={(e) => {
-                      if (e.target.value === 'new') {
-                        setIsNewMainCustomer(true);
-                        setFormData({ ...formData, customer_id: '' });
-                      } else {
-                        setIsNewMainCustomer(false);
-                        setFormData({ ...formData, customer_id: e.target.value });
-                      }
-                    }}
-                    required={!isNewMainCustomer}
-                    disabled={modalMode === 'view'}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                  >
-                    <option value="">Selecione um cliente</option>
-                    {customers.map(customer => (
-                      <option key={customer.id} value={customer.id}>
-                        {customer.firstName} {customer.lastName}
-                      </option>
-                    ))}
-                    <option value="new">Cadastrar novo cliente</option>
-                  </select>
-                </div>
-
-                {isNewMainCustomer && (
-                  <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
-                      <input
-                        type="text"
-                        value={newMainCustomer.firstName}
-                        onChange={(e) => setNewMainCustomer({ ...newMainCustomer, firstName: e.target.value })}
-                        required
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-zapchat-primary focus:border-zapchat-primary"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Sobrenome</label>
-                      <input
-                        type="text"
-                        value={newMainCustomer.lastName}
-                        onChange={(e) => setNewMainCustomer({ ...newMainCustomer, lastName: e.target.value })}
-                        required
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-zapchat-primary focus:border-zapchat-primary"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                      <input
-                        type="email"
-                        value={newMainCustomer.email}
-                        onChange={(e) => setNewMainCustomer({ ...newMainCustomer, email: e.target.value })}
-                        required
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-zapchat-primary focus:border-zapchat-primary"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
-                      <input
-                        type="tel"
-                        value={newMainCustomer.phone}
-                        onChange={(e) => setNewMainCustomer({ ...newMainCustomer, phone: e.target.value })}
-                        required
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-zapchat-primary focus:border-zapchat-primary"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Data de Nascimento</label>
-                      <input
-                        type="date"
-                        value={newMainCustomer.birthDate}
-                        onChange={(e) => setNewMainCustomer({ ...newMainCustomer, birthDate: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-zapchat-primary focus:border-zapchat-primary"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {modalMode !== 'create' && (
-                  <div className="md:col-span-2">
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="block text-sm font-medium text-gray-700">Clientes da Venda</label>
-                      {modalMode === 'edit' && (
-                        <button
-                          type="button"
-                          onClick={() => setShowAddCustomerModal(true)}
-                          className="btn-primary px-3 py-1 text-sm"
-                        >
-                          Adicionar Cliente
-                        </button>
-                      )}
-                    </div>
-                    <ul className="space-y-1">
-                      {saleCustomers.map(sc => (
-                        <li key={sc.id} className="text-sm text-gray-700">
-                          {sc.customer.first_name} {sc.customer.last_name} - {sc.customer.email}
-                        </li>
-                      ))}
-                      {saleCustomers.length === 0 && (
-                        <li className="text-sm text-gray-500">Nenhum cliente adicionado</li>
-                      )}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Descrição */}
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Descrição
-                  </label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    disabled={modalMode === 'view'}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                    placeholder="Descrição da venda..."
-                  />
-                </div>
-
-                {/* Valores */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Subtotal *
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData.subtotal}
-                    onChange={(e) => setFormData({ ...formData, subtotal: e.target.value })}
-                    required
-                    disabled={modalMode === 'view'}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                    placeholder="0,00"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Desconto (R$)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData.discount_amount}
-                    onChange={(e) => setFormData({ ...formData, discount_amount: e.target.value })}
-                    disabled={modalMode === 'view'}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                    placeholder="0,00"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Desconto (%)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    max="100"
-                    value={formData.discount_percentage}
-                    onChange={(e) => setFormData({ ...formData, discount_percentage: e.target.value })}
-                    disabled={modalMode === 'view'}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                    placeholder="0,00"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Impostos/Taxas
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={formData.tax_amount}
-                    onChange={(e) => setFormData({ ...formData, tax_amount: e.target.value })}
-                    disabled={modalMode === 'view'}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                    placeholder="0,00"
-                  />
-                </div>
-
-                {/* Total Calculado */}
-                <div className="md:col-span-2">
-                  <div className="bg-zapchat-light p-4 rounded-lg">
-                    <div className="text-lg font-semibold text-zapchat-darker">
-                      Total: {formatCurrency(calculateTotal())}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Status */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Status
-                  </label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                    disabled={modalMode === 'view'}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                  >
-                    {statusOptions.map(option => (
-                      <option key={option.value} value={option.value}>{option.label}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Prioridade
-                  </label>
-                  <select
-                    value={formData.priority}
-                    onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-                    disabled={modalMode === 'view'}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                  >
-                    {priorityOptions.map(option => (
-                      <option key={option.value} value={option.value}>{option.label}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Pagamento */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Método de Pagamento
-                  </label>
-                  <select
-                    value={formData.payment_method}
-                    onChange={(e) => setFormData({ ...formData, payment_method: e.target.value })}
-                    disabled={modalMode === 'view'}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                  >
-                    <option value="">Selecione um método</option>
-                    {paymentMethodOptions.map(option => (
-                      <option key={option.value} value={option.value}>{option.label}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Status do Pagamento
-                  </label>
-                  <select
-                    value={formData.payment_status}
-                    onChange={(e) => setFormData({ ...formData, payment_status: e.target.value })}
-                    disabled={modalMode === 'view'}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                  >
-                    {paymentStatusOptions.map(option => (
-                      <option key={option.value} value={option.value}>{option.label}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Datas */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Data da Venda
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.sale_date}
-                    onChange={(e) => setFormData({ ...formData, sale_date: e.target.value })}
-                    disabled={modalMode === 'view'}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Data de Vencimento
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.due_date}
-                    onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
-                    disabled={modalMode === 'view'}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Data de Pagamento
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.payment_date}
-                    onChange={(e) => setFormData({ ...formData, payment_date: e.target.value })}
-                    disabled={modalMode === 'view'}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Data de Entrega
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.delivery_date}
-                    onChange={(e) => setFormData({ ...formData, delivery_date: e.target.value })}
-                    disabled={modalMode === 'view'}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                  />
-                </div>
-
-                {/* Outros campos */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Parcelas
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="24"
-                    value={formData.installments}
-                    onChange={(e) => setFormData({ ...formData, installments: e.target.value })}
-                    disabled={modalMode === 'view'}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Comissão (%)
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    max="100"
-                    value={formData.commission_percentage}
-                    onChange={(e) => setFormData({ ...formData, commission_percentage: e.target.value })}
-                    disabled={modalMode === 'view'}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                    placeholder="0,00"
-                  />
-                </div>
-
-                {/* Observações */}
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Observações
-                  </label>
-                  <textarea
-                    value={formData.notes}
-                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    disabled={modalMode === 'view'}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                    placeholder="Observações para o cliente..."
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Notas Internas
-                  </label>
-                  <textarea
-                    value={formData.internal_notes}
-                    onChange={(e) => setFormData({ ...formData, internal_notes: e.target.value })}
-                    disabled={modalMode === 'view'}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                    placeholder="Notas internas (não visíveis ao cliente)..."
-                  />
-                </div>
-              </div>
-
-              {/* Botões */}
-              {modalMode !== 'view' && (
-                <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
-                  <button
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                    className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    className="btn-primary flex items-center gap-2"
-                  >
-                    <Save className="h-4 w-4" />
-                    {modalMode === 'create' ? 'Criar Venda' : 'Salvar Alterações'}
-                  </button>
-                </div>
-              )}
-            </form>
           </div>
         </div>
       )}
+
+      {/* Modal de Adicionar Cliente */}
       {showAddCustomerModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 px-4 py-6">
-          <div className="w-full max-w-md bg-white rounded-lg shadow-xl p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium text-gray-900">Adicionar Cliente</h3>
-              <button onClick={() => setShowAddCustomerModal(false)} className="text-gray-400 hover:text-gray-600">
-                <X className="h-5 w-5" />
-              </button>
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
             </div>
-            <form onSubmit={handleAddCustomer} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nome</label>
-                <input
-                  type="text"
-                  value={newCustomer.firstName}
-                  onChange={(e) => setNewCustomer({ ...newCustomer, firstName: e.target.value })}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-zapchat-primary focus:border-zapchat-primary"
-                />
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="flex justify-between items-center pb-4 mb-4 border-b border-gray-200">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900">
+                    Adicionar Cliente à Venda
+                  </h3>
+                  <button
+                    onClick={() => setShowAddCustomerModal(false)}
+                    className="text-gray-400 hover:text-gray-500"
+                  >
+                    <X className="h-6 w-6" />
+                  </button>
+                </div>
+
+                <form onSubmit={handleAddCustomer}>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Nome
+                        </label>
+                        <input
+                          type="text"
+                          value={newCustomer.firstName}
+                          onChange={(e) =>
+                            setNewCustomer({
+                              ...newCustomer,
+                              firstName: e.target.value
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Sobrenome
+                        </label>
+                        <input
+                          type="text"
+                          value={newCustomer.lastName}
+                          onChange={(e) =>
+                            setNewCustomer({
+                              ...newCustomer,
+                              lastName: e.target.value
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        value={newCustomer.email}
+                        onChange={(e) =>
+                          setNewCustomer({
+                            ...newCustomer,
+                            email: e.target.value
+                          })
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Telefone
+                        </label>
+                        <input
+                          type="text"
+                          value={newCustomer.phone}
+                          onChange={(e) =>
+                            setNewCustomer({
+                              ...newCustomer,
+                              phone: e.target.value
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Data de Nascimento
+                        </label>
+                        <input
+                          type="date"
+                          value={newCustomer.birthDate}
+                          onChange={(e) =>
+                            setNewCustomer({
+                              ...newCustomer,
+                              birthDate: e.target.value
+                            })
+                          }
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 flex justify-end space-x-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowAddCustomerModal(false)}
+                      className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-zapchat-primary border border-transparent rounded-md text-sm font-medium text-white hover:bg-zapchat-medium"
+                    >
+                      Adicionar Cliente
+                    </button>
+                  </div>
+                </form>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Sobrenome</label>
-                <input
-                  type="text"
-                  value={newCustomer.lastName}
-                  onChange={(e) => setNewCustomer({ ...newCustomer, lastName: e.target.value })}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-zapchat-primary focus:border-zapchat-primary"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                <input
-                  type="email"
-                  value={newCustomer.email}
-                  onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-zapchat-primary focus:border-zapchat-primary"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
-                <input
-                  type="tel"
-                  value={newCustomer.phone}
-                  onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-zapchat-primary focus:border-zapchat-primary"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Data de Nascimento</label>
-                <input
-                  type="date"
-                  value={newCustomer.birthDate}
-                  onChange={(e) => setNewCustomer({ ...newCustomer, birthDate: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-zapchat-primary focus:border-zapchat-primary"
-                />
-              </div>
-              <div className="flex justify-end pt-2 border-t border-gray-200">
-                <button type="submit" className="btn-primary px-4 py-2">Salvar</button>
-              </div>
-            </form>
-            <div>
-              <h4 className="text-sm font-medium text-gray-700 mb-2">Clientes Cadastrados</h4>
-              <ul className="max-h-40 overflow-y-auto space-y-1">
-                {saleCustomers.map(sc => (
-                  <li key={sc.id} className="text-sm text-gray-700">
-                    {sc.customer.first_name} {sc.customer.last_name} - {sc.customer.email}
-                  </li>
-                ))}
-                {saleCustomers.length === 0 && <li className="text-sm text-gray-500">Nenhum cliente</li>}
-              </ul>
             </div>
           </div>
         </div>
@@ -1413,4 +1336,3 @@ const Sales = () => {
 };
 
 export default Sales;
-
