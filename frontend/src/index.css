@@ -266,3 +266,16 @@ input:focus, textarea:focus, select:focus {
   animation: slideOutRight 0.3s ease-in;
 }
 
+/* Estilos para react-select */
+.react-select__control {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-md bg-white;
+}
+.react-select__control--is-focused {
+  @apply ring-2 ring-zapchat-primary border-zapchat-primary;
+}
+.react-select__option--is-focused {
+  @apply bg-zapchat-primary/20;
+}
+.react-select__option--is-selected {
+  @apply bg-zapchat-primary text-white;
+}

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import AuthContext from '@/contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import api from '../../services/api';
+import AsyncSelect from "react-select/async";
 import {
   DollarSign,
   Plus,
@@ -32,10 +33,10 @@ const Sales = () => {
   const { user } = useContext(AuthContext);
   const { showSuccess, showError } = useToast();
   const [sales, setSales] = useState([]);
-  const [customers, setCustomers] = useState([]);
   const [trips, setTrips] = useState([]);
   const [drivers, setDrivers] = useState([]);
   const [vehicles, setVehicles] = useState([]);
+  const [selectedCustomerOption, setSelectedCustomerOption] = useState(null);
   const [sellers, setSellers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -137,8 +138,6 @@ const Sales = () => {
 
   useEffect(() => {
     fetchSales();
-    fetchCustomers();
-    fetchTrips();
     fetchDrivers();
     fetchVehicles();
     fetchSellers();
@@ -208,12 +207,25 @@ const Sales = () => {
     }
   };
 
-  const fetchCustomers = async () => {
+  const loadCustomerOptions = async (inputValue) => {
     try {
-      const response = await api.get('/customers');
-      setCustomers(response.data.customers || []);
+      const response = await api.get("/customers", { params: { search: inputValue } });
+      const customers = response.data.data.customers || [];
+      return customers.map(c => ({ value: c.id, label: `${c.firstName} ${c.lastName} - ${c.email || c.phone}` }));
     } catch (error) {
-      console.error('Erro ao buscar clientes:', error);
+      console.error("Erro ao buscar clientes:", error);
+      return [];
+    }
+  };
+
+  const fetchCustomerOptionById = async (id) => {
+    try {
+      const res = await api.get(`/customers/${id}`);
+      const c = res.data.data.customer;
+      return { value: c.id, label: `${c.firstName} ${c.lastName} - ${c.email || c.phone}` };
+    } catch (error) {
+      console.error("Erro ao buscar cliente:", error);
+      return null;
     }
   };
 
@@ -332,6 +344,7 @@ const Sales = () => {
     if (mode === 'create') {
       resetForm();
       setSaleCustomers([]);
+      setSelectedCustomerOption(null);
     } else if ((mode === 'edit' || mode === 'view') && sale) {
       setFormData({
         trip_id: sale.trip_id || '',
@@ -358,6 +371,11 @@ const Sales = () => {
         internal_notes: sale.internal_notes || ''
       });
       fetchSaleCustomers(sale.id);
+      if (sale.customer_id) {
+        fetchCustomerOptionById(sale.customer_id).then(setSelectedCustomerOption);
+      } else {
+        setSelectedCustomerOption(null);
+      }
     }
 
     setShowModal(true);
@@ -388,6 +406,7 @@ const Sales = () => {
       notes: '',
       internal_notes: ''
     });
+    setSelectedCustomerOption(null);
     setUseExistingCustomer(true);
     setNewResponsibleCustomer({
       firstName: '',
@@ -896,19 +915,20 @@ const Sales = () => {
                                 Cadastrar novo cliente
                               </button>
                             </div>
-                            <select
-                              value={formData.customer_id}
-                              onChange={(e) => setFormData({ ...formData, customer_id: e.target.value })}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
-                              required={!isNewMainCustomer}
-                            >
-                              <option value="">Selecione um cliente</option>
-                              {customers.map((customer) => (
-                                <option key={customer.id} value={customer.id}>
-                                  {customer.firstName} {customer.lastName} - {customer.email || customer.phone}
-                                </option>
-                              ))}
-                            </select>
+                            <AsyncSelect
+                              cacheOptions
+                              defaultOptions
+                              loadOptions={loadCustomerOptions}
+                              value={selectedCustomerOption}
+                              onChange={(option) => {
+                                setSelectedCustomerOption(option);
+                                setFormData({ ...formData, customer_id: option ? option.value : '' });
+                              }}
+                              placeholder="Selecione um cliente"
+                              className="react-select-container"
+                              classNamePrefix="react-select"
+                              isClearable
+                            />
                           </div>
                         )}
                       </div>
