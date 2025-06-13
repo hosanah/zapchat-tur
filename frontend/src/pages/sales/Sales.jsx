@@ -58,6 +58,14 @@ const Sales = () => {
     phone: '',
     birthDate: ''
   });
+  const [useExistingCustomer, setUseExistingCustomer] = useState(true);
+  const [newResponsibleCustomer, setNewResponsibleCustomer] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    birthDate: ''
+  });
 
   const [formData, setFormData] = useState({
     trip_id: '',
@@ -230,6 +238,11 @@ const Sales = () => {
       const tax = parseFloat(dataToSend.tax_amount) || 0;
       dataToSend.total_amount = subtotal - discount + tax;
 
+      if (!useExistingCustomer) {
+        const customerRes = await api.post('/customers', newResponsibleCustomer);
+        dataToSend.customer_id = customerRes.data.data.customer.id;
+      }
+
       if (modalMode === 'create') {
         await api.post('/sales', dataToSend);
         showSuccess('Venda criada com sucesso!');
@@ -292,6 +305,14 @@ const Sales = () => {
   const openModal = (mode, sale = null) => {
     setModalMode(mode);
     setSelectedSale(sale);
+    setUseExistingCustomer(true);
+    setNewResponsibleCustomer({
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      birthDate: ''
+    });
     
     if (mode === 'create') {
       resetForm();
@@ -351,6 +372,14 @@ const Sales = () => {
       commission_percentage: 0,
       notes: '',
       internal_notes: ''
+    });
+    setUseExistingCustomer(true);
+    setNewResponsibleCustomer({
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      birthDate: ''
     });
   };
 
@@ -812,20 +841,87 @@ const Sales = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Cliente Responsável *
                   </label>
-                  <select
-                    value={formData.customer_id}
-                    onChange={(e) => setFormData({ ...formData, customer_id: e.target.value })}
-                    required
-                    disabled={modalMode === 'view'}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
-                  >
-                    <option value="">Selecione um cliente</option>
-                    {customers.map(customer => (
-                      <option key={customer.id} value={customer.id}>
-                        {customer.firstName} {customer.lastName}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="flex gap-2 mb-2">
+                    <button
+                      type="button"
+                      onClick={() => setUseExistingCustomer(true)}
+                      className={`px-3 py-1 rounded-md border ${useExistingCustomer ? 'bg-zapchat-primary text-white' : 'bg-white text-gray-700'}`}
+                    >
+                      Selecionar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setUseExistingCustomer(false);
+                        setFormData({ ...formData, customer_id: '' });
+                      }}
+                      className={`px-3 py-1 rounded-md border ${!useExistingCustomer ? 'bg-zapchat-primary text-white' : 'bg-white text-gray-700'}`}
+                    >
+                      Cadastrar Novo
+                    </button>
+                  </div>
+                  {useExistingCustomer ? (
+                    <select
+                      value={formData.customer_id}
+                      onChange={(e) => setFormData({ ...formData, customer_id: e.target.value })}
+                      required
+                      disabled={modalMode === 'view'}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
+                    >
+                      <option value="">Selecione um cliente</option>
+                      {customers.map(customer => (
+                        <option key={customer.id} value={customer.id}>
+                          {customer.firstName} {customer.lastName}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="space-y-2">
+                      <input
+                        type="text"
+                        placeholder="Nome"
+                        value={newResponsibleCustomer.firstName}
+                        onChange={(e) => setNewResponsibleCustomer({ ...newResponsibleCustomer, firstName: e.target.value })}
+                        required
+                        disabled={modalMode === 'view'}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Sobrenome"
+                        value={newResponsibleCustomer.lastName}
+                        onChange={(e) => setNewResponsibleCustomer({ ...newResponsibleCustomer, lastName: e.target.value })}
+                        required
+                        disabled={modalMode === 'view'}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
+                      />
+                      <input
+                        type="email"
+                        placeholder="Email"
+                        value={newResponsibleCustomer.email}
+                        onChange={(e) => setNewResponsibleCustomer({ ...newResponsibleCustomer, email: e.target.value })}
+                        required
+                        disabled={modalMode === 'view'}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
+                      />
+                      <input
+                        type="tel"
+                        placeholder="Telefone"
+                        value={newResponsibleCustomer.phone}
+                        onChange={(e) => setNewResponsibleCustomer({ ...newResponsibleCustomer, phone: e.target.value })}
+                        required
+                        disabled={modalMode === 'view'}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
+                      />
+                      <input
+                        type="date"
+                        value={newResponsibleCustomer.birthDate}
+                        onChange={(e) => setNewResponsibleCustomer({ ...newResponsibleCustomer, birthDate: e.target.value })}
+                        disabled={modalMode === 'view'}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent disabled:bg-gray-100"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {modalMode !== 'create' && (
