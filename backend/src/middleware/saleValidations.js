@@ -3,11 +3,49 @@ const { User } = require('../models');
 
 // Validações para criação de venda
 const createSaleValidation = [
+  body().custom((_, { req }) => {
+    if (!req.body.customer_id && !req.body.new_customer) {
+      throw new Error('ID do cliente é obrigatório');
+    }
+    return true;
+  }),
   body('customer_id')
-    .notEmpty()
-    .withMessage('ID do cliente é obrigatório')
+    .optional()
     .isUUID()
     .withMessage('ID do cliente deve ser um UUID válido'),
+  body('new_customer')
+    .optional()
+    .isObject()
+    .withMessage('Dados do novo cliente inválidos'),
+  body('new_customer.firstName')
+    .if(body('new_customer').exists())
+    .notEmpty()
+    .withMessage('Nome é obrigatório')
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Nome deve ter entre 2 e 50 caracteres'),
+  body('new_customer.lastName')
+    .if(body('new_customer').exists())
+    .notEmpty()
+    .withMessage('Sobrenome é obrigatório')
+    .isLength({ min: 2, max: 50 })
+    .withMessage('Sobrenome deve ter entre 2 e 50 caracteres'),
+  body('new_customer.email')
+    .if(body('new_customer').exists())
+    .notEmpty()
+    .withMessage('Email é obrigatório')
+    .isEmail()
+    .withMessage('Email deve ser válido'),
+  body('new_customer.phone')
+    .if(body('new_customer').exists())
+    .notEmpty()
+    .withMessage('Telefone é obrigatório')
+    .isLength({ min: 10, max: 20 })
+    .withMessage('Telefone deve ter entre 10 e 20 caracteres'),
+  body('new_customer.birthDate')
+    .if(body('new_customer').exists())
+    .optional()
+    .isISO8601()
+    .withMessage('Data de nascimento inválida'),
 
   body('description')
     .optional()
