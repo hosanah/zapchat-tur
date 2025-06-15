@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
+import { dashboardService } from '../../services/api';
 import {
   Building2,
   Users,
@@ -26,24 +28,24 @@ const Dashboard = () => {
     revenue: 0,
   });
   const [loading, setLoading] = useState(true);
+  const { showError } = useToast();
 
   useEffect(() => {
-    // Simular carregamento de estatísticas
-    // Em uma implementação real, isso viria da API
-    setTimeout(() => {
-      setStats({
-        companies: isMaster() ? 12 : 1,
-        users: 45,
-        vehicles: 28,
-        drivers: 35,
-        customers: 156,
-        trips: 89,
-        bookings: 234,
-        revenue: 45670.50,
-      });
-      setLoading(false);
-    }, 1000);
-  }, [isMaster]);
+    const fetchStats = async () => {
+      setLoading(true);
+      try {
+        const response = await dashboardService.getStats();
+        setStats(response.data.stats);
+      } catch (err) {
+        console.error(err);
+        showError('Erro ao carregar estatísticas');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, [isMaster, showError]);
 
   const StatCard = ({ title, value, icon: Icon, color, trend }) => (
     <div className="bg-white rounded-lg shadow p-6">
