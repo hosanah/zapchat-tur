@@ -289,4 +289,8 @@ export const bookingService = {
   getRevenue: (params) => api.get('/bookings/revenue', { params }),
 };
 
+export const dashboardService = {
+  getStats: () => api.get('/dashboard/stats'),
+};
+
 export default api;
