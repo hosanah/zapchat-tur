@@ -26,6 +26,9 @@ const dashboardRoutes = require('./routes/dashboard');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Configuração de rota segura
+app.set('trust proxy', true);
+
 // Middleware de segurança
 app.use(helmet());
 
