@@ -1,6 +1,8 @@
 const { User, Company } = require('../models');
 const JWTUtils = require('../utils/jwtUtils');
 
+console.log('✅ Arquivo auth.js carregado com sucesso');
+
 /**
  * Middleware de autenticação
  */
