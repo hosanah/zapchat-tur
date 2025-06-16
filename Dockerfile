@@ -10,7 +10,7 @@ COPY frontend/package.json ./
 COPY frontend/pnpm-lock.yaml ./
 
 # Instalar pnpm e dependências
-RUN npm ci
+RUN npm i --force
 
 # Estágio de build
 FROM base AS build
