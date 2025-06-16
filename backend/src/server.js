@@ -79,6 +79,10 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/sales', saleRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.get('/', (req, res) => {
+  res.send('API ZapChat Tur está rodando.');
+});
+
 
 // Middleware de tratamento de erros
 app.use(notFound);
