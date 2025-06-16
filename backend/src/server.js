@@ -10,7 +10,7 @@ const { runMigrations } = require('./database/migrate');
 const errorHandler = require('./middleware/errorHandler');
 const notFound = require('./middleware/notFound');
 
-// Importar rotas
+// Rotas
 const authRoutes = require('./routes/auth');
 const companyRoutes = require('./routes/companies');
 const userRoutes = require('./routes/users');
@@ -26,38 +26,36 @@ const dashboardRoutes = require('./routes/dashboard');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Configuração de rota segura
+// Confiança no primeiro proxy (NGINX, EasyPanel, etc)
 app.set('trust proxy', 1);
 
-// Middleware de segurança
+// Segurança
 app.use(helmet());
 
-// Configuração CORS
+// CORS
 app.use(cors({
   origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
   credentials: true
 }));
 
-// Rate limiting
+// Limite de requisições
 const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutos
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // máximo 100 requests por IP
-  message: {
-    error: 'Muitas tentativas. Tente novamente em alguns minutos.'
-  }
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
+  message: { error: 'Muitas tentativas. Tente novamente em alguns minutos.' }
 });
 app.use(limiter);
 
-// Middleware de logging
+// Logger
 if (process.env.NODE_ENV !== 'test') {
   app.use(morgan('combined'));
 }
 
-// Middleware para parsing JSON
+// Parsing
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Rota de health check
+// Healthcheck
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'OK',
@@ -67,7 +65,12 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Configurar rotas
+// Rota raiz
+app.get('/', (req, res) => {
+  res.send('API ZapChat Tur está rodando.');
+});
+
+// Rotas da API
 app.use('/api/auth', authRoutes);
 app.use('/api/companies', companyRoutes);
 app.use('/api/users', userRoutes);
@@ -79,68 +82,52 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/sales', saleRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/dashboard', dashboardRoutes);
-app.get('/', (req, res) => {
-  res.send('API ZapChat Tur está rodando.');
-});
 
-
-// Middleware de tratamento de erros
+// Erros
 app.use(notFound);
 app.use(errorHandler);
 
-// Função para inicializar o servidor
+// Inicialização do servidor
 async function startServer() {
   try {
-    // Conectar ao banco de dados
     await sequelize.authenticate();
     console.log('✅ Conexão com banco de dados estabelecida com sucesso.');
 
-    // Sincronizar modelos (apenas em desenvolvimento)
     if (process.env.NODE_ENV === 'development' && process.env.DB_RECREATE_FORCE === 'true') {
       await sequelize.sync({ force: true });
       console.log('✅ Modelos sincronizados com o banco de dados.');
     }
 
-    // Executar migrations pendentes
     await runMigrations();
 
-    // Iniciar servidor
     const server = app.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 Servidor rodando na porta ${PORT}`);
       console.log(`🌍 Ambiente: ${process.env.NODE_ENV}`);
       console.log(`📊 Health check: http://localhost:${PORT}/health`);
     });
 
-    // Graceful shutdown
-    process.on('SIGTERM', () => {
-      console.log('🛑 SIGTERM recebido. Encerrando servidor...');
+    const shutdown = (signal) => {
+      console.log(`🛑 ${signal} recebido. Encerrando servidor...`);
       server.close(() => {
         console.log('✅ Servidor encerrado.');
         sequelize.close();
         process.exit(0);
       });
-    });
+    };
 
-    process.on('SIGINT', () => {
-      console.log('🛑 SIGINT recebido. Encerrando servidor...');
-      server.close(() => {
-        console.log('✅ Servidor encerrado.');
-        sequelize.close();
-        process.exit(0);
-      });
-    });
+    process.on('SIGTERM', () => shutdown('SIGTERM'));
+    process.on('SIGINT', () => shutdown('SIGINT'));
 
-    return server;
+    // Evita que o container finalize (caso o app entre em background)
+    setInterval(() => {}, 1000 * 60 * 60);
   } catch (error) {
     console.error('❌ Erro ao inicializar servidor:', error);
     process.exit(1);
   }
 }
 
-// Inicializar servidor apenas se não estiver em modo de teste
 if (process.env.NODE_ENV !== 'test') {
   startServer();
 }
 
 module.exports = { app, startServer };
-
