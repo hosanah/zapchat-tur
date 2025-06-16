@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
+import { dashboardService } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
 import {
   Building2,
@@ -22,6 +24,7 @@ import {
 const ModernDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { showError } = useToast();
   const [stats, setStats] = useState({
     companies: 0,
     users: 0,
@@ -32,21 +35,24 @@ const ModernDashboard = () => {
     bookings: 0,
     revenue: 0
   });
+  const [loading, setLoading] = useState(true);
 
-  // Simular carregamento de estatísticas
   useEffect(() => {
-    // Aqui você faria a chamada real para a API
-    setStats({
-      companies: user?.role === 'master' ? 12 : 1,
-      users: 124,
-      vehicles: 28,
-      drivers: 15,
-      customers: 342,
-      trips: 89,
-      bookings: 156,
-      revenue: 45750
-    });
-  }, [user]);
+    const fetchStats = async () => {
+      setLoading(true);
+      try {
+        const response = await dashboardService.getStats();
+        setStats(response.data.stats);
+      } catch (err) {
+        console.error(err);
+        showError('Erro ao carregar estatísticas');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, [user, showError]);
 
   const quickActions = [
     {
@@ -138,9 +144,13 @@ const ModernDashboard = () => {
     }
   ];
 
-  const filteredActions = quickActions.filter(action => 
+  const filteredActions = quickActions.filter(action =>
     !action.masterOnly || user?.role === 'master'
   );
+
+  if (loading) {
+    return <p>Carregando...</p>;
+  }
 
   return (
     <div className="space-y-6">
