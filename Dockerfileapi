@@ -10,7 +10,7 @@ WORKDIR /app
 COPY backend/package*.json ./
 
 # Instalar dependências
-RUN npm ci
+RUN npm install
 
 # Copiar código-fonte e variáveis de ambiente
 COPY backend/src ./src
