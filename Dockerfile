@@ -20,7 +20,7 @@ WORKDIR /app
 COPY frontend/ ./
 
 # Construir a aplicação
-RUN pnpm run build
+RUN npm run preview
 
 # Estágio de produção
 FROM nginx:alpine AS production
