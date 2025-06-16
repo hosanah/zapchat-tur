@@ -1,7 +1,21 @@
 const { Sequelize } = require('sequelize');
 const path = require('path');
+const dotenv = require('dotenv');
+//const { runMigrations } = require('../database/migrate');
+dotenv.config();
 
-// Configuração do banco de dados baseada no ambiente
+
+let seedDatabase;
+try {
+  // Importação condicional do seeder (evita erro caso o arquivo não exista)
+  seedDatabase = require('../src/database/seeders').seedDatabase;
+} catch (err) {
+  seedDatabase = async () => {
+    console.log('ℹ️ Seeder não encontrado ou não definido.');
+  };
+}
+
+// Configuração por ambiente
 const config = {
   development: {
     dialect: 'sqlite',
@@ -24,23 +38,13 @@ const config = {
     }
   },
   production: {
-    dialect: process.env.DB_DIALECT || 'postgres',
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    database: process.env.DB_NAME,
-    username: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    logging: false,
+    dialect: 'sqlite',
+    storage: (process.env.NODE_ENV === 'production' && process.env.DB_STORAGE) || path.join(__dirname, '../database/zapchat_tur_dev.sqlite'),
+    logging: console.log,
     define: {
       timestamps: true,
       underscored: true,
       freezeTableName: true
-    },
-    pool: {
-      max: 10,
-      min: 0,
-      acquire: 30000,
-      idle: 10000
     }
   }
 };
@@ -48,50 +52,46 @@ const config = {
 const environment = process.env.NODE_ENV || 'development';
 const dbConfig = config[environment];
 
-// Criar instância do Sequelize
+// Instância Sequelize
 const sequelize = new Sequelize(dbConfig);
 
-// Função para testar conexão
-async function testConnection() {
+// Inicialização completa do banco
+async function initializeDatabase() {
   try {
     await sequelize.authenticate();
     console.log('✅ Conexão com banco de dados estabelecida com sucesso.');
-    return true;
+
+    if (process.env.NODE_ENV === 'development' && process.env.DB_RECREATE_FORCE === 'true') {
+      await sequelize.sync({ force: true });
+      console.log('🔁 Modelos sincronizados com `force: true`');
+    }
+
+    //await runMigrations();
+
+    if (process.env.DB_CREATE_DEVINFO === 'true') {
+      console.log('🌱 Executando seed de desenvolvimento...');
+      await seedDatabase();
+      console.log('✅ Seed de desenvolvimento executado com sucesso.');
+    }
   } catch (error) {
-    console.error('❌ Erro ao conectar com banco de dados:', error);
-    return false;
+    console.error('❌ Erro ao inicializar banco de dados:', error);
+    throw error;
   }
 }
 
-// Função para sincronizar modelos
-async function syncModels(options = {}) {
-  try {
-    await sequelize.sync(options);
-    console.log('✅ Modelos sincronizados com sucesso.');
-    return true;
-  } catch (error) {
-    console.error('❌ Erro ao sincronizar modelos:', error);
-    return false;
-  }
-}
-
-// Função para fechar conexão
+// Utilitários auxiliares
 async function closeConnection() {
   try {
     await sequelize.close();
     console.log('✅ Conexão com banco de dados fechada.');
-    return true;
   } catch (error) {
     console.error('❌ Erro ao fechar conexão:', error);
-    return false;
   }
 }
 
 module.exports = {
   sequelize,
-  testConnection,
-  syncModels,
+  initializeDatabase,
   closeConnection,
   config
 };
-

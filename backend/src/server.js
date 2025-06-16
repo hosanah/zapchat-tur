@@ -4,7 +4,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
 const path = require('path');
-const { seedDatabase } = require('./database/seeders');
+const { initializeDatabase } = require('./config/database');
 
 dotenv.config();
 
@@ -84,22 +84,7 @@ app.use(errorHandler);
 // Inicialização do servidor
 async function startServer() {
   try {
-    await sequelize.authenticate();
-    console.log('✅ Conexão com banco de dados estabelecida com sucesso.');
-
-    if (process.env.NODE_ENV === 'development' && process.env.DB_RECREATE_FORCE === 'true') {
-      await sequelize.sync({ force: true });
-      console.log('🔁 Modelos sincronizados com o banco de dados.');
-    }
-
-    await runMigrations();
-
-    // Executa seeder de desenvolvimento, se necessário
-    if (process.env.DB_CREATE_DEVINFO === 'true') {
-      console.log('🌱 Executando seed de desenvolvimento...');      
-      await seedDatabase();
-      console.log('✅ Seed executado com sucesso.');
-    }
+    await initializeDatabase();
 
     const server = app.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 Servidor rodando na porta ${PORT}`);
