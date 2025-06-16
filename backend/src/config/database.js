@@ -8,7 +8,7 @@ dotenv.config();
 let seedDatabase;
 try {
   // Importação condicional do seeder (evita erro caso o arquivo não exista)
-  seedDatabase = require('../src/database/seeders').seedDatabase;
+  seedDatabase = require('../database/seeders').seedDatabase;
 } catch (err) {
   seedDatabase = async () => {
     console.log('ℹ️ Seeder não encontrado ou não definido.');
