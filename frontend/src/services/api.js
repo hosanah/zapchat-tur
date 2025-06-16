@@ -245,6 +245,7 @@ export const driverService = {
   updateStatus: (id, status) => api.patch(`/drivers/${id}/status`, { status }),
   getActive: (params) => api.get('/drivers/active', { params }),
   getExpiringLicenses: (params) => api.get('/drivers/expiring-licenses', { params }),
+  getStats: (params) => api.get('/drivers/stats', { params }),
 };
 
 // Serviços de clientes
@@ -275,6 +276,7 @@ export const tripService = {
 export const saleService = {
   getCustomers: (saleId) => api.get(`/sales/${saleId}/customers`),
   addCustomer: (saleId, data) => api.post(`/sales/${saleId}/customers`, data),
+  getStats: (params) => api.get('/sales/stats', { params }),
 };
 
 // Serviços de reservas
@@ -292,6 +294,8 @@ export const bookingService = {
 // Serviços de atividades
 export const activityService = {
   getRecent: (params) => api.get('/activities/recent', { params }),
+export const dashboardService = {
+  getStats: () => api.get('/dashboard/stats'),
 };
 
 export default api;
