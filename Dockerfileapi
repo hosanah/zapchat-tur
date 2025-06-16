@@ -13,8 +13,7 @@ COPY backend/package*.json ./
 RUN npm install
 
 # Copiar restante do código
-COPY backend/src ./src
-COPY backend/.env ./
+COPY backend ./
 
 # Estágio de produção
 FROM node:20-alpine
