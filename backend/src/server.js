@@ -4,6 +4,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const dotenv = require('dotenv');
 const path = require('path');
+const { seedDatabase } = require('./database/seeders');
 
 dotenv.config();
 
@@ -95,8 +96,7 @@ async function startServer() {
 
     // Executa seeder de desenvolvimento, se necessário
     if (process.env.DB_CREATE_DEVINFO === 'true') {
-      console.log('🌱 Executando seed de desenvolvimento...');
-      const { seedDatabase } = require('./src/database/seeders');
+      console.log('🌱 Executando seed de desenvolvimento...');      
       await seedDatabase();
       console.log('✅ Seed executado com sucesso.');
     }
