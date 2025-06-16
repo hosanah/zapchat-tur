@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { dashboardService } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
+import { activityService } from '../../services/api';
 import {
   Building2,
   Users,
@@ -36,6 +37,7 @@ const ModernDashboard = () => {
     revenue: 0
   });
   const [loading, setLoading] = useState(true);
+  const [recentActivities, setRecentActivities] = useState([]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -53,6 +55,18 @@ const ModernDashboard = () => {
 
     fetchStats();
   }, [user, showError]);
+
+  useEffect(() => {
+    const loadActivities = async () => {
+      try {
+        const response = await activityService.getRecent({ limit: 5 });
+        setRecentActivities(response.data.activities || []);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    loadActivities();
+  }, []);
 
   const quickActions = [
     {
@@ -117,32 +131,28 @@ const ModernDashboard = () => {
     }
   ];
 
-  const recentActivities = [
-    {
-      id: 1,
-      type: 'vehicle',
-      message: 'Novo veículo cadastrado: Sprinter 2024',
-      time: '2 horas atrás',
-      icon: Car,
-      color: 'text-green-600'
-    },
-    {
-      id: 2,
-      type: 'booking',
-      message: 'Nova reserva para passeio em Gramado',
-      time: '4 horas atrás',
-      icon: Calendar,
-      color: 'text-blue-600'
-    },
-    {
-      id: 3,
-      type: 'driver',
-      message: 'CNH de João Silva vence em 30 dias',
-      time: '1 dia atrás',
-      icon: AlertTriangle,
-      color: 'text-amber-600'
-    }
-  ];
+  const typeIcons = {
+    vehicle: Car,
+    booking: Calendar,
+    customer: UserCircle,
+  };
+
+  const typeColors = {
+    vehicle: 'text-green-600',
+    booking: 'text-blue-600',
+    customer: 'text-zapchat-medium',
+  };
+
+  const formatRelativeTime = (dateString) => {
+    if (!dateString) return '';
+    const diff = Date.now() - new Date(dateString).getTime();
+    const minutes = Math.floor(diff / 60000);
+    if (minutes < 60) return `${minutes} minutos atrás`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} horas atrás`;
+    const days = Math.floor(hours / 24);
+    return `${days} dias atrás`;
+  };
 
   const filteredActions = quickActions.filter(action =>
     !action.masterOnly || user?.role === 'master'
@@ -215,15 +225,19 @@ const ModernDashboard = () => {
           
           <div className="space-y-4">
             {recentActivities.map((activity) => {
-              const Icon = activity.icon;
+              const Icon = typeIcons[activity.type] || Activity;
+              const color = typeColors[activity.type] || 'text-gray-600';
               return (
-                <div key={activity.id} className="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg">
-                  <div className={`${activity.color} p-2 rounded-lg bg-gray-50`}>
+                <div
+                  key={activity.id}
+                  className="flex items-start space-x-3 p-3 hover:bg-gray-50 rounded-lg"
+                >
+                  <div className={`${color} p-2 rounded-lg bg-gray-50`}>
                     <Icon className="w-4 h-4" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900">{activity.message}</p>
-                    <p className="text-xs text-gray-500">{activity.time}</p>
+                    <p className="text-xs text-gray-500">{formatRelativeTime(activity.createdAt)}</p>
                   </div>
                 </div>
               );

@@ -20,6 +20,7 @@ const customerRoutes = require('./routes/customers');
 const tripRoutes = require('./routes/trips');
 const bookingRoutes = require('./routes/bookings');
 const saleRoutes = require('./routes/sales');
+const activityRoutes = require('./routes/activities');
 const dashboardRoutes = require('./routes/dashboard');
 
 const app = express();
@@ -73,6 +74,7 @@ app.use('/api/customers', customerRoutes);
 app.use('/api/trips', tripRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/sales', saleRoutes);
+app.use('/api/activities', activityRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
 // Middleware de tratamento de erros
