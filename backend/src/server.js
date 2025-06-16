@@ -27,7 +27,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Configuração de rota segura
-app.set('trust proxy', true);
+app.set('trust proxy', 1);
 
 // Middleware de segurança
 app.use(helmet());
@@ -61,7 +61,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'OK',
-    message: 'ZapChat Tur API está funcionando',
+    message: 'ZapTur API está funcionando',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV
   });
