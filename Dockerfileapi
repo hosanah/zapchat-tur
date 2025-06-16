@@ -36,7 +36,7 @@ RUN mkdir -p ./database && \
 
 # Variáveis de ambiente padrão (podem ser sobrescritas pelo EasyPanel)
 ENV PORT=3001 \
-    DATABASE_URL="file:/app/database/database.sqlite" \
+    DATABASE_URL="file:/app/src/database/database.sqlite" \
     NODE_ENV="production"
 
 # Executar como usuário seguro
