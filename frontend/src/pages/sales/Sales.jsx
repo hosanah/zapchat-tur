@@ -142,6 +142,7 @@ const Sales = () => {
     fetchVehicles();
     fetchSellers();
     fetchStats();
+    fetchTrips();
   }, [currentPage, searchTerm, statusFilter, paymentStatusFilter]);
 
   const fetchTrips = async () => {
@@ -210,7 +211,7 @@ const Sales = () => {
   const loadCustomerOptions = async (inputValue) => {
     try {
       const response = await api.get("/customers", { params: { search: inputValue } });
-      const customers = response.data.data.customers || [];
+      const customers = response.data.customers || [];
       return customers.map(c => ({ value: c.id, label: `${c.firstName} ${c.lastName} - ${c.email || c.phone}` }));
     } catch (error) {
       console.error("Erro ao buscar clientes:", error);

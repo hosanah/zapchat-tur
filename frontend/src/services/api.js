@@ -294,6 +294,7 @@ export const bookingService = {
 // Serviços de atividades
 export const activityService = {
   getRecent: (params) => api.get('/activities/recent', { params }),
+};  
 export const dashboardService = {
   getStats: () => api.get('/dashboard/stats'),
 };
