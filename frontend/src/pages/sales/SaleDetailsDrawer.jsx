@@ -36,8 +36,11 @@ const formatCurrency = (value) =>
     value || 0
   );
 
-const formatDate = (dateString) =>
-  dateString ? new Date(dateString).toLocaleDateString('pt-BR') : '-';
+const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString + 'T00:00:00');
+    return date.toLocaleDateString('pt-BR');
+  };
 
 const calculateDaysLeft = (dateString) => {
   if (!dateString) return null;
@@ -281,7 +284,6 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [] }) => {
         <DrawerHeader className="border-b px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50">
           <div className="flex justify-between items-center">
             <div>
-              <p className="text-sm text-blue-600 font-medium">Venda #{sale.id || sale.sale_number}</p>
               <DrawerTitle className="text-2xl font-bold text-gray-800">
                 Detalhes da Venda
               </DrawerTitle>
@@ -300,32 +302,46 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [] }) => {
         </DrawerHeader>
         
         <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(100vh-140px)]">
-          {/* Card de Resumo */}
-          <div className="bg-blue-50 rounded-xl p-4 mb-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <StatItem 
-                icon={<DollarSign className="h-5 w-5 text-green-500" />}
-                label="Total"
-                value={formatCurrency(sale.total_amount)}
-                valueClassName="text-xl font-bold text-green-600"
+          {/* Card de Clientes */}
+          <Card className="overflow-hidden border-amber-100">
+            <CardHeader className="bg-amber-50 border-b border-amber-100 py-3">
+              <CardTitle className="flex items-center gap-2 text-amber-700">
+                <FileText className="w-5 h-5 text-amber-600" /> Informações dos Clientes ({customers.length + 1})
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 grid grid-cols-1 gap-y-3">
+              <InfoItem
+                icon={<User className="w-4 h-4 text-blue-500" />}
+                label="Cliente Responsável"                
               />
-              <StatItem 
-                icon={<Calendar className="h-5 w-5 text-blue-500" />}
-                label="Data da Venda"
-                value={formatDate(sale.sale_date)}
-              />
-              <StatItem 
-                icon={<User className="h-5 w-5 text-purple-500" />}
-                label="Cliente"
-                value={`${sale.customer?.first_name || ''} ${sale.customer?.last_name || ''}`}
-              />
-              <StatItem 
-                icon={<MapPin className="h-5 w-5 text-amber-500" />}
-                label="Passeio"
-                value={sale.trip?.title || "-"}
-              />
-            </div>
-          </div>
+              <div className="space-y-3">
+                  <div key={sale.customer.id} className="flex items-center gap-3 p-2 hover:bg-amber-50 rounded-lg transition-colors">
+                      <div>
+                        <p className="font-medium">{sale.customer.firstName} {sale.customer.lastName}</p>
+                        {sale.customer.email && <p className="text-xs text-gray-500">{sale.customer.email}</p>}
+                        {sale.customer.phone && <p className="text-xs text-gray-500">{sale.customer.phone}</p>}
+                      </div>
+                    </div>
+                </div>
+              {otherCustomers.length > 0 && (
+                <InfoItem
+                  icon={<Users className="w-4 h-4 text-amber-500" />}
+                  label="Outros Clientes"
+                />
+              )}
+              <div className="space-y-3">
+                  {customers.map((sc) => (
+                    <div key={sc.id} className="flex items-center gap-3 p-2 hover:bg-amber-50 rounded-lg transition-colors">
+                      <div>
+                        <p className="font-medium">{sc.customer.first_name} {sc.customer.last_name}</p>
+                        {sc.customer.email && <p className="text-xs text-gray-500">{sc.customer.email}</p>}
+                        {sc.customer.phone && <p className="text-xs text-gray-500">{sc.customer.phone}</p>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+            </CardContent>
+          </Card>
 
           {/* Card de Informações da Venda */}
           <Card className="overflow-hidden border-blue-100">
@@ -337,18 +353,14 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [] }) => {
             <CardContent className="p-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
               <InfoItem
                 icon={<User className="w-4 h-4 text-blue-500" />}
-                label="Cliente Responsável"
-                value={`${sale.customer?.first_name || ''} ${sale.customer?.last_name || ''}`}
+                label="Data da Venda"
+                value={formatDate(sale.sale_date)}
               />
-              {otherCustomers.length > 0 && (
-                <InfoItem
-                  icon={<Users className="w-4 h-4 text-amber-500" />}
-                  label="Outros Clientes"
-                  value={otherCustomers
-                    .map((sc) => `${sc.customer.first_name} ${sc.customer.last_name}`)
-                    .join(', ')}
-                />
-              )}
+              <InfoItem
+                icon={<User className="w-4 h-4 text-blue-500" />}
+                label="Data de Execução"
+                value={formatDate(sale.sale_date)}
+              />              
               {sale.seller && (
                 <InfoItem 
                   icon={<UserCheck className="w-4 h-4 text-indigo-500" />}
@@ -425,13 +437,6 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [] }) => {
                     value={<PaymentStatusBadge status={sale.payment_status} />}
                   />
                 </div>
-                
-                <div className="w-full md:w-40 flex items-center justify-center">
-                  <SimplePieChart 
-                    paid={sale.payment_status === 'pago' ? sale.total_amount : (sale.payment_status === 'parcial' ? sale.total_amount * 0.5 : 0)}
-                    total={sale.total_amount}
-                  />
-                </div>
               </div>
             </CardContent>
           </Card>
@@ -466,7 +471,7 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [] }) => {
                 />
                 <TimelineItem 
                   date={sale.delivery_date}
-                  label="Entrega"
+                  label="Execução"
                   icon={<CheckCircle />}
                   status="upcoming"
                   daysLeft={calculateDaysLeft(sale.delivery_date)}
@@ -474,34 +479,6 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [] }) => {
               </Timeline>
             </CardContent>
           </Card>
-
-          {/* Card de Participantes */}
-          {customers.length > 0 && (
-            <Card className="overflow-hidden border-amber-100">
-              <CardHeader className="bg-amber-50 border-b border-amber-100 py-3">
-                <CardTitle className="flex items-center gap-2 text-amber-700">
-                  <Users className="w-5 h-5 text-amber-600" /> Participantes ({customers.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4">
-                <div className="space-y-3">
-                  {customers.map((sc) => (
-                    <div key={sc.id} className="flex items-center gap-3 p-2 hover:bg-amber-50 rounded-lg transition-colors">
-                      <Avatar 
-                        name={`${sc.customer.first_name} ${sc.customer.last_name}`}
-                        className="bg-amber-100 text-amber-600"
-                      />
-                      <div>
-                        <p className="font-medium">{sc.customer.first_name} {sc.customer.last_name}</p>
-                        {sc.customer.email && <p className="text-xs text-gray-500">{sc.customer.email}</p>}
-                        {sc.customer.phone && <p className="text-xs text-gray-500">{sc.customer.phone}</p>}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
 
           {/* Card de Observações */}
           {sale.notes && (

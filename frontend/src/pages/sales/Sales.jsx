@@ -252,7 +252,7 @@ const Sales = () => {
   const fetchSaleCustomers = async (saleId) => {
     try {
       const response = await api.get(`/sales/${saleId}/customers`);
-      setSaleCustomers(response.data.data || []);
+      setSaleCustomers(response.data || []);
     } catch (error) {
       console.error('Erro ao buscar clientes da venda:', error);
     }
