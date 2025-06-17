@@ -26,7 +26,8 @@ import {
   Users,
   CalendarCheck,
   Car,
-  UserCheck
+  UserCheck,
+  UserPlus
 } from 'lucide-react';
 
 const Sales = () => {
@@ -382,6 +383,18 @@ const Sales = () => {
     setShowModal(true);
   };
 
+  const openAddCustomerModal = (sale) => {
+    setSelectedSale(sale);
+    setNewCustomer({
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      birthDate: ''
+    });
+    setShowAddCustomerModal(true);
+  };
+
   const resetForm = () => {
     setFormData({
       trip_id: '',
@@ -706,6 +719,13 @@ const Sales = () => {
                           title="Editar"
                         >
                           <Edit className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={() => openAddCustomerModal(sale)}
+                          className="text-green-600 hover:text-green-900"
+                          title="Adicionar Cliente"
+                        >
+                          <UserPlus className="h-5 w-5" />
                         </button>
                         <button
                           onClick={() => handleDelete(sale.id)}
