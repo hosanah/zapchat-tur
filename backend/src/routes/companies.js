@@ -8,19 +8,22 @@ const { authenticate, authorize, requireMaster } = require('../middleware/auth')
 router.use(authenticate);
 
 // Listar todas as empresas (apenas masters podem ver todas)
-router.get('/', 
+router.get('/',
+  requireMaster,
   companyValidations.validateQuery,
   CompanyController.getAll
 );
 
 // Obter empresa por ID
-router.get('/:id', 
+router.get('/:id',
+  requireMaster,
   companyValidations.validateId,
   CompanyController.getById
 );
 
 // Obter estatísticas da empresa
-router.get('/:id/stats', 
+router.get('/:id/stats',
+  requireMaster,
   companyValidations.validateId,
   CompanyController.getStats
 );

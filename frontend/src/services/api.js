@@ -207,7 +207,7 @@ export const companyService = {
   create: (data) => api.post('/companies', data),
   update: (id, data) => api.put(`/companies/${id}`, data),
   delete: (id) => api.delete(`/companies/${id}`),
-  updateStatus: (id, status) => api.patch(`/companies/${id}/status`, { status }),
+  updateStatus: (id) => api.patch(`/companies/${id}/toggle-status`),
   getStats: (id) => api.get(`/companies/${id}/stats`),
 };
 
