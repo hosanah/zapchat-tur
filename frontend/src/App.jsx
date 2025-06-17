@@ -20,14 +20,9 @@ import Customers from './pages/customers/Customers';
 import Trips from './pages/trips/Trips';
 import Sales from './pages/sales/Sales';
 import UsersPage from './pages/users/Users';
+import Companies from './pages/companies/Companies';
 
-// Placeholder components for other pages
-const Companies = () => (
-  <div className="bg-white rounded-lg shadow-card p-6">
-    <h2 className="text-2xl font-bold text-gray-900 mb-4">Empresas</h2>
-    <p className="text-gray-600">Página de gestão de empresas em desenvolvimento...</p>
-  </div>
-);
+// Placeholder component for bookings
 
 const Bookings = () => (
   <div className="bg-white rounded-lg shadow-card p-6">
@@ -63,14 +58,14 @@ const AppContent = () => {
             
             {/* Master only routes */}
             <Route path="companies" element={
-              <ProtectedRoute requiredRole="master">
+              <ProtectedRoute requireRoles={["master"]}>
                 <Companies />
               </ProtectedRoute>
             } />
             
             {/* Admin and Master routes */}
             <Route path="users" element={
-              <ProtectedRoute requiredRole={["admin", "master"]}>
+              <ProtectedRoute requireRoles={["admin", "master"]}>
                 <UsersPage />
               </ProtectedRoute>
             } />
