@@ -46,6 +46,8 @@ const Sales = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [paymentStatusFilter, setPaymentStatusFilter] = useState('');
+  const [startDateFilter, setStartDateFilter] = useState('');
+  const [endDateFilter, setEndDateFilter] = useState('');
   const [stats, setStats] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -144,7 +146,7 @@ const Sales = () => {
     fetchSellers();
     fetchStats();
     fetchTrips();
-  }, [currentPage, searchTerm, statusFilter, paymentStatusFilter]);
+  }, [currentPage, searchTerm, statusFilter, paymentStatusFilter, startDateFilter, endDateFilter]);
 
   const fetchTrips = async () => {
     try {
@@ -198,6 +200,8 @@ const Sales = () => {
       if (searchTerm) params.append('search', searchTerm);
       if (statusFilter) params.append('status', statusFilter);
       if (paymentStatusFilter) params.append('payment_status', paymentStatusFilter);
+      if (startDateFilter) params.append('start_date', startDateFilter);
+      if (endDateFilter) params.append('end_date', endDateFilter);
 
       const response = await api.get(`/sales?${params}`);
       setSales(response.data.sales);
@@ -576,26 +580,44 @@ const Sales = () => {
                 ))}
               </select>
             </div>
-            <div className="w-full sm:w-48">
-              <select
-                value={paymentStatusFilter}
-                onChange={(e) => setPaymentStatusFilter(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent"
-              >
-                <option value="">Pagamento</option>
-                {paymentStatusOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <button
-              onClick={() => {
-                setSearchTerm('');
-                setStatusFilter('');
-                setPaymentStatusFilter('');
-              }}
+              <div className="w-full sm:w-48">
+                <select
+                  value={paymentStatusFilter}
+                  onChange={(e) => setPaymentStatusFilter(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent"
+                >
+                  <option value="">Pagamento</option>
+                  {paymentStatusOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="w-full sm:w-40">
+                <input
+                  type="date"
+                  value={startDateFilter}
+                  onChange={(e) => setStartDateFilter(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent"
+                />
+              </div>
+              <div className="w-full sm:w-40">
+                <input
+                  type="date"
+                  value={endDateFilter}
+                  onChange={(e) => setEndDateFilter(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent"
+                />
+              </div>
+              <button
+                onClick={() => {
+                  setSearchTerm('');
+                  setStatusFilter('');
+                  setPaymentStatusFilter('');
+                  setStartDateFilter('');
+                  setEndDateFilter('');
+                }}
               className="btn-secondary flex items-center gap-2"
             >
               <Filter className="h-5 w-5" />
