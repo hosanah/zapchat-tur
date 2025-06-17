@@ -42,6 +42,7 @@ const Sales = () => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState('create');
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedSale, setSelectedSale] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -351,7 +352,7 @@ const Sales = () => {
       resetForm();
       setSaleCustomers([]);
       setSelectedCustomerOption(null);
-    } else if ((mode === 'edit' || mode === 'view') && sale) {
+    } else if (mode === 'edit' && sale) {
       setFormData({
         trip_id: sale.trip_id || '',
         driver_id: sale.driver_id || '',
@@ -403,6 +404,23 @@ const Sales = () => {
       birthDate: ''
     });
     setShowAddCustomerModal(true);
+  };
+
+  const fetchSaleDetails = async (id) => {
+    try {
+      const res = await api.get(`/sales/${id}`);
+      return res.data?.data || res.data;
+    } catch (error) {
+      console.error('Erro ao buscar venda:', error);
+      return null;
+    }
+  };
+
+  const openDetailsModal = async (sale) => {
+    const details = await fetchSaleDetails(sale.id);
+    if (details) setSelectedSale(details);
+    fetchSaleCustomers(sale.id);
+    setShowDetailsModal(true);
   };
 
   const resetForm = () => {
@@ -736,7 +754,7 @@ const Sales = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end space-x-2">
                         <button
-                          onClick={() => openModal('view', sale)}
+                          onClick={() => openDetailsModal(sale)}
                           className="text-blue-600 hover:text-blue-900"
                           title="Visualizar"
                         >
@@ -822,6 +840,60 @@ const Sales = () => {
         </div>
       )}
 
+      {/* Modal de Detalhes da Venda */}
+      {showDetailsModal && selectedSale && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="flex justify-between items-center pb-4 mb-4 border-b border-gray-200">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900">Detalhes da Venda</h3>
+                  <button onClick={() => setShowDetailsModal(false)} className="text-gray-400 hover:text-gray-500">
+                    <X className="h-6 w-6" />
+                  </button>
+                </div>
+                <div className="space-y-4 text-sm">
+                  <div><span className="font-semibold">Venda:</span> {selectedSale.sale_number}</div>
+                  <div><span className="font-semibold">Cliente Responsável:</span> {selectedSale.customer?.first_name} {selectedSale.customer?.last_name}</div>
+                  <div><span className="font-semibold">Vendedor:</span> {selectedSale.seller?.first_name} {selectedSale.seller?.last_name}</div>
+                  {selectedSale.trip && (<div><span className="font-semibold">Passeio:</span> {selectedSale.trip.title}</div>)}
+                  {selectedSale.vehicle && (<div><span className="font-semibold">Veículo:</span> {selectedSale.vehicle.plate} - {selectedSale.vehicle.model}</div>)}
+                  {selectedSale.driver && (<div><span className="font-semibold">Motorista:</span> {selectedSale.driver.first_name} {selectedSale.driver.last_name}</div>)}
+                  {selectedSale.description && (<div><span className="font-semibold">Descrição:</span> {selectedSale.description}</div>)}
+                  <div><span className="font-semibold">Subtotal:</span> {formatCurrency(selectedSale.subtotal)}</div>
+                  <div><span className="font-semibold">Desconto:</span> {selectedSale.discount_percentage ? `${selectedSale.discount_percentage}% ` : ''}{formatCurrency(selectedSale.discount_amount)}</div>
+                  <div><span className="font-semibold">Impostos:</span> {formatCurrency(selectedSale.tax_amount)}</div>
+                  <div><span className="font-semibold">Total:</span> {formatCurrency(selectedSale.total_amount)}</div>
+                  {selectedSale.commission_percentage && (<div><span className="font-semibold">Comissão:</span> {selectedSale.commission_percentage}% ({formatCurrency(selectedSale.commission_amount)})</div>)}
+                  {selectedSale.payment_method && (<div><span className="font-semibold">Método de Pagamento:</span> {selectedSale.payment_method}</div>)}
+                  <div><span className="font-semibold">Status do Pagamento:</span> {selectedSale.payment_status}</div>
+                  <div><span className="font-semibold">Data da Venda:</span> {formatDate(selectedSale.sale_date)}</div>
+                  <div><span className="font-semibold">Vencimento:</span> {formatDate(selectedSale.due_date)}</div>
+                  <div><span className="font-semibold">Data do Pagamento:</span> {formatDate(selectedSale.payment_date)}</div>
+                  <div><span className="font-semibold">Data de Entrega:</span> {formatDate(selectedSale.delivery_date)}</div>
+                  {saleCustomers.length > 0 && (
+                    <div>
+                      <span className="font-semibold">Participantes:</span>
+                      <ul className="list-disc list-inside">
+                        {saleCustomers.map(sc => (
+                          <li key={sc.id}>{sc.customer.first_name} {sc.customer.last_name}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {selectedSale.notes && (<div><span className="font-semibold">Observações:</span> {selectedSale.notes}</div>)}
+                  {selectedSale.internal_notes && (<div><span className="font-semibold">Notas Internas:</span> {selectedSale.internal_notes}</div>)}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modal de Venda */}
       {showModal && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -836,7 +908,6 @@ const Sales = () => {
                   <h3 className="text-lg leading-6 font-medium text-gray-900">
                     {modalMode === 'create' && 'Nova Venda'}
                     {modalMode === 'edit' && 'Editar Venda'}
-                    {modalMode === 'view' && 'Detalhes da Venda'}
                   </h3>
                   <button
                     onClick={() => setShowModal(false)}
@@ -1252,15 +1323,13 @@ const Sales = () => {
                     >
                       Cancelar
                     </button>
-                    {modalMode !== 'view' && (
-                      <button
-                        type="submit"
-                        className="px-4 py-2 bg-zapchat-primary border border-transparent rounded-md text-sm font-medium text-white hover:bg-zapchat-medium"
-                      >
-                        {modalMode === 'create' ? 'Criar Venda' : 'Atualizar Venda'}
-                      </button>
-                    )}
-                  </div>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-zapchat-primary border border-transparent rounded-md text-sm font-medium text-white hover:bg-zapchat-medium"
+                    >
+                      {modalMode === 'create' ? 'Criar Venda' : 'Atualizar Venda'}
+                    </button>
+                 </div>
                 </form>
               </div>
             </div>
