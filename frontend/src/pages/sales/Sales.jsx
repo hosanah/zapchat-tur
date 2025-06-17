@@ -373,7 +373,13 @@ const Sales = () => {
         internal_notes: sale.internal_notes || ''
       });
       fetchSaleCustomers(sale.id);
-      if (sale.customer_id) {
+      if (sale.customer) {
+        const c = sale.customer;
+        setSelectedCustomerOption({
+          value: c.id,
+          label: `${c.firstName || c.first_name} ${c.lastName || c.last_name} - ${c.email || c.phone}`,
+        });
+      } else if (sale.customer_id) {
         fetchCustomerOptionById(sale.customer_id).then(setSelectedCustomerOption);
       } else {
         setSelectedCustomerOption(null);
