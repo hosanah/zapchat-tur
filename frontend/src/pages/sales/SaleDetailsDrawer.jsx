@@ -270,11 +270,13 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [] }) => {
     window.print();
   };
 
+  const otherCustomers = customers.filter((c) => !c.is_responsible);
+
   if (!sale) return null;
   
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction="right">
-      <DrawerContent className="w-full sm:max-w-lg p-0">
+      <DrawerContent className="w-full sm:max-w-lg p-0 bg-white">
         {/* Header com gradiente e informações principais */}
         <DrawerHeader className="border-b px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50">
           <div className="flex justify-between items-center">
@@ -333,11 +335,20 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [] }) => {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
-              <InfoItem 
+              <InfoItem
                 icon={<User className="w-4 h-4 text-blue-500" />}
                 label="Cliente Responsável"
                 value={`${sale.customer?.first_name || ''} ${sale.customer?.last_name || ''}`}
               />
+              {otherCustomers.length > 0 && (
+                <InfoItem
+                  icon={<Users className="w-4 h-4 text-amber-500" />}
+                  label="Outros Clientes"
+                  value={otherCustomers
+                    .map((sc) => `${sc.customer.first_name} ${sc.customer.last_name}`)
+                    .join(', ')}
+                />
+              )}
               {sale.seller && (
                 <InfoItem 
                   icon={<UserCheck className="w-4 h-4 text-indigo-500" />}
