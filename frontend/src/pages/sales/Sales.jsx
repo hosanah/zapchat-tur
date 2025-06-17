@@ -27,7 +27,8 @@ import {
   CalendarCheck,
   Car,
   UserCheck,
-  UserPlus
+  UserPlus,
+  Printer
 } from 'lucide-react';
 
 const Sales = () => {
@@ -43,6 +44,7 @@ const Sales = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState('create');
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [autoPrint, setAutoPrint] = useState(false);
   const [selectedSale, setSelectedSale] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -148,6 +150,16 @@ const Sales = () => {
     fetchStats();
     fetchTrips();
   }, [currentPage, searchTerm, statusFilter, paymentStatusFilter, startDateFilter, endDateFilter]);
+
+  useEffect(() => {
+    if (showDetailsModal && autoPrint) {
+      const timer = setTimeout(() => {
+        window.print();
+        setAutoPrint(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [showDetailsModal, autoPrint]);
 
   const fetchTrips = async () => {
     try {
@@ -421,6 +433,11 @@ const Sales = () => {
     if (details) setSelectedSale(details);
     fetchSaleCustomers(sale.id);
     setShowDetailsModal(true);
+  };
+
+  const handlePrintVoucher = async (sale) => {
+    await openDetailsModal(sale);
+    setAutoPrint(true);
   };
 
   const resetForm = () => {
@@ -759,6 +776,13 @@ const Sales = () => {
                           title="Visualizar"
                         >
                           <Eye className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={() => handlePrintVoucher(sale)}
+                          className="text-gray-600 hover:text-gray-900"
+                          title="Imprimir Voucher"
+                        >
+                          <Printer className="h-5 w-5" />
                         </button>
                         <button
                           onClick={() => openModal('edit', sale)}
