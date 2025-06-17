@@ -57,9 +57,19 @@ const Companies = () => {
       setEditing(null);
       resetForm();
       fetchCompanies();
-    } catch (err) {
-      console.error(err);
-      showError('Erro ao salvar empresa');
+    } catch (error) {
+      console.error('Erro ao salvar empresa:', error);
+    
+      const response = error.response?.data;
+    
+      if (response?.success === false && Array.isArray(response.details)) {
+        response.details.forEach((detail) => {
+          if (detail.msg) showError(detail.msg);
+        });
+      } else {
+        const errorMessage = response?.message || 'Erro ao salvar empresa';
+        showError(errorMessage);
+      }
     }
   };
 
@@ -228,10 +238,10 @@ const Companies = () => {
               />
               <div className="flex justify-end space-x-2">
                 <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 bg-gray-200 rounded-md flex items-center">
-                  <X className="w-4 h-4 mr-1" /> Cancelar
+                  <X className="w-5 h-5 mr-1" /> Cancelar
                 </button>
                 <button type="submit" className="px-4 py-2 bg-zapchat-primary text-white rounded-md flex items-center">
-                  <Save className="w-4 h-4 mr-1" /> Salvar
+                  <Save className="w-5 h-5 mr-1" /> Salvar
                 </button>
               </div>
             </form>
