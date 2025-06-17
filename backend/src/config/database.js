@@ -19,7 +19,7 @@ try {
 const config = {
   development: {
     dialect: 'sqlite',
-    storage: (process.env.NODE_ENV === 'production' && process.env.DB_STORAGE) || path.join(__dirname, '../database/zapchat_tur_dev.sqlite'),
+    storage: path.join(__dirname, '../database/zapchat_tur_dev.sqlite'),
     logging: console.log,
     define: {
       timestamps: true,
