@@ -39,7 +39,7 @@ const config = {
   },
   production: {
     dialect: 'sqlite',
-    storage: (process.env.NODE_ENV === 'production' && process.env.DB_STORAGE) || path.join(__dirname, '../database/zapchat_tur_dev.sqlite'),
+    storage: process.env.DB_STORAGE,
     logging: console.log,
     define: {
       timestamps: true,
@@ -61,7 +61,7 @@ async function initializeDatabase() {
     await sequelize.authenticate();
     console.log('✅ Conexão com banco de dados estabelecida com sucesso.');
 
-    if (process.env.NODE_ENV === 'development' && process.env.DB_RECREATE_FORCE === 'true') {
+    if (process.env.DB_RECREATE_FORCE === 'true') {
       await sequelize.sync({ force: true });
       console.log('🔁 Modelos sincronizados com `force: true`');
     }
