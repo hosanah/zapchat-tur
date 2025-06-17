@@ -3,6 +3,7 @@ import AuthContext from '@/contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import api from '../../services/api';
 import AsyncSelect from "react-select/async";
+import SaleDetailsDrawer from './SaleDetailsDrawer';
 import {
   DollarSign,
   Plus,
@@ -865,58 +866,12 @@ const Sales = () => {
       )}
 
       {/* Modal de Detalhes da Venda */}
-      {showDetailsModal && selectedSale && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-            </div>
-            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div className="flex justify-between items-center pb-4 mb-4 border-b border-gray-200">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900">Detalhes da Venda</h3>
-                  <button onClick={() => setShowDetailsModal(false)} className="text-gray-400 hover:text-gray-500">
-                    <X className="h-6 w-6" />
-                  </button>
-                </div>
-                <div className="space-y-4 text-sm">
-                  <div><span className="font-semibold">Venda:</span> {selectedSale.sale_number}</div>
-                  <div><span className="font-semibold">Cliente Responsável:</span> {selectedSale.customer?.first_name} {selectedSale.customer?.last_name}</div>
-                  <div><span className="font-semibold">Vendedor:</span> {selectedSale.seller?.first_name} {selectedSale.seller?.last_name}</div>
-                  {selectedSale.trip && (<div><span className="font-semibold">Passeio:</span> {selectedSale.trip.title}</div>)}
-                  {selectedSale.vehicle && (<div><span className="font-semibold">Veículo:</span> {selectedSale.vehicle.plate} - {selectedSale.vehicle.model}</div>)}
-                  {selectedSale.driver && (<div><span className="font-semibold">Motorista:</span> {selectedSale.driver.first_name} {selectedSale.driver.last_name}</div>)}
-                  {selectedSale.description && (<div><span className="font-semibold">Descrição:</span> {selectedSale.description}</div>)}
-                  <div><span className="font-semibold">Subtotal:</span> {formatCurrency(selectedSale.subtotal)}</div>
-                  <div><span className="font-semibold">Desconto:</span> {selectedSale.discount_percentage ? `${selectedSale.discount_percentage}% ` : ''}{formatCurrency(selectedSale.discount_amount)}</div>
-                  <div><span className="font-semibold">Impostos:</span> {formatCurrency(selectedSale.tax_amount)}</div>
-                  <div><span className="font-semibold">Total:</span> {formatCurrency(selectedSale.total_amount)}</div>
-                  {selectedSale.commission_percentage && (<div><span className="font-semibold">Comissão:</span> {selectedSale.commission_percentage}% ({formatCurrency(selectedSale.commission_amount)})</div>)}
-                  {selectedSale.payment_method && (<div><span className="font-semibold">Método de Pagamento:</span> {selectedSale.payment_method}</div>)}
-                  <div><span className="font-semibold">Status do Pagamento:</span> {selectedSale.payment_status}</div>
-                  <div><span className="font-semibold">Data da Venda:</span> {formatDate(selectedSale.sale_date)}</div>
-                  <div><span className="font-semibold">Vencimento:</span> {formatDate(selectedSale.due_date)}</div>
-                  <div><span className="font-semibold">Data do Pagamento:</span> {formatDate(selectedSale.payment_date)}</div>
-                  <div><span className="font-semibold">Data de Entrega:</span> {formatDate(selectedSale.delivery_date)}</div>
-                  {saleCustomers.length > 0 && (
-                    <div>
-                      <span className="font-semibold">Participantes:</span>
-                      <ul className="list-disc list-inside">
-                        {saleCustomers.map(sc => (
-                          <li key={sc.id}>{sc.customer.first_name} {sc.customer.last_name}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {selectedSale.notes && (<div><span className="font-semibold">Observações:</span> {selectedSale.notes}</div>)}
-                  {selectedSale.internal_notes && (<div><span className="font-semibold">Notas Internas:</span> {selectedSale.internal_notes}</div>)}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <SaleDetailsDrawer
+        open={showDetailsModal && !!selectedSale}
+        onOpenChange={setShowDetailsModal}
+        sale={selectedSale}
+        customers={saleCustomers}
+      />
 
       {/* Modal de Venda */}
       {showModal && (
