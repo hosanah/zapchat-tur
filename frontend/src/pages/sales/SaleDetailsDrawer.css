@@ -1,0 +1,73 @@
+/* Estilos adicionais para o SaleDetailsDrawer */
+.drawer-content {
+  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card {
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.timeline-dot {
+  transition: background-color 300ms ease;
+}
+
+.stat-item {
+  transition: all 200ms ease;
+}
+
+.stat-item:hover {
+  background-color: rgba(255, 255, 255, 0.6);
+}
+
+.pie-chart-container {
+  position: relative;
+  width: 100px;
+  height: 100px;
+}
+
+.pie-chart-circle {
+  transition: stroke-dashoffset 1s ease-in-out;
+  transform: rotate(-90deg);
+  transform-origin: center;
+}
+
+@media print {
+  .drawer-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  
+  .drawer-close-button {
+    display: none;
+  }
+  
+  .card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+
+@media (max-width: 640px) {
+  .stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .value-layout {
+    flex-direction: column;
+  }
+  
+  .pie-chart-container {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto;
+  }
+}

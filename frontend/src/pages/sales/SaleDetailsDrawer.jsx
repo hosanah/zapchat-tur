@@ -13,175 +13,514 @@ import {
   CardTitle,
   CardContent,
 } from '@/components/ui/card';
-import { FileText, CreditCard, Calendar, Users, User } from 'lucide-react';
+import { 
+  FileText, 
+  CreditCard, 
+  Calendar, 
+  Users, 
+  User, 
+  DollarSign, 
+  MapPin, 
+  Car, 
+  UserCheck, 
+  Clock, 
+  CheckCircle, 
+  X, 
+  AlertCircle,
+  Printer
+} from 'lucide-react';
+import './SaleDetailsDrawer.css';
 
 const formatCurrency = (value) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
     value || 0
   );
+
 const formatDate = (dateString) =>
   dateString ? new Date(dateString).toLocaleDateString('pt-BR') : '-';
 
+const calculateDaysLeft = (dateString) => {
+  if (!dateString) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const targetDate = new Date(dateString);
+  targetDate.setHours(0, 0, 0, 0);
+  const diffTime = targetDate - today;
+  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+};
+
+// Status Badge Component
+const StatusBadge = ({ status }) => {
+  const statusConfig = {
+    orcamento: { color: 'bg-gray-100 text-gray-800 border-gray-200', label: 'Orçamento' },
+    pendente: { color: 'bg-yellow-100 text-yellow-800 border-yellow-200', label: 'Pendente' },
+    confirmada: { color: 'bg-blue-100 text-blue-800 border-blue-200', label: 'Confirmada' },
+    paga: { color: 'bg-green-100 text-green-800 border-green-200', label: 'Paga' },
+    cancelada: { color: 'bg-red-100 text-red-800 border-red-200', label: 'Cancelada' },
+    reembolsada: { color: 'bg-purple-100 text-purple-800 border-purple-200', label: 'Reembolsada' }
+  };
+  
+  const config = statusConfig[status] || statusConfig.pendente;
+  
+  return (
+    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border ${config.color}`}>
+      <span className="text-xs font-medium">{config.label}</span>
+    </div>
+  );
+};
+
+// Payment Method Badge Component
+const PaymentMethodBadge = ({ method }) => {
+  const methodMap = {
+    dinheiro: 'Dinheiro',
+    cartao_credito: 'Cartão de Crédito',
+    cartao_debito: 'Cartão de Débito',
+    pix: 'PIX',
+    transferencia: 'Transferência',
+    boleto: 'Boleto',
+    parcelado: 'Parcelado',
+    outros: 'Outros'
+  };
+  
+  return <span>{methodMap[method] || method}</span>;
+};
+
+// Payment Status Badge Component
+const PaymentStatusBadge = ({ status }) => {
+  const statusConfig = {
+    pendente: { color: 'bg-yellow-100 text-yellow-800 border-yellow-200', label: 'Pendente' },
+    parcial: { color: 'bg-orange-100 text-orange-800 border-orange-200', label: 'Parcial' },
+    pago: { color: 'bg-green-100 text-green-800 border-green-200', label: 'Pago' },
+    atrasado: { color: 'bg-red-100 text-red-800 border-red-200', label: 'Atrasado' },
+    cancelado: { color: 'bg-gray-100 text-gray-800 border-gray-200', label: 'Cancelado' }
+  };
+  
+  const config = statusConfig[status] || statusConfig.pendente;
+  
+  return (
+    <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border ${config.color}`}>
+      <span className="text-xs font-medium">{config.label}</span>
+    </div>
+  );
+};
+
+// Priority Badge Component
+const PriorityBadge = ({ priority }) => {
+  const priorityConfig = {
+    baixa: { color: 'bg-green-100 text-green-800 border-green-200', label: 'Baixa' },
+    media: { color: 'bg-yellow-100 text-yellow-800 border-yellow-200', label: 'Média' },
+    alta: { color: 'bg-orange-100 text-orange-800 border-orange-200', label: 'Alta' },
+    urgente: { color: 'bg-red-100 text-red-800 border-red-200', label: 'Urgente' }
+  };
+  
+  const config = priorityConfig[priority] || priorityConfig.media;
+  
+  return (
+    <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border ${config.color}`}>
+      <span className="text-xs font-medium">{config.label}</span>
+    </div>
+  );
+};
+
+// Stat Item Component
+const StatItem = ({ icon, label, value, valueClassName = "font-bold text-gray-800" }) => {
+  return (
+    <div className="flex flex-col">
+      <div className="flex items-center gap-1.5 text-gray-500 text-sm mb-1">
+        {icon}
+        <span>{label}</span>
+      </div>
+      <div className={valueClassName}>{value}</div>
+    </div>
+  );
+};
+
+// Info Item Component
+const InfoItem = ({ icon, label, value }) => {
+  return (
+    <div className="flex items-start gap-2">
+      <div className="mt-0.5">{icon}</div>
+      <div>
+        <div className="text-xs text-gray-500">{label}</div>
+        <div className="font-medium">{value}</div>
+      </div>
+    </div>
+  );
+};
+
+// Value Item Component
+const ValueItem = ({ label, value, percentage, valueClassName = "font-medium" }) => {
+  return (
+    <div className="flex justify-between items-center">
+      <span className="text-gray-600">{label}</span>
+      <div className="flex items-center gap-2">
+        {percentage && <span className="text-xs text-gray-500">({percentage}%)</span>}
+        <span className={valueClassName}>{value}</span>
+      </div>
+    </div>
+  );
+};
+
+// Timeline Component
+const Timeline = ({ children }) => {
+  return (
+    <div className="relative pl-6 border-l-2 border-gray-200 space-y-6">
+      {children}
+    </div>
+  );
+};
+
+// Timeline Item Component
+const TimelineItem = ({ date, label, icon, status, daysLeft }) => {
+  const statusColors = {
+    completed: 'bg-green-500 border-green-500',
+    pending: 'bg-yellow-500 border-yellow-500',
+    upcoming: 'bg-blue-500 border-blue-500',
+    overdue: 'bg-red-500 border-red-500'
+  };
+  
+  return (
+    <div className="relative">
+      <div className={`absolute -left-[29px] w-5 h-5 rounded-full border-2 ${statusColors[status]}`}>
+        {icon && <div className="absolute inset-0 flex items-center justify-center text-white">{React.cloneElement(icon, { className: 'w-3 h-3' })}</div>}
+      </div>
+      <div>
+        <p className="font-medium">{label}</p>
+        <p className="text-sm text-gray-500">{formatDate(date)}</p>
+        {daysLeft !== undefined && (
+          <span className={`text-xs px-2 py-0.5 rounded-full ${
+            daysLeft < 0 ? 'bg-red-100 text-red-800' : 
+            daysLeft < 3 ? 'bg-yellow-100 text-yellow-800' : 
+            'bg-blue-100 text-blue-800'
+          }`}>
+            {daysLeft < 0 ? `${Math.abs(daysLeft)} dias atrasado` : 
+             daysLeft === 0 ? 'Hoje' : 
+             `Faltam ${daysLeft} dias`}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Avatar Component
+const Avatar = ({ name, className = "" }) => {
+  const initials = name
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .substring(0, 2);
+    
+  return (
+    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${className}`}>
+      {initials}
+    </div>
+  );
+};
+
+// Divider Component
+const Divider = () => <div className="border-t border-gray-200 my-3"></div>;
+
+// Expandable Text Component
+const ExpandableText = ({ text, maxLength = 100 }) => {
+  const [expanded, setExpanded] = React.useState(false);
+  
+  if (text.length <= maxLength) return <p className="text-sm">{text}</p>;
+  
+  return (
+    <div>
+      <p className="text-sm">
+        {expanded ? text : `${text.substring(0, maxLength)}...`}
+      </p>
+      <button 
+        onClick={() => setExpanded(!expanded)}
+        className="text-xs text-blue-600 hover:text-blue-800 mt-1"
+      >
+        {expanded ? 'Ver menos' : 'Ver mais'}
+      </button>
+    </div>
+  );
+};
+
+// Simple Pie Chart Component (CSS-based)
+const SimplePieChart = ({ paid, total }) => {
+  const percentage = total > 0 ? (paid / total) * 100 : 0;
+  
+  return (
+    <div className="relative w-24 h-24">
+      <div className="absolute inset-0 rounded-full border-8 border-gray-100"></div>
+      <div 
+        className="absolute inset-0 rounded-full border-8 border-blue-500 border-t-transparent border-r-transparent"
+        style={{ 
+          transform: `rotate(${percentage * 3.6}deg)`,
+          transition: 'transform 1s ease-out'
+        }}
+      ></div>
+      <div className="absolute inset-0 flex items-center justify-center flex-col">
+        <span className="text-xs text-gray-500">Pago</span>
+        <span className="text-sm font-bold">{Math.round(percentage)}%</span>
+      </div>
+    </div>
+  );
+};
+
 const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [] }) => {
+  const handlePrint = () => {
+    window.print();
+  };
+
   if (!sale) return null;
+  
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction="right">
       <DrawerContent className="w-full sm:max-w-lg p-0">
-        <DrawerHeader className="border-b px-6 py-4">
-          <DrawerTitle>Detalhes da Venda</DrawerTitle>
+        {/* Header com gradiente e informações principais */}
+        <DrawerHeader className="border-b px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50">
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="text-sm text-blue-600 font-medium">Venda #{sale.id || sale.sale_number}</p>
+              <DrawerTitle className="text-2xl font-bold text-gray-800">
+                Detalhes da Venda
+              </DrawerTitle>
+            </div>
+            <div className="flex items-center gap-2">
+              <StatusBadge status={sale.status} />
+              <button 
+                onClick={handlePrint}
+                className="p-2 rounded-full bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                aria-label="Imprimir"
+              >
+                <Printer className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
         </DrawerHeader>
-        <div className="p-6 space-y-4 overflow-y-auto max-h-[calc(100vh-140px)]">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="w-4 h-4" /> Venda {sale.sale_number}
+        
+        <div className="p-6 space-y-6 overflow-y-auto max-h-[calc(100vh-140px)]">
+          {/* Card de Resumo */}
+          <div className="bg-blue-50 rounded-xl p-4 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <StatItem 
+                icon={<DollarSign className="h-5 w-5 text-green-500" />}
+                label="Total"
+                value={formatCurrency(sale.total_amount)}
+                valueClassName="text-xl font-bold text-green-600"
+              />
+              <StatItem 
+                icon={<Calendar className="h-5 w-5 text-blue-500" />}
+                label="Data da Venda"
+                value={formatDate(sale.sale_date)}
+              />
+              <StatItem 
+                icon={<User className="h-5 w-5 text-purple-500" />}
+                label="Cliente"
+                value={`${sale.customer?.first_name || ''} ${sale.customer?.last_name || ''}`}
+              />
+              <StatItem 
+                icon={<MapPin className="h-5 w-5 text-amber-500" />}
+                label="Passeio"
+                value={sale.trip?.title || "-"}
+              />
+            </div>
+          </div>
+
+          {/* Card de Informações da Venda */}
+          <Card className="overflow-hidden border-blue-100">
+            <CardHeader className="bg-blue-50 border-b border-blue-100 py-3">
+              <CardTitle className="flex items-center gap-2 text-blue-700">
+                <FileText className="w-5 h-5 text-blue-600" /> Informações da Venda
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              <div>
-                <span className="font-semibold">Cliente Responsável:</span>{' '}
-                {sale.customer?.first_name} {sale.customer?.last_name}
-              </div>
+            <CardContent className="p-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+              <InfoItem 
+                icon={<User className="w-4 h-4 text-blue-500" />}
+                label="Cliente Responsável"
+                value={`${sale.customer?.first_name || ''} ${sale.customer?.last_name || ''}`}
+              />
               {sale.seller && (
-                <div>
-                  <span className="font-semibold">Vendedor:</span>{' '}
-                  {sale.seller.first_name} {sale.seller.last_name}
-                </div>
+                <InfoItem 
+                  icon={<UserCheck className="w-4 h-4 text-indigo-500" />}
+                  label="Vendedor"
+                  value={`${sale.seller.first_name || ''} ${sale.seller.last_name || ''}`}
+                />
               )}
               {sale.trip && (
-                <div>
-                  <span className="font-semibold">Passeio:</span> {sale.trip.title}
-                </div>
+                <InfoItem 
+                  icon={<MapPin className="w-4 h-4 text-amber-500" />}
+                  label="Passeio"
+                  value={sale.trip.title}
+                />
               )}
               {sale.vehicle && (
-                <div>
-                  <span className="font-semibold">Veículo:</span>{' '}
-                  {sale.vehicle.plate} - {sale.vehicle.model}
-                </div>
+                <InfoItem 
+                  icon={<Car className="w-4 h-4 text-emerald-500" />}
+                  label="Veículo"
+                  value={`${sale.vehicle.plate} - ${sale.vehicle.model}`}
+                />
               )}
               {sale.driver && (
-                <div>
-                  <span className="font-semibold">Motorista:</span>{' '}
-                  {sale.driver.first_name} {sale.driver.last_name}
-                </div>
+                <InfoItem 
+                  icon={<User className="w-4 h-4 text-violet-500" />}
+                  label="Motorista"
+                  value={`${sale.driver.first_name} ${sale.driver.last_name}`}
+                />
               )}
-              {sale.description && (
-                <div>
-                  <span className="font-semibold">Descrição:</span>{' '}
-                  {sale.description}
-                </div>
-              )}
+              <InfoItem 
+                icon={<AlertCircle className="w-4 h-4 text-blue-500" />}
+                label="Prioridade"
+                value={<PriorityBadge priority={sale.priority} />}
+              />
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CreditCard className="w-4 h-4" /> Valores
+          {/* Card de Valores */}
+          <Card className="overflow-hidden border-green-100">
+            <CardHeader className="bg-green-50 border-b border-green-100 py-3">
+              <CardTitle className="flex items-center gap-2 text-green-700">
+                <CreditCard className="w-5 h-5 text-green-600" /> Valores
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              <div>
-                <span className="font-semibold">Subtotal:</span>{' '}
-                {formatCurrency(sale.subtotal)}
-              </div>
-              <div>
-                <span className="font-semibold">Desconto:</span>{' '}
-                {sale.discount_percentage ? `${sale.discount_percentage}% ` : ''}
-                {formatCurrency(sale.discount_amount)}
-              </div>
-              <div>
-                <span className="font-semibold">Impostos:</span>{' '}
-                {formatCurrency(sale.tax_amount)}
-              </div>
-              <div>
-                <span className="font-semibold">Total:</span>{' '}
-                {formatCurrency(sale.total_amount)}
-              </div>
-              {sale.commission_percentage && (
-                <div>
-                  <span className="font-semibold">Comissão:</span>{' '}
-                  {sale.commission_percentage}% (
-                  {formatCurrency(sale.commission_amount)})
+            <CardContent className="p-4">
+              <div className="flex flex-col md:flex-row gap-6">
+                <div className="flex-1 space-y-3">
+                  <ValueItem 
+                    label="Subtotal"
+                    value={formatCurrency(sale.subtotal)}
+                  />
+                  <ValueItem 
+                    label="Desconto"
+                    value={formatCurrency(sale.discount_amount)}
+                    percentage={sale.discount_percentage}
+                    valueClassName="text-amber-600"
+                  />
+                  <ValueItem 
+                    label="Impostos"
+                    value={formatCurrency(sale.tax_amount)}
+                    valueClassName="text-gray-600"
+                  />
+                  <ValueItem 
+                    label="Total"
+                    value={formatCurrency(sale.total_amount)}
+                    valueClassName="text-lg font-bold text-green-600"
+                  />
+                  <Divider />
+                  <ValueItem 
+                    label="Método de Pagamento"
+                    value={<PaymentMethodBadge method={sale.payment_method} />}
+                  />
+                  <ValueItem 
+                    label="Status do Pagamento"
+                    value={<PaymentStatusBadge status={sale.payment_status} />}
+                  />
                 </div>
-              )}
-              {sale.payment_method && (
-                <div>
-                  <span className="font-semibold">Método de Pagamento:</span>{' '}
-                  {sale.payment_method}
+                
+                <div className="w-full md:w-40 flex items-center justify-center">
+                  <SimplePieChart 
+                    paid={sale.payment_status === 'pago' ? sale.total_amount : (sale.payment_status === 'parcial' ? sale.total_amount * 0.5 : 0)}
+                    total={sale.total_amount}
+                  />
                 </div>
-              )}
-              <div>
-                <span className="font-semibold">Status do Pagamento:</span>{' '}
-                {sale.payment_status}
               </div>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" /> Datas
+          {/* Card de Cronograma */}
+          <Card className="overflow-hidden border-purple-100">
+            <CardHeader className="bg-purple-50 border-b border-purple-100 py-3">
+              <CardTitle className="flex items-center gap-2 text-purple-700">
+                <Calendar className="w-5 h-5 text-purple-600" /> Cronograma
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              <div>
-                <span className="font-semibold">Data da Venda:</span>{' '}
-                {formatDate(sale.sale_date)}
-              </div>
-              <div>
-                <span className="font-semibold">Vencimento:</span>{' '}
-                {formatDate(sale.due_date)}
-              </div>
-              <div>
-                <span className="font-semibold">Data do Pagamento:</span>{' '}
-                {formatDate(sale.payment_date)}
-              </div>
-              <div>
-                <span className="font-semibold">Data de Entrega:</span>{' '}
-                {formatDate(sale.delivery_date)}
-              </div>
+            <CardContent className="p-4">
+              <Timeline>
+                <TimelineItem 
+                  date={sale.sale_date}
+                  label="Data da Venda"
+                  icon={<FileText />}
+                  status="completed"
+                />
+                <TimelineItem 
+                  date={sale.payment_date}
+                  label="Pagamento"
+                  icon={<CreditCard />}
+                  status={sale.payment_status === 'pago' ? 'completed' : 'pending'}
+                />
+                <TimelineItem 
+                  date={sale.due_date}
+                  label="Vencimento"
+                  icon={<AlertCircle />}
+                  status={new Date() > new Date(sale.due_date) ? 'overdue' : 'upcoming'}
+                  daysLeft={calculateDaysLeft(sale.due_date)}
+                />
+                <TimelineItem 
+                  date={sale.delivery_date}
+                  label="Entrega"
+                  icon={<CheckCircle />}
+                  status="upcoming"
+                  daysLeft={calculateDaysLeft(sale.delivery_date)}
+                />
+              </Timeline>
             </CardContent>
           </Card>
 
+          {/* Card de Participantes */}
           {customers.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="w-4 h-4" /> Participantes ({customers.length})
+            <Card className="overflow-hidden border-amber-100">
+              <CardHeader className="bg-amber-50 border-b border-amber-100 py-3">
+                <CardTitle className="flex items-center gap-2 text-amber-700">
+                  <Users className="w-5 h-5 text-amber-600" /> Participantes ({customers.length})
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2 text-sm">
-                {customers.map((sc) => (
-                  <div key={sc.id} className="flex items-center gap-2">
-                    <User className="w-4 h-4 text-zapchat-primary" />
-                    <span>
-                      {sc.customer.first_name} {sc.customer.last_name}
-                    </span>
-                  </div>
-                ))}
+              <CardContent className="p-4">
+                <div className="space-y-3">
+                  {customers.map((sc) => (
+                    <div key={sc.id} className="flex items-center gap-3 p-2 hover:bg-amber-50 rounded-lg transition-colors">
+                      <Avatar 
+                        name={`${sc.customer.first_name} ${sc.customer.last_name}`}
+                        className="bg-amber-100 text-amber-600"
+                      />
+                      <div>
+                        <p className="font-medium">{sc.customer.first_name} {sc.customer.last_name}</p>
+                        {sc.customer.email && <p className="text-xs text-gray-500">{sc.customer.email}</p>}
+                        {sc.customer.phone && <p className="text-xs text-gray-500">{sc.customer.phone}</p>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           )}
 
+          {/* Card de Observações */}
           {sale.notes && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Observações</CardTitle>
+            <Card className="overflow-hidden border-blue-100">
+              <CardHeader className="bg-blue-50 border-b border-blue-100 py-3">
+                <CardTitle className="flex items-center gap-2 text-blue-700">
+                  <FileText className="w-5 h-5 text-blue-600" /> Observações
+                </CardTitle>
               </CardHeader>
-              <CardContent className="text-sm">{sale.notes}</CardContent>
+              <CardContent className="p-4">
+                <ExpandableText text={sale.notes} maxLength={100} />
+              </CardContent>
             </Card>
           )}
 
+          {/* Card de Notas Internas */}
           {sale.internal_notes && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Notas Internas</CardTitle>
+            <Card className="overflow-hidden border-gray-100">
+              <CardHeader className="bg-gray-50 border-b border-gray-100 py-3">
+                <CardTitle className="flex items-center gap-2 text-gray-700">
+                  <FileText className="w-5 h-5 text-gray-600" /> Notas Internas
+                </CardTitle>
               </CardHeader>
-              <CardContent className="text-sm">{sale.internal_notes}</CardContent>
+              <CardContent className="p-4">
+                <ExpandableText text={sale.internal_notes} maxLength={100} />
+              </CardContent>
             </Card>
           )}
         </div>
+        
         <DrawerFooter className="border-t px-6 py-4">
           <DrawerClose className="px-4 py-2 bg-zapchat-primary text-white rounded-md hover:bg-zapchat-medium">
             Fechar
