@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import AuthContext from '@/contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
-import api from '../../services/api';
+import api, { saleService } from '../../services/api';
 import AsyncSelect from "react-select/async";
 import SaleDetailsDrawer from './SaleDetailsDrawer';
 import {
@@ -45,7 +45,6 @@ const Sales = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState('create');
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [autoPrint, setAutoPrint] = useState(false);
   const [selectedSale, setSelectedSale] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -152,15 +151,6 @@ const Sales = () => {
     fetchTrips();
   }, [currentPage, searchTerm, statusFilter, paymentStatusFilter, startDateFilter, endDateFilter]);
 
-  useEffect(() => {
-    if (showDetailsModal && autoPrint) {
-      const timer = setTimeout(() => {
-        window.print();
-        setAutoPrint(false);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [showDetailsModal, autoPrint]);
 
   const fetchTrips = async () => {
     try {
@@ -437,8 +427,21 @@ const Sales = () => {
   };
 
   const handlePrintVoucher = async (sale) => {
-    await openDetailsModal(sale);
-    setAutoPrint(true);
+    try {
+      const data = await saleService.downloadVoucher(sale.id);
+      const blob = new Blob([data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `voucher-${sale.sale_number}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Erro ao baixar voucher:', error);
+      showError('Não foi possível gerar o voucher');
+    }
   };
 
   const resetForm = () => {

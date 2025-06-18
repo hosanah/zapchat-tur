@@ -63,6 +63,9 @@ router.get('/:id/customers',
   SaleController.listCustomers
 );
 
+// GET /api/sales/:id/voucher - Gerar voucher em PDF
+router.get('/:id/voucher', SaleController.voucher);
+
 // POST /api/sales/:id/customers - Adicionar cliente à venda
 router.post('/:id/customers',
   addSaleCustomerValidation,

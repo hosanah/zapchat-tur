@@ -28,7 +28,7 @@ import {
   CheckCircle, 
   X, 
   AlertCircle,
-  Printer
+  
 } from 'lucide-react';
 import './SaleDetailsDrawer.css';
 
@@ -269,6 +269,7 @@ const SimplePieChart = ({ paid, total }) => {
   );
 };
 
+
 const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [], refreshCustomers }) => {
   const handlePrint = () => {
     window.print();
@@ -304,13 +305,6 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [], refreshCu
             </div>
             <div className="flex items-center gap-2">
               <StatusBadge status={sale.status} />
-              <button 
-                onClick={handlePrint}
-                className="p-2 rounded-full bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-                aria-label="Imprimir"
-              >
-                <Printer className="h-4 w-4" />
-              </button>
             </div>
           </div>
         </DrawerHeader>

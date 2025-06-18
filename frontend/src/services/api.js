@@ -280,6 +280,7 @@ export const saleService = {
   removeCustomer: (saleId, customerId) =>
     api.delete(`/sales/${saleId}/customers/${customerId}`),
   getStats: (params) => api.get('/sales/stats', { params }),
+  downloadVoucher: (id) => api.get(`/sales/${id}/voucher`, { responseType: 'blob' }),
 };
 
 // Serviços de reservas
