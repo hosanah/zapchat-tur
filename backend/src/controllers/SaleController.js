@@ -6,7 +6,7 @@ class SaleController {
   // Listar vendas com filtros e paginação
   static async index(req, res) {
     try {
-      
+
       const {
         page = 1,
         limit = 10,
@@ -26,7 +26,7 @@ class SaleController {
       const where = {};
 
       // Construir filtros
-      
+
       // Filtro por empresa (usuários comuns só veem da própria empresa)
       if (user.role !== 'master') {
         where.company_id = user.company_id;
@@ -184,7 +184,7 @@ class SaleController {
             as: 'users',
             attributes: ['id', 'first_name', 'email']
           }
-          ,{
+          , {
             model: User,
             as: 'seller',
             attributes: ['id', 'first_name', 'last_name', 'email'],
@@ -328,7 +328,7 @@ class SaleController {
             as: 'users',
             attributes: ['id', 'first_name', 'email']
           }
-          ,{
+          , {
             model: User,
             as: 'seller',
             attributes: ['id', 'first_name', 'last_name', 'email'],
@@ -465,7 +465,7 @@ class SaleController {
             as: 'users',
             attributes: ['id', 'first_name', 'email']
           }
-          ,{
+          , {
             model: User,
             as: 'seller',
             attributes: ['id', 'first_name', 'last_name', 'email'],
@@ -540,9 +540,9 @@ class SaleController {
 
       // Estatísticas gerais
       const totalSales = await Sale.count({ where });
-      
+
       const totalAmount = await Sale.sum('total_amount', { where });
-      
+
       const totalCommission = await Sale.sum('commission_amount', { where });
 
       // Vendas por status
@@ -700,7 +700,7 @@ class SaleController {
 
       const saleCustomers = await SaleCustomer.findAll({
         where: { sale_id: id },
-        include: [{ model: Customer, as: 'customer', attributes: ['id','first_name','last_name','email','phone','birthDate'] }]
+        include: [{ model: Customer, as: 'customer', attributes: ['id', 'first_name', 'last_name', 'email', 'phone', 'birthDate'] }]
       });
 
       res.json({ success: true, data: saleCustomers });
@@ -742,7 +742,7 @@ class SaleController {
 
       const saleCustomers = await SaleCustomer.findAll({
         where: { sale_id: id },
-        include: [{ model: Customer, as: 'customer', attributes: ['id','first_name','last_name','email','phone','birthDate'] }]
+        include: [{ model: Customer, as: 'customer', attributes: ['id', 'first_name', 'last_name', 'email', 'phone', 'birthDate'] }]
       });
 
       res.status(201).json({
@@ -807,51 +807,52 @@ class SaleController {
     } catch (error) {
       console.error('Erro ao gerar voucher:', error);
       res.status(500).json({ success: false, message: 'Erro interno do servidor', error: error.message });
-  // Remover cliente de uma venda
-  static async removeCustomer(req, res) {
-    try {
-      const { id, customer_id } = req.params;
-      const user = req.user;
-
-      const sale = await Sale.findByPk(id);
-      if (!sale || (user.role !== 'master' && sale.company_id !== user.company_id)) {
-        return res.status(404).json({
-          success: false,
-          message: 'Venda não encontrada'
-        });
       }
-
-      const relation = await SaleCustomer.findOne({
-        where: { sale_id: id, customer_id }
-      });
-
-      if (!relation) {
-        return res.status(404).json({
-          success: false,
-          message: 'Cliente não vinculado a esta venda'
-        });
-      }
-
-      if (relation.is_responsible) {
-        return res.status(400).json({
-          success: false,
-          message: 'Não é possível remover o cliente responsável pela venda'
-        });
-      }
-
-      await relation.destroy();
-
-      res.json({ success: true, message: 'Cliente removido com sucesso' });
-    } catch (error) {
-      console.error('Erro ao remover cliente da venda:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Erro interno do servidor',
-        error: error.message
-      });
     }
-  }
+    // Remover cliente de uma venda
+    static async removeCustomer(req, res) {
+      try {
+        const { id, customer_id } = req.params;
+        const user = req.user;
 
+        const sale = await Sale.findByPk(id);
+        if (!sale || (user.role !== 'master' && sale.company_id !== user.company_id)) {
+          return res.status(404).json({
+            success: false,
+            message: 'Venda não encontrada'
+          });
+        }
+
+        const relation = await SaleCustomer.findOne({
+          where: { sale_id: id, customer_id }
+        });
+
+        if (!relation) {
+          return res.status(404).json({
+            success: false,
+            message: 'Cliente não vinculado a esta venda'
+          });
+        }
+
+        if (relation.is_responsible) {
+          return res.status(400).json({
+            success: false,
+            message: 'Não é possível remover o cliente responsável pela venda'
+          });
+        }
+
+        await relation.destroy();
+
+        res.json({ success: true, message: 'Cliente removido com sucesso' });
+      } catch (error) {
+        console.error('Erro ao remover cliente da venda:', error);
+        res.status(500).json({
+          success: false,
+          message: 'Erro interno do servidor',
+          error: error.message
+        });
+      }
+    }
 }
 
 module.exports = SaleController;
