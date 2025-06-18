@@ -278,6 +278,7 @@ export const saleService = {
   getCustomers: (saleId) => api.get(`/sales/${saleId}/customers`),
   addCustomer: (saleId, data) => api.post(`/sales/${saleId}/customers`, data),
   getStats: (params) => api.get('/sales/stats', { params }),
+  downloadVoucher: (id) => api.get(`/sales/${id}/voucher`, { responseType: 'blob' }),
 };
 
 // Serviços de reservas

@@ -1,5 +1,6 @@
 const { Sale, Customer, Company, User, Trip, Vehicle, Booking, Driver, SaleCustomer } = require('../models');
 const { Op } = require('sequelize');
+const PDFDocument = require('pdfkit');
 
 class SaleController {
   // Listar vendas com filtros e paginação
@@ -756,6 +757,56 @@ class SaleController {
         message: 'Erro interno do servidor',
         error: error.message
       });
+    }
+  }
+
+  // Gerar voucher em PDF
+  static async voucher(req, res) {
+    try {
+      const { id } = req.params;
+      const user = req.user;
+
+      const sale = await Sale.findByPk(id, {
+        include: [
+          { model: Customer, as: 'customer', attributes: ['firstName', 'lastName'] },
+          { model: Company, as: 'company', attributes: ['name'] },
+          { model: Trip, as: 'trip', attributes: ['title'] },
+          {
+            model: SaleCustomer,
+            as: 'sale_customers',
+            include: [
+              { model: Customer, as: 'customer', attributes: ['firstName', 'lastName'] }
+            ]
+          }
+        ]
+      });
+
+      if (!sale || (user.role !== 'master' && sale.company_id !== user.company_id)) {
+        return res.status(404).json({ success: false, message: 'Venda não encontrada' });
+      }
+
+      const doc = new PDFDocument();
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="voucher-${sale.sale_number}.pdf"`);
+      doc.pipe(res);
+
+      doc.fontSize(18).text(`Voucher ${sale.sale_number}`, { align: 'center' });
+      doc.moveDown();
+      doc.fontSize(12);
+      if (sale.company) doc.text(`Empresa: ${sale.company.name}`);
+      if (sale.customer) doc.text(`Cliente: ${sale.customer.firstName} ${sale.customer.lastName}`);
+      if (sale.trip) doc.text(`Passeio: ${sale.trip.title}`);
+      if (sale.sale_date) doc.text(`Data: ${new Date(sale.sale_date).toLocaleDateString('pt-BR')}`);
+      doc.moveDown();
+      doc.fontSize(14).text('Clientes da venda:');
+      sale.sale_customers.forEach((sc, index) => {
+        doc.fontSize(12).text(`${index + 1}. ${sc.customer.firstName} ${sc.customer.lastName}`);
+      });
+
+      doc.end();
+    } catch (error) {
+      console.error('Erro ao gerar voucher:', error);
+      res.status(500).json({ success: false, message: 'Erro interno do servidor', error: error.message });
     }
   }
 
