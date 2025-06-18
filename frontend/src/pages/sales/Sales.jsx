@@ -871,6 +871,7 @@ const Sales = () => {
         onOpenChange={setShowDetailsModal}
         sale={selectedSale}
         customers={saleCustomers}
+        refreshCustomers={() => selectedSale && fetchSaleCustomers(selectedSale.id)}
       />
 
       {/* Modal de Venda */}
