@@ -1,4 +1,5 @@
 import React from 'react';
+import { saleService } from '../../services/api';
 import {
   Drawer,
   DrawerContent,
@@ -268,9 +269,26 @@ const SimplePieChart = ({ paid, total }) => {
   );
 };
 
-const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [] }) => {
+
+const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [], refreshCustomers }) => {
+  const handlePrint = () => {
+    window.print();
+  };
 
   const otherCustomers = customers.filter((c) => !c.is_responsible);
+
+  const handleRemove = async (customerId) => {
+    if (!sale) return;
+    if (!window.confirm('Remover este cliente da venda?')) return;
+    try {
+      await saleService.removeCustomer(sale.id, customerId);
+      if (typeof refreshCustomers === 'function') {
+        refreshCustomers();
+      }
+    } catch (error) {
+      console.error('Erro ao remover cliente:', error);
+    }
+  };
 
   if (!sale) return null;
   
@@ -321,12 +339,25 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [] }) => {
               )}
               <div className="space-y-3">
                   {customers.map((sc) => (
-                    <div key={sc.id} className="flex items-center gap-3 p-2 hover:bg-amber-50 rounded-lg transition-colors">
+                    <div
+                      key={sc.id}
+                      className="flex items-center gap-3 p-2 hover:bg-amber-50 rounded-lg transition-colors"
+                    >
                       <div>
                         <p className="font-medium">{sc.customer.first_name} {sc.customer.last_name}</p>
-                        {sc.customer.email && <p className="text-xs text-gray-500">{sc.customer.email}</p>}
-                        {sc.customer.phone && <p className="text-xs text-gray-500">{sc.customer.phone}</p>}
+                        {sc.customer.email && (
+                          <p className="text-xs text-gray-500">{sc.customer.email}</p>
+                        )}
+                        {sc.customer.phone && (
+                          <p className="text-xs text-gray-500">{sc.customer.phone}</p>
+                        )}
                       </div>
+                      <button
+                        className="ml-auto text-red-600 text-xs hover:underline"
+                        onClick={() => handleRemove(sc.customer_id || sc.customer.id)}
+                      >
+                        Remover
+                      </button>
                     </div>
                   ))}
                 </div>

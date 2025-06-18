@@ -277,6 +277,8 @@ export const saleService = {
   getById: (id) => api.get(`/sales/${id}`),
   getCustomers: (saleId) => api.get(`/sales/${saleId}/customers`),
   addCustomer: (saleId, data) => api.post(`/sales/${saleId}/customers`, data),
+  removeCustomer: (saleId, customerId) =>
+    api.delete(`/sales/${saleId}/customers/${customerId}`),
   getStats: (params) => api.get('/sales/stats', { params }),
   downloadVoucher: (id) => api.get(`/sales/${id}/voucher`, { responseType: 'blob' }),
 };

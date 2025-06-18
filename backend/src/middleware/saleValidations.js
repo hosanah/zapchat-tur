@@ -460,6 +460,16 @@ const listSaleCustomersValidation = [
     .withMessage('ID da venda deve ser um UUID válido'),
 ];
 
+// Validação para remover cliente da venda
+const removeSaleCustomerValidation = [
+  param('id')
+    .isUUID()
+    .withMessage('ID da venda deve ser um UUID válido'),
+  param('customer_id')
+    .isUUID()
+    .withMessage('ID do cliente deve ser um UUID válido'),
+];
+
 
 module.exports = {
   createSaleValidation,
@@ -470,6 +480,7 @@ module.exports = {
   getSalesByCustomerValidation,
   addSaleCustomerValidation,
   listSaleCustomersValidation,
+  removeSaleCustomerValidation,
 
 };
 

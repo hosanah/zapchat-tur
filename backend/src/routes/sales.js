@@ -11,7 +11,8 @@ const {
   listSalesValidation,
   getSalesByCustomerValidation,
   addSaleCustomerValidation,
-  listSaleCustomersValidation
+  listSaleCustomersValidation,
+  removeSaleCustomerValidation
 } = require('../middleware/saleValidations');
 
 // Middleware para verificar erros de validação
@@ -70,6 +71,13 @@ router.post('/:id/customers',
   addSaleCustomerValidation,
   checkValidationErrors,
   SaleController.addCustomer
+);
+
+// DELETE /api/sales/:id/customers/:customer_id - Remover cliente da venda
+router.delete('/:id/customers/:customer_id',
+  removeSaleCustomerValidation,
+  checkValidationErrors,
+  SaleController.removeCustomer
 );
 
 // POST /api/sales - Criar nova venda

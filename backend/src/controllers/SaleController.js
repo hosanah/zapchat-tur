@@ -807,6 +807,48 @@ class SaleController {
     } catch (error) {
       console.error('Erro ao gerar voucher:', error);
       res.status(500).json({ success: false, message: 'Erro interno do servidor', error: error.message });
+  // Remover cliente de uma venda
+  static async removeCustomer(req, res) {
+    try {
+      const { id, customer_id } = req.params;
+      const user = req.user;
+
+      const sale = await Sale.findByPk(id);
+      if (!sale || (user.role !== 'master' && sale.company_id !== user.company_id)) {
+        return res.status(404).json({
+          success: false,
+          message: 'Venda não encontrada'
+        });
+      }
+
+      const relation = await SaleCustomer.findOne({
+        where: { sale_id: id, customer_id }
+      });
+
+      if (!relation) {
+        return res.status(404).json({
+          success: false,
+          message: 'Cliente não vinculado a esta venda'
+        });
+      }
+
+      if (relation.is_responsible) {
+        return res.status(400).json({
+          success: false,
+          message: 'Não é possível remover o cliente responsável pela venda'
+        });
+      }
+
+      await relation.destroy();
+
+      res.json({ success: true, message: 'Cliente removido com sucesso' });
+    } catch (error) {
+      console.error('Erro ao remover cliente da venda:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Erro interno do servidor',
+        error: error.message
+      });
     }
   }
 
