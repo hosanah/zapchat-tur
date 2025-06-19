@@ -24,7 +24,7 @@ const SalePaymentsTable = ({ saleId, totalAmount }) => {
   const { showSuccess, showError } = useToast();
   const [payments, setPayments] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({ method: '', amount: '', date: '', notes: '' });
+  const [formData, setFormData] = useState({ payment_method: '', amount: '', date: '', notes: '' });
 
   const fetchPayments = async () => {
     if (!saleId) return;
@@ -51,18 +51,27 @@ const SalePaymentsTable = ({ saleId, totalAmount }) => {
     e.preventDefault();
     try {
       await salePaymentService.add(saleId, {
-        method: formData.method,
+        payment_method: formData.payment_method,
         amount: parseFloat(formData.amount),
         date: formData.date,
         notes: formData.notes,
       });
       showSuccess('Pagamento adicionado');
-      setFormData({ method: '', amount: '', date: '', notes: '' });
+      setFormData({ payment_method: '', amount: '', date: '', notes: '' });
       setShowModal(false);
       fetchPayments();
-    } catch (err) {
-      console.error(err);
-      showError(err.response?.data?.message || 'Erro ao adicionar pagamento');
+    } catch (error) {
+      console.error(error);
+      const response = error.response?.data;
+    
+      if (response?.success === false && Array.isArray(response.errors)) {
+        response.errors.forEach((detail) => {
+          if (detail.msg) showError(detail.msg);
+        });
+      } else {
+        const errorMessage = response?.message || 'Erro ao adicionar pagamento';
+        showError(errorMessage);
+      }
     }
   };
 
@@ -105,11 +114,11 @@ const SalePaymentsTable = ({ saleId, totalAmount }) => {
           {payments.map((p) => (
             <tr key={p.id}>
               <td className="px-3 py-2">
-                {paymentMethodOptions.find((o) => o.value === p.method)?.label || p.method}
+                {paymentMethodOptions.find((o) => o.value === p.payment_method)?.label || p.payment_method}
               </td>
               <td className="px-3 py-2 text-right">{formatCurrency(p.amount)}</td>
               <td className="px-3 py-2">
-                {p.date ? new Date(p.date).toLocaleDateString('pt-BR') : '-'}
+                {p.payment_date ? new Date(p.payment_date).toLocaleDateString('pt-BR') : '-'}
               </td>
               <td className="px-3 py-2">{p.notes || '-'}</td>
               <td className="px-3 py-2 text-right">
@@ -146,8 +155,8 @@ const SalePaymentsTable = ({ saleId, totalAmount }) => {
                 </label>
                 <select
                   required
-                  value={formData.method}
-                  onChange={(e) => setFormData({ ...formData, method: e.target.value })}
+                  value={formData.payment_method}
+                  onChange={(e) => setFormData({ ...formData, payment_method: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
                 >
                   <option value="">Selecione</option>

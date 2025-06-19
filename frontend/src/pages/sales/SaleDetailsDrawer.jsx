@@ -434,10 +434,6 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [], refreshCu
                   />
                   <Divider />
                   <SalePaymentsTable saleId={sale.id} totalAmount={sale.total_amount} />
-                  <ValueItem 
-                    label="Status do Pagamento"
-                    value={<PaymentStatusBadge status={sale.payment_status} />}
-                  />
                 </div>
               </div>
             </CardContent>
@@ -457,13 +453,6 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [], refreshCu
                   label="Data da Venda"
                   icon={<FileText />}
                   status="completed"
-                />
-                <TimelineItem 
-                  date={sale.due_date}
-                  label="Vencimento"
-                  icon={<AlertCircle />}
-                  status={new Date() > new Date(sale.due_date) ? 'overdue' : 'upcoming'}
-                  daysLeft={calculateDaysLeft(sale.due_date)}
                 />
                 <TimelineItem 
                   date={sale.delivery_date}
