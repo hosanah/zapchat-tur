@@ -25,12 +25,12 @@ import {
   Car, 
   UserCheck, 
   Clock, 
-  CheckCircle, 
-  X, 
+  CheckCircle,
   AlertCircle,
   
 } from 'lucide-react';
 import './SaleDetailsDrawer.css';
+import SalePaymentsTable from './SalePaymentsTable';
 
 const formatCurrency = (value) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
@@ -433,6 +433,7 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [], refreshCu
                     valueClassName="text-lg font-bold text-green-600"
                   />
                   <Divider />
+                  <SalePaymentsTable saleId={sale.id} totalAmount={sale.total_amount} />
                   <ValueItem 
                     label="Status do Pagamento"
                     value={<PaymentStatusBadge status={sale.payment_status} />}
@@ -456,12 +457,6 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [], refreshCu
                   label="Data da Venda"
                   icon={<FileText />}
                   status="completed"
-                />
-                <TimelineItem 
-                  date={sale.payment_date}
-                  label="Pagamento"
-                  icon={<CreditCard />}
-                  status={sale.payment_status === 'pago' ? 'completed' : 'pending'}
                 />
                 <TimelineItem 
                   date={sale.due_date}
