@@ -25,6 +25,7 @@ const saleRoutes = require('./routes/sales');
 const activityRoutes = require('./routes/activities');
 const dashboardRoutes = require('./routes/dashboard');
 const settingsRoutes = require('./routes/settings');
+const notificationRoutes = require('./routes/notifications');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -77,6 +78,7 @@ app.use('/api/sales', saleRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Middlewares de erro
 app.use(notFound);

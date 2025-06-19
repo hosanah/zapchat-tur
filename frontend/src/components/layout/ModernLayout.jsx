@@ -22,7 +22,8 @@ import {
   LogOut,
   ChevronDown,
   Sun,
-  Moon
+  Moon,
+  Contrast
 } from 'lucide-react';
 
 const ModernLayout = () => {
@@ -33,6 +34,10 @@ const ModernLayout = () => {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [highContrast, setHighContrast] = useState(() => {
+    const saved = localStorage.getItem('highContrast');
+    return saved ? saved === 'true' : false;
+  });
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -43,6 +48,11 @@ const ModernLayout = () => {
     if (saved === 'true') {
       setDarkMode(true);
       document.documentElement.classList.add('dark');
+    }
+    const hc = localStorage.getItem('highContrast');
+    if (hc === 'true') {
+      setHighContrast(true);
+      document.documentElement.classList.add('high-contrast');
     }
   }, []);
 
@@ -55,6 +65,16 @@ const ModernLayout = () => {
     }
     localStorage.setItem('darkMode', darkMode);
   }, [darkMode]);
+
+  // Aplicar classe high-contrast ao alterar
+  useEffect(() => {
+    if (highContrast) {
+      document.documentElement.classList.add('high-contrast');
+    } else {
+      document.documentElement.classList.remove('high-contrast');
+    }
+    localStorage.setItem('highContrast', highContrast);
+  }, [highContrast]);
 
   // Persistir estado do sidebar
   useEffect(() => {
@@ -191,7 +211,7 @@ const ModernLayout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={`min-h-screen bg-gray-50 ${highContrast ? 'contrast-bg' : ''}`}>
       {/* Sidebar */}
       <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl transform ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
@@ -335,11 +355,19 @@ const ModernLayout = () => {
               </div>
 
               {/* Theme Toggle */}
-              <button 
+              <button
                 onClick={() => setDarkMode(!darkMode)}
                 className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
+
+              {/* High Contrast Toggle */}
+              <button
+                onClick={() => setHighContrast(!highContrast)}
+                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <Contrast className={`w-5 h-5 ${highContrast ? 'text-zapchat-medium' : ''}`} />
               </button>
 
               {/* Notifications */}
