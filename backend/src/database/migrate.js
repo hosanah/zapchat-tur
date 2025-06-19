@@ -1,3 +1,6 @@
+const dotenv = require('dotenv');
+dotenv.config();
+
 const path = require('path');
 const { SequelizeStorage, Umzug } = require('umzug');
 const { sequelize } = require('../config/database');
@@ -28,3 +31,12 @@ async function runMigrations() {
 }
 
 module.exports = { runMigrations };
+
+if (require.main === module) {
+  runMigrations()
+    .then(() => process.exit(0))
+    .catch((err) => {
+      console.error('❌ Falha ao executar migrations:', err);
+      process.exit(1);
+    });
+}
