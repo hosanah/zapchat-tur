@@ -10,6 +10,7 @@ const Trip = require('./Trip');
 const Booking = require('./Booking');
 const Sale = require('./Sale');
 const SaleCustomer = require('./SaleCustomer');
+const SalePayment = require('./SalePayment');
 
 // Definir associações
 // Company associations
@@ -221,6 +222,16 @@ Vehicle.hasMany(Sale, {
   as: 'sales'
 });
 
+Sale.hasMany(SalePayment, {
+  foreignKey: 'sale_id',
+  as: 'payments'
+});
+
+SalePayment.belongsTo(Sale, {
+  foreignKey: 'sale_id',
+  as: 'sale'
+});
+
 
 module.exports = {
   sequelize,
@@ -232,6 +243,7 @@ module.exports = {
   Trip,
   Booking,
   Sale,
-  SaleCustomer
+  SaleCustomer,
+  SalePayment
 };
 
