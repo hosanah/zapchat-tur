@@ -1,7 +1,6 @@
 const { Sequelize } = require('sequelize');
 const path = require('path');
 const dotenv = require('dotenv');
-//const { runMigrations } = require('../database/migrate');
 dotenv.config();
 
 

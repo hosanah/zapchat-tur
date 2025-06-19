@@ -1266,6 +1266,7 @@ const Sales = () => {
                       </div>
                     </div>
                   </div>
+                  </div>
 
                   {/* Botões */}
                   <div className="mt-8 flex justify-end space-x-3">
