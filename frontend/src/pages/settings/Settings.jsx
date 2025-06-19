@@ -1,20 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { settingService } from '../../services/api';
-import { useToast } from '../../contexts/ToastContext';
-
-const Settings = () => {
-  const { showError, showSuccess } = useToast();
-  const [guidelines, setGuidelines] = useState('');
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        const res = await settingService.get();
-        setGuidelines(res.data?.setting?.guidelines || '');
-      } catch (err) {
-        console.error(err);
-        showError('Erro ao carregar configura\u00E7\u00F5es');
 import { settingsService } from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
 import { Input } from '@/components/ui/input';
@@ -34,45 +18,23 @@ const bufferToDataUrl = (buf, mime = 'image/png') => {
 const Settings = () => {
   const { showSuccess, showError } = useToast();
   const [guidelines, setGuidelines] = useState('');
-  const [logoPreview, setLogoPreview] = useState(null);
-  const [logoFile, setLogoFile] = useState(null);
+  const [logoPreview, setLogoPreview] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
       try {
         const res = await settingsService.get();
-        const setting = res.data?.setting;
-        if (setting) {
-          setGuidelines(setting.guidelines || '');
-          if (setting.logo) {
-            if (typeof setting.logo === 'string') {
-              setLogoPreview(setting.logo);
-            } else if (setting.logo.data) {
-              const url = bufferToDataUrl(setting.logo.data);
-              if (url) setLogoPreview(url);
-            }
+        const setting = res.data?.setting || {};
+        setGuidelines(setting.guidelines || '');
+        if (setting.logo) {
+          if (typeof setting.logo === 'string') {
+            setLogoPreview(setting.logo);
+          } else if (setting.logo.data) {
+            const url = bufferToDataUrl(setting.logo.data);
+            if (url) setLogoPreview(url);
           }
         }
-      } catch (err) {
-
-const Settings = () => {
-  const { showSuccess, showError } = useToast();
-  const [loading, setLoading] = useState(true);
-  const [formData, setFormData] = useState({
-    logo: '',
-    guidelines: ''
-  });
-
-  useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        const res = await settingsService.get();
-        const setting = res.data.setting || {};
-        setFormData({
-          logo: setting.logo || '',
-          guidelines: setting.guidelines || ''
-        });
       } catch (err) {
         console.error(err);
         showError('Erro ao carregar configurações');
@@ -80,86 +42,25 @@ const Settings = () => {
         setLoading(false);
       }
     };
-    fetchSettings();
-  }, [showError]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await settingService.update({ guidelines });
-      showSuccess('Configura\u00E7\u00F5es salvas');
-    } catch (err) {
-      console.error(err);
-      showError('Erro ao salvar configura\u00E7\u00F5es');
-    }
-  };
-
-  if (loading) {
-    return <div>Carregando...</div>;
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium mb-1">Diretrizes</label>
-        <textarea
-          value={guidelines}
-          onChange={(e) => setGuidelines(e.target.value)}
-          className="w-full border rounded px-3 py-2"
-        />
-      </div>
-      <button type="submit" className="px-4 py-2 bg-zapchat-medium text-white rounded">
-        Salvar
-      </button>
-    </form>
-  );
-};
-=======
     load();
   }, [showError]);
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+  const handleLogoChange = (e) => {
+    const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) {
       showError('Envie apenas arquivos de imagem');
       return;
     }
-    setLogoFile(file);
     const reader = new FileReader();
     reader.onloadend = () => setLogoPreview(reader.result);
     reader.readAsDataURL(file);
-    loadSettings();
-  }, [showError]);
-
-  const handleChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === 'logo' && files && files[0]) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData((prev) => ({ ...prev, logo: reader.result }));
-      };
-      reader.readAsDataURL(files[0]);
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (guidelines.trim().length < 5) {
-      showError('As diretrizes devem ter ao menos 5 caracteres');
-      return;
-    }
     try {
-      await settingsService.update({
-        logo: logoPreview || null,
-        guidelines,
-      });
-      showSuccess('Configurações salvas');
-    } catch (err) {
-    try {
-      await settingsService.update(formData);
+      await settingsService.update({ logo: logoPreview || null, guidelines });
       showSuccess('Configurações salvas');
     } catch (err) {
       console.error(err);
@@ -178,7 +79,7 @@ const Settings = () => {
           {logoPreview && (
             <img src={logoPreview} alt="Pré-visualização" className="h-24 mb-2 object-contain" />
           )}
-          <Input type="file" accept="image/*" onChange={handleFileChange} />
+          <Input type="file" accept="image/*" onChange={handleLogoChange} />
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Diretrizes</label>
@@ -195,40 +96,5 @@ const Settings = () => {
     </div>
   );
 };
-    <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-card p-6">
-      <h2 className="text-xl font-bold mb-4">Configurações</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">Logo</label>
-          <input
-            type="file"
-            name="logo"
-            accept="image/*"
-            onChange={handleChange}
-          />
-          {formData.logo && (
-            <img src={formData.logo} alt="Logo" className="h-20 mt-2" />
-          )}
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Diretrizes</label>
-          <textarea
-            name="guidelines"
-            value={formData.guidelines}
-            onChange={handleChange}
-            className="w-full border rounded px-3 py-2"
-            rows={6}
-          />
-        </div>
-        <div className="text-right">
-          <button
-            type="submit"
-            className="px-4 py-2 bg-zapchat-medium text-white rounded"
-          >
-            Salvar
-          </button>
-        </div>
-      </form>)
-
 
 export default Settings;
