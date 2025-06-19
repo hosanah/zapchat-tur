@@ -83,10 +83,6 @@ const createSaleValidation = [
     .isIn(['baixa', 'media', 'alta', 'urgente'])
     .withMessage('Prioridade deve ser: baixa, media, alta ou urgente'),
 
-  body('payment_method')
-    .optional()
-    .isIn(['dinheiro', 'cartao_credito', 'cartao_debito', 'pix', 'transferencia', 'boleto', 'parcelado', 'outros'])
-    .withMessage('Método de pagamento inválido'),
 
   body('payment_status')
     .optional()
@@ -254,10 +250,6 @@ const updateSaleValidation = [
     .isIn(['baixa', 'media', 'alta', 'urgente'])
     .withMessage('Prioridade deve ser: baixa, media, alta ou urgente'),
 
-  body('payment_method')
-    .optional()
-    .isIn(['dinheiro', 'cartao_credito', 'cartao_debito', 'pix', 'transferencia', 'boleto', 'parcelado', 'outros'])
-    .withMessage('Método de pagamento inválido'),
 
   body('payment_status')
     .optional()
