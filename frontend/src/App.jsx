@@ -24,6 +24,7 @@ import Companies from './pages/companies/Companies';
 import Profile from './pages/profile/Profile';
 import ChangePassword from './pages/profile/ChangePassword';
 import Settings from './pages/settings/Settings';
+import Notifications from './pages/notifications/Notifications';
 
 // Placeholder component for bookings
 
@@ -79,6 +80,7 @@ const AppContent = () => {
             <Route path="customers" element={<Customers />} />
             <Route path="trips" element={<Trips />} />
             <Route path="sales" element={<Sales />} />
+            <Route path="notifications" element={<Notifications />} />
             <Route path="bookings" element={<Bookings />} />
             <Route path="settings" element={<Settings />} />
             <Route path="profile" element={<Profile />} />
