@@ -279,6 +279,10 @@ export const saleService = {
   addCustomer: (saleId, data) => api.post(`/sales/${saleId}/customers`, data),
   removeCustomer: (saleId, customerId) =>
     api.delete(`/sales/${saleId}/customers/${customerId}`),
+  getPayments: (saleId) => api.get(`/sales/${saleId}/payments`),
+  addPayment: (saleId, data) => api.post(`/sales/${saleId}/payments`, data),
+  removePayment: (saleId, paymentId) =>
+    api.delete(`/sales/${saleId}/payments/${paymentId}`),
   getStats: (params) => api.get('/sales/stats', { params }),
   downloadVoucher: (id) => api.get(`/sales/${id}/voucher`, { responseType: 'blob' }),
 };
