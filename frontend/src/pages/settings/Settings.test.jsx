@@ -2,10 +2,10 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import Settings from './Settings';
 import { ToastProvider } from '../../contexts/ToastContext';
-import { settingService } from '../../services/api';
+import { settingsService } from '../../services/api';
 
 jest.mock('../../services/api', () => ({
-  settingService: {
+  settingsService: {
     get: jest.fn(),
     update: jest.fn(),
   },
@@ -19,18 +19,18 @@ const renderPage = () =>
   );
 
 test('fetches settings on mount', async () => {
-  settingService.get.mockResolvedValue({ data: { setting: { guidelines: 'foo' } } });
+  settingsService.get.mockResolvedValue({ data: { setting: { guidelines: 'foo' } } });
   renderPage();
-  expect(settingService.get).toHaveBeenCalled();
+  expect(settingsService.get).toHaveBeenCalled();
   await screen.findByDisplayValue('foo');
 });
 
 test('posts updated data on submit', async () => {
-  settingService.get.mockResolvedValue({ data: { setting: { guidelines: '' } } });
-  settingService.update.mockResolvedValue({});
+  settingsService.get.mockResolvedValue({ data: { setting: { guidelines: '' } } });
+  settingsService.update.mockResolvedValue({});
   renderPage();
   const textarea = await screen.findByRole('textbox');
   await userEvent.type(textarea, 'bar');
   await userEvent.click(screen.getByRole('button', { name: /salvar/i }));
-  expect(settingService.update).toHaveBeenCalledWith({ guidelines: 'bar' });
+  expect(settingsService.update).toHaveBeenCalledWith({ logo: null, guidelines: 'bar' });
 });
