@@ -310,6 +310,8 @@ export const bookingService = {
 export const settingsService = {
   get: () => api.get('/settings'),
   update: (data) => api.put('/settings', data),
+  create: (data) => api.post('/settings', data), 
+  remove: (id) => api.delete(`/settings/${id}`), 
 };
 
 // Serviços de atividades
