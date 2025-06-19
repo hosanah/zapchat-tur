@@ -83,6 +83,7 @@ const AppContent = () => {
             <Route path="profile" element={<Profile />} />
             <Route path="settings" element={<Settings />} />
             <Route path="change-password" element={<ChangePassword />} />
+            <Route path="settings" element={<Settings />} />
           </Route>
           
           {/* Catch all route */}
