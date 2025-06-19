@@ -30,7 +30,8 @@ const SalePaymentsTable = ({ saleId, totalAmount }) => {
     if (!saleId) return;
     try {
       const res = await salePaymentService.list(saleId);
-      setPayments(res.data?.data || res.data || res);
+      const list = res.data?.payments ?? res.payments ?? [];
+      setPayments(list);
     } catch (err) {
       console.error(err);
       showError('Erro ao buscar pagamentos');
@@ -41,7 +42,9 @@ const SalePaymentsTable = ({ saleId, totalAmount }) => {
     fetchPayments();
   }, [saleId]);
 
-  const totalPaid = payments.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+  const totalPaid = Array.isArray(payments)
+    ? payments.reduce((sum, p) => sum + parseFloat(p.amount || 0), 0)
+    : 0;
   const remaining = (parseFloat(totalAmount) || 0) - totalPaid;
 
   const handleAdd = async (e) => {
