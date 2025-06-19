@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
-import { dashboardService } from '../../services/api';
+import { dashboardService, saleService, activityService } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
-import { activityService } from '../../services/api';
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
 import {
   Building2,
   Users,
@@ -38,6 +39,7 @@ const ModernDashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [recentActivities, setRecentActivities] = useState([]);
+  const [salesEvents, setSalesEvents] = useState([]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -66,6 +68,31 @@ const ModernDashboard = () => {
       }
     };
     loadActivities();
+  }, []);
+
+  useEffect(() => {
+    const loadSales = async () => {
+      try {
+        const start = new Date();
+        const end = new Date();
+        end.setMonth(end.getMonth() + 1);
+        const params = {
+          start_date: start.toISOString().slice(0, 10),
+          end_date: end.toISOString().slice(0, 10),
+          limit: 50,
+        };
+        const res = await saleService.list(params);
+        const events = res.data.sales.map((s) => ({
+          id: s.id,
+          title: s.trip ? s.trip.title : s.sale_number,
+          start: s.sale_date,
+        }));
+        setSalesEvents(events);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    loadSales();
   }, []);
 
   const quickActions = [
@@ -277,6 +304,17 @@ const ModernDashboard = () => {
               <div className="bg-zapchat-primary h-2 rounded-full" style={{ width: '87%' }}></div>
             </div>
           </div>
+        </div>
+
+        {/* Próximos Passeios */}
+        <div className="lg:col-span-3 bg-white rounded-lg shadow-card p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Próximos Passeios</h3>
+          <FullCalendar
+            plugins={[dayGridPlugin]}
+            initialView="dayGridMonth"
+            events={salesEvents}
+            height="auto"
+          />
         </div>
       </div>
     </div>

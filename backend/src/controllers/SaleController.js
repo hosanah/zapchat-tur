@@ -1,4 +1,4 @@
-const { Sale, Customer, Company, User, Trip, Vehicle, Booking, Driver, SaleCustomer } = require('../models');
+const { Sale, Customer, Company, User, Trip, Vehicle, Booking, Driver, SaleCustomer, GeneralSetting } = require('../models');
 const { Op } = require('sequelize');
 const PDFDocument = require('pdfkit');
 
@@ -791,6 +791,13 @@ class SaleController {
       sale.sale_customers.forEach((sc, index) => {
         doc.fontSize(12).text(`${index + 1}. ${sc.customer.firstName} ${sc.customer.lastName}`);
       });
+
+      const setting = await GeneralSetting.findOne({ where: { company_id: sale.company_id } });
+      if (setting && setting.guidelines) {
+        doc.moveDown();
+        doc.fontSize(14).text('Diretrizes da Empresa:');
+        doc.fontSize(12).text(setting.guidelines);
+      }
 
       doc.end();
     } catch (error) {

@@ -90,8 +90,6 @@ api.interceptors.response.use(
           localStorage.setItem('refreshToken', newRefreshToken);
         }
 
-        // Resetar timer de inatividade
-        window.dispatchEvent(new CustomEvent('auth:activity'));
 
         // Processar fila de requisições pendentes
         processQueue(null, accessToken);
@@ -175,8 +173,7 @@ api.interceptors.response.use(
             localStorage.setItem('refreshToken', newRefreshToken);
           }
 
-          // Resetar timer de inatividade
-          window.dispatchEvent(new CustomEvent('auth:activity'));
+
 
           // Repetir a requisição original com o novo token
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
@@ -221,6 +218,9 @@ export const userService = {
   updateStatus: (id, status) => api.patch(`/users/${id}/toggle-status`, { status }),
   getByCompany: (company_id, params) =>
     api.get('/users', { params: { company_id, ...params } }),
+  getProfile: () => api.get('/users/profile'),
+  updateProfile: (data) => api.put('/users/profile', data),
+  changePassword: (id, data) => api.patch(`/users/${id}/change-password`, data),
 };
 
 // Serviços de veículos
@@ -274,6 +274,7 @@ export const tripService = {
 
 // Serviços de vendas
 export const saleService = {
+  list: (params) => api.get('/sales', { params }),
   getById: (id) => api.get(`/sales/${id}`),
   getCustomers: (saleId) => api.get(`/sales/${saleId}/customers`),
   addCustomer: (saleId, data) => api.post(`/sales/${saleId}/customers`, data),
