@@ -48,7 +48,6 @@ const Sales = () => {
   const [selectedSale, setSelectedSale] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [paymentStatusFilter, setPaymentStatusFilter] = useState('');
   const [startDateFilter, setStartDateFilter] = useState('');
   const [endDateFilter, setEndDateFilter] = useState('');
   const [stats, setStats] = useState({});
@@ -95,9 +94,6 @@ const Sales = () => {
     tax_amount: 0,
     status: 'orcamento',
     priority: 'media',
-    payment_status: 'pendente',
-    payment_date: new Date().toISOString().split('T')[0],
-    due_date: new Date().toISOString().split('T')[0],
     installments: 1,
     sale_date: new Date().toISOString().split('T')[0],
     delivery_date: new Date().toISOString().split('T')[0],
@@ -115,13 +111,6 @@ const Sales = () => {
     { value: 'reembolsada', label: 'Reembolsada', color: 'bg-purple-100 text-purple-800' }
   ];
 
-  const paymentStatusOptions = [
-    { value: 'pendente', label: 'Pendente', color: 'bg-yellow-100 text-yellow-800' },
-    { value: 'parcial', label: 'Parcial', color: 'bg-orange-100 text-orange-800' },
-    { value: 'pago', label: 'Pago', color: 'bg-green-100 text-green-800' },
-    { value: 'atrasado', label: 'Atrasado', color: 'bg-red-100 text-red-800' },
-    { value: 'cancelado', label: 'Cancelado', color: 'bg-gray-100 text-gray-800' }
-  ];
 
   const priorityOptions = [
     { value: 'baixa', label: 'Baixa', color: 'bg-green-100 text-green-800' },
@@ -137,7 +126,7 @@ const Sales = () => {
     fetchSellers();
     fetchStats();
     fetchTrips();
-  }, [currentPage, searchTerm, statusFilter, paymentStatusFilter, startDateFilter, endDateFilter]);
+  }, [currentPage, searchTerm, statusFilter, startDateFilter, endDateFilter]);
 
 
   const fetchTrips = async () => {
@@ -191,7 +180,6 @@ const Sales = () => {
 
       if (searchTerm) params.append('search', searchTerm);
       if (statusFilter) params.append('status', statusFilter);
-      if (paymentStatusFilter) params.append('payment_status', paymentStatusFilter);
       if (startDateFilter) params.append('start_date', startDateFilter);
       if (endDateFilter) params.append('end_date', endDateFilter);
 
@@ -357,9 +345,6 @@ const Sales = () => {
         tax_amount: sale.tax_amount || 0,
         status: sale.status || 'orcamento',
         priority: sale.priority || 'media',
-        payment_status: sale.payment_status || 'pendente',
-        payment_date: sale.payment_date ? sale.payment_date.split('T')[0] : '',
-        due_date: sale.due_date ? sale.due_date.split('T')[0] : '',
         installments: sale.installments || 1,
         sale_date: sale.sale_date ? sale.sale_date.split('T')[0] : '',
         delivery_date: sale.delivery_date ? sale.delivery_date.split('T')[0] : '',
@@ -445,9 +430,6 @@ const Sales = () => {
       tax_amount: 0,
       status: 'orcamento',
       priority: 'media',
-      payment_status: 'pendente',
-      payment_date: new Date().toISOString().split('T')[0],
-      due_date: new Date().toISOString().split('T')[0],
       installments: 1,
       sale_date: new Date().toISOString().split('T')[0],
       delivery_date: new Date().toISOString().split('T')[0],
@@ -606,20 +588,6 @@ const Sales = () => {
                 ))}
               </select>
             </div>
-              <div className="w-full sm:w-48">
-                <select
-                  value={paymentStatusFilter}
-                  onChange={(e) => setPaymentStatusFilter(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent"
-                >
-                  <option value="">Pagamento</option>
-                  {paymentStatusOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
               <div className="w-full sm:w-40">
                 <input
                   type="date"
@@ -640,7 +608,6 @@ const Sales = () => {
                 onClick={() => {
                   setSearchTerm('');
                   setStatusFilter('');
-                  setPaymentStatusFilter('');
                   setStartDateFilter('');
                   setEndDateFilter('');
                 }}
@@ -676,9 +643,6 @@ const Sales = () => {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Pagamento
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Data
@@ -751,9 +715,6 @@ const Sales = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {getStatusBadge(sale.status, statusOptions)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {getStatusBadge(sale.payment_status, paymentStatusOptions)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {formatDate(sale.sale_date)}
@@ -1220,51 +1181,7 @@ const Sales = () => {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                      <div className="grid grid-cols-1 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Status do Pagamento
-                          </label>
-                          <select
-                            value={formData.payment_status}
-                            onChange={(e) => setFormData({ ...formData, payment_status: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
-                          >
-                            {paymentStatusOptions.map((option) => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Data de Pagamento
-                          </label>
-                          <input
-                            type="date"
-                            value={formData.payment_date}
-                            onChange={(e) => setFormData({ ...formData, payment_date: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Data de Vencimento
-                          </label>
-                          <input
-                            type="date"
-                            value={formData.due_date}
-                            onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
-                          />
-                        </div>
-                      </div>
-                    </div>
+                      
                   </div>
                   </div>
 
