@@ -233,6 +233,16 @@ Vehicle.hasMany(Sale, {
   as: 'sales'
 });
 
+Sale.hasMany(SalePayment, {
+  foreignKey: 'sale_id',
+  as: 'payments'
+});
+
+SalePayment.belongsTo(Sale, {
+  foreignKey: 'sale_id',
+  as: 'sale'
+});
+
 
 module.exports = {
   sequelize,

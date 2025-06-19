@@ -26,12 +26,18 @@ const SalePayment = sequelize.define('SalePayment', {
   },
   payment_method: {
     type: DataTypes.ENUM('dinheiro','cartao_credito','cartao_debito','pix','transferencia','boleto','cheque','outro'),
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false
+  },
+  payment_method: {
+    type: DataTypes.ENUM('dinheiro', 'cartao_credito', 'cartao_debito', 'pix', 'transferencia', 'boleto', 'cheque', 'outro'),
     allowNull: false
   },
   payment_date: {
     type: DataTypes.DATEONLY,
     allowNull: false,
     defaultValue: DataTypes.NOW
+    allowNull: false
   },
   notes: {
     type: DataTypes.TEXT,
@@ -41,6 +47,11 @@ const SalePayment = sequelize.define('SalePayment', {
   tableName: 'sale_payments',
   indexes:[
     { fields:['sale_id'] }
+}, {
+  tableName: 'sale_payments',
+  indexes: [
+    { fields: ['sale_id'] },
+    { fields: ['payment_method'] }
   ]
 });
 
