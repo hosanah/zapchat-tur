@@ -278,7 +278,7 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [], refreshCu
   
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction="right">
-      <DrawerContent className="w-full sm:max-w-lg p-0 bg-white">
+      <DrawerContent className="w-full sm:max-w-3xl p-0 bg-white">
         {/* Header com gradiente e informações principais */}
         <DrawerHeader className="border-b px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50">
           <div className="flex justify-between items-center">
