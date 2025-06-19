@@ -283,6 +283,12 @@ export const saleService = {
   downloadVoucher: (id) => api.get(`/sales/${id}/voucher`, { responseType: 'blob' }),
 };
 
+export const salePaymentService = {
+  list: (saleId) => api.get(`/sales/${saleId}/payments`),
+  add: (saleId, data) => api.post(`/sales/${saleId}/payments`, data),
+  remove: (saleId, paymentId) => api.delete(`/sales/${saleId}/payments/${paymentId}`),
+};
+
 // Serviços de reservas
 export const bookingService = {
   getAll: (params) => api.get('/bookings', { params }),

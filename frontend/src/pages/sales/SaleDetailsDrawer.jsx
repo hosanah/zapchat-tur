@@ -25,12 +25,12 @@ import {
   Car, 
   UserCheck, 
   Clock, 
-  CheckCircle, 
-  X, 
+  CheckCircle,
   AlertCircle,
   
 } from 'lucide-react';
 import './SaleDetailsDrawer.css';
+import SalePaymentsTable from './SalePaymentsTable';
 
 const formatCurrency = (value) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
@@ -73,40 +73,6 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-// Payment Method Badge Component
-const PaymentMethodBadge = ({ method }) => {
-  const methodMap = {
-    dinheiro: 'Dinheiro',
-    cartao_credito: 'Cartão de Crédito',
-    cartao_debito: 'Cartão de Débito',
-    pix: 'PIX',
-    transferencia: 'Transferência',
-    boleto: 'Boleto',
-    parcelado: 'Parcelado',
-    outros: 'Outros'
-  };
-  
-  return <span>{methodMap[method] || method}</span>;
-};
-
-// Payment Status Badge Component
-const PaymentStatusBadge = ({ status }) => {
-  const statusConfig = {
-    pendente: { color: 'bg-yellow-100 text-yellow-800 border-yellow-200', label: 'Pendente' },
-    parcial: { color: 'bg-orange-100 text-orange-800 border-orange-200', label: 'Parcial' },
-    pago: { color: 'bg-green-100 text-green-800 border-green-200', label: 'Pago' },
-    atrasado: { color: 'bg-red-100 text-red-800 border-red-200', label: 'Atrasado' },
-    cancelado: { color: 'bg-gray-100 text-gray-800 border-gray-200', label: 'Cancelado' }
-  };
-  
-  const config = statusConfig[status] || statusConfig.pendente;
-  
-  return (
-    <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border ${config.color}`}>
-      <span className="text-xs font-medium">{config.label}</span>
-    </div>
-  );
-};
 
 // Priority Badge Component
 const PriorityBadge = ({ priority }) => {
@@ -449,14 +415,7 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [], refreshCu
                     valueClassName="text-lg font-bold text-green-600"
                   />
                   <Divider />
-                  <ValueItem 
-                    label="Método de Pagamento"
-                    value={<PaymentMethodBadge method={sale.payment_method} />}
-                  />
-                  <ValueItem 
-                    label="Status do Pagamento"
-                    value={<PaymentStatusBadge status={sale.payment_status} />}
-                  />
+                  <SalePaymentsTable saleId={sale.id} totalAmount={sale.total_amount} />
                 </div>
               </div>
             </CardContent>
@@ -476,12 +435,6 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [], refreshCu
                   label="Data da Venda"
                   icon={<FileText />}
                   status="completed"
-                />
-                <TimelineItem 
-                  date={sale.payment_date}
-                  label="Pagamento"
-                  icon={<CreditCard />}
-                  status={sale.payment_status === 'pago' ? 'completed' : 'pending'}
                 />
                 <TimelineItem 
                   date={sale.due_date}

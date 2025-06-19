@@ -95,9 +95,6 @@ const Sales = () => {
     tax_amount: 0,
     status: 'orcamento',
     priority: 'media',
-    payment_method: '',
-    payment_status: 'pendente',
-    payment_date: new Date().toISOString().split('T')[0],
     due_date: new Date().toISOString().split('T')[0],
     installments: 1,
     sale_date: new Date().toISOString().split('T')[0],
@@ -129,17 +126,6 @@ const Sales = () => {
     { value: 'media', label: 'Média', color: 'bg-yellow-100 text-yellow-800' },
     { value: 'alta', label: 'Alta', color: 'bg-orange-100 text-orange-800' },
     { value: 'urgente', label: 'Urgente', color: 'bg-red-100 text-red-800' }
-  ];
-
-  const paymentMethodOptions = [
-    { value: 'dinheiro', label: 'Dinheiro' },
-    { value: 'cartao_credito', label: 'Cartão de Crédito' },
-    { value: 'cartao_debito', label: 'Cartão de Débito' },
-    { value: 'pix', label: 'PIX' },
-    { value: 'transferencia', label: 'Transferência' },
-    { value: 'boleto', label: 'Boleto' },
-    { value: 'parcelado', label: 'Parcelado' },
-    { value: 'outros', label: 'Outros' }
   ];
 
   useEffect(() => {
@@ -369,9 +355,6 @@ const Sales = () => {
         tax_amount: sale.tax_amount || 0,
         status: sale.status || 'orcamento',
         priority: sale.priority || 'media',
-        payment_method: sale.payment_method || '',
-        payment_status: sale.payment_status || 'pendente',
-        payment_date: sale.payment_date ? sale.payment_date.split('T')[0] : '',
         due_date: sale.due_date ? sale.due_date.split('T')[0] : '',
         installments: sale.installments || 1,
         sale_date: sale.sale_date ? sale.sale_date.split('T')[0] : '',
@@ -458,9 +441,6 @@ const Sales = () => {
       tax_amount: 0,
       status: 'orcamento',
       priority: 'media',
-      payment_method: '',
-      payment_status: 'pendente',
-      payment_date: new Date().toISOString().split('T')[0],
       due_date: new Date().toISOString().split('T')[0],
       installments: 1,
       sale_date: new Date().toISOString().split('T')[0],
@@ -1235,53 +1215,6 @@ const Sales = () => {
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Método de Pagamento
-                          </label>
-                          <select
-                            value={formData.payment_method}
-                            onChange={(e) => setFormData({ ...formData, payment_method: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
-                          >
-                            <option value="">Selecione</option>
-                            {paymentMethodOptions.map((option) => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Status do Pagamento
-                          </label>
-                          <select
-                            value={formData.payment_status}
-                            onChange={(e) => setFormData({ ...formData, payment_status: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
-                          >
-                            {paymentStatusOptions.map((option) => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Data de Pagamento
-                          </label>
-                          <input
-                            type="date"
-                            value={formData.payment_date}
-                            onChange={(e) => setFormData({ ...formData, payment_date: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
-                          />
-                        </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Data de Vencimento
