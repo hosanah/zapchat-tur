@@ -328,4 +328,10 @@ export const settingService = {
   update: (data) => api.put('/settings', data),
 };
 
+export const notificationService = {
+  list: () => api.get('/notifications'),
+  create: (data) => api.post('/notifications', data),
+  markRead: (id) => api.patch(`/notifications/${id}/read`),
+};
+
 export default api;

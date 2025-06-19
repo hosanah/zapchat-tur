@@ -12,6 +12,7 @@ const Sale = require('./Sale');
 const SaleCustomer = require('./SaleCustomer');
 const SalePayment = require('./SalePayment');
 const GeneralSetting = require('./GeneralSetting');
+const Notification = require('./Notification');
 
 // Definir associações
 // Company associations
@@ -71,6 +72,16 @@ User.hasMany(Sale, {
 User.hasMany(Sale, {
   foreignKey: 'seller_id',
   as: 'sales_as_seller'
+});
+
+User.hasMany(Notification, {
+  foreignKey: 'user_id',
+  as: 'notifications'
+});
+
+Notification.belongsTo(User, {
+  foreignKey: 'user_id',
+  as: 'user'
 });
 
 
@@ -257,6 +268,7 @@ module.exports = {
   Sale,
   SaleCustomer,
   SalePayment,
-  GeneralSetting
+  GeneralSetting,
+  Notification
 };
 
