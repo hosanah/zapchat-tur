@@ -14,11 +14,22 @@ class DashboardController {
         Customer.count({ where: companyFilter }),
         Trip.count({ where: companyFilter }),
         Booking.count({
-          include: [{ model: Trip, as: 'trip', where: companyFilter, required: true }]
+          include: [{ 
+            model: Trip, 
+            as: 'trip', 
+            where: companyFilter, 
+            required: true 
+          }]
         }),
         Booking.sum('total_amount', {
           where: { status: 'pago' },
-          include: [{ model: Trip, as: 'trip', where: companyFilter, required: true }]
+          include: [{ 
+            model: Trip, 
+            as: 'trip', 
+            where: companyFilter, 
+            required: true,
+            attributes: []
+          }]
         })
       ]);
 
