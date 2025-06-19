@@ -10,6 +10,8 @@ const Trip = require('./Trip');
 const Booking = require('./Booking');
 const Sale = require('./Sale');
 const SaleCustomer = require('./SaleCustomer');
+const SalePayment = require('./SalePayment');
+const GeneralSetting = require('./GeneralSetting');
 
 // Definir associações
 // Company associations
@@ -36,6 +38,16 @@ Company.hasMany(Customer, {
 Company.hasMany(Trip, {
   foreignKey: 'company_id',
   as: 'trips'
+});
+
+Company.hasOne(GeneralSetting, {
+  foreignKey: 'company_id',
+  as: 'general_setting'
+});
+
+GeneralSetting.belongsTo(Company, {
+  foreignKey: 'company_id',
+  as: 'company'
 });
 
 
@@ -205,6 +217,11 @@ SaleCustomer.belongsTo(Customer, {
   as: 'customer'
 });
 
+SalePayment.belongsTo(Sale, {
+  foreignKey: 'sale_id',
+  as: 'sale'
+});
+
 Customer.hasMany(SaleCustomer, {
   foreignKey: 'customer_id',
   as: 'sale_customers'
@@ -221,6 +238,12 @@ Vehicle.hasMany(Sale, {
   as: 'sales'
 });
 
+Sale.hasMany(SalePayment, {
+  foreignKey: 'sale_id',
+  as: 'payments'
+});
+
+
 
 module.exports = {
   sequelize,
@@ -232,6 +255,8 @@ module.exports = {
   Trip,
   Booking,
   Sale,
-  SaleCustomer
+  SaleCustomer,
+  SalePayment,
+  GeneralSetting
 };
 

@@ -36,25 +36,6 @@
   transform-origin: center;
 }
 
-@media print {
-  .drawer-content {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: auto;
-    overflow: visible;
-  }
-  
-  .drawer-close-button {
-    display: none;
-  }
-  
-  .card {
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-}
 
 @media (max-width: 640px) {
   .stat-grid {

@@ -1,11 +1,12 @@
-const { Sale, Customer, Company, User, Trip, Vehicle, Booking, Driver, SaleCustomer } = require('../models');
+const { Sale, Customer, Company, User, Trip, Vehicle, Booking, Driver, SaleCustomer, GeneralSetting } = require('../models');
 const { Op } = require('sequelize');
+const PDFDocument = require('pdfkit');
 
 class SaleController {
   // Listar vendas com filtros e paginação
   static async index(req, res) {
     try {
-      
+
       const {
         page = 1,
         limit = 10,
@@ -25,7 +26,7 @@ class SaleController {
       const where = {};
 
       // Construir filtros
-      
+
       // Filtro por empresa (usuários comuns só veem da própria empresa)
       if (user.role !== 'master') {
         where.company_id = user.company_id;
@@ -183,7 +184,7 @@ class SaleController {
             as: 'users',
             attributes: ['id', 'first_name', 'email']
           }
-          ,{
+          , {
             model: User,
             as: 'seller',
             attributes: ['id', 'first_name', 'last_name', 'email'],
@@ -217,8 +218,9 @@ class SaleController {
   static async store(req, res) {
     try {
       const user = req.user;
+      const { payment_method, ...bodyData } = req.body;
       const saleData = {
-        ...req.body,
+        ...bodyData,
         company_id: user.company_id,
         created_by: user.id
       };
@@ -327,7 +329,7 @@ class SaleController {
             as: 'users',
             attributes: ['id', 'first_name', 'email']
           }
-          ,{
+          , {
             model: User,
             as: 'seller',
             attributes: ['id', 'first_name', 'last_name', 'email'],
@@ -439,7 +441,8 @@ class SaleController {
         }
       }
 
-      await sale.update(req.body);
+      const { payment_method, ...updateData } = req.body;
+      await sale.update(updateData);
 
       // Buscar venda atualizada com relacionamentos
       const updatedSale = await Sale.findByPk(sale.id, {
@@ -464,7 +467,7 @@ class SaleController {
             as: 'users',
             attributes: ['id', 'first_name', 'email']
           }
-          ,{
+          , {
             model: User,
             as: 'seller',
             attributes: ['id', 'first_name', 'last_name', 'email'],
@@ -539,9 +542,9 @@ class SaleController {
 
       // Estatísticas gerais
       const totalSales = await Sale.count({ where });
-      
+
       const totalAmount = await Sale.sum('total_amount', { where });
-      
+
       const totalCommission = await Sale.sum('commission_amount', { where });
 
       // Vendas por status
@@ -556,17 +559,6 @@ class SaleController {
         raw: true
       });
 
-      // Vendas por método de pagamento
-      const salesByPaymentMethod = await Sale.findAll({
-        where: { ...where, payment_method: { [Op.not]: null } },
-        attributes: [
-          'payment_method',
-          [Sale.sequelize.fn('COUNT', Sale.sequelize.col('id')), 'count'],
-          [Sale.sequelize.fn('SUM', Sale.sequelize.col('total_amount')), 'total_amount']
-        ],
-        group: ['payment_method'],
-        raw: true
-      });
 
       // Vendas dos últimos 30 dias
       const thirtyDaysAgo = new Date();
@@ -592,8 +584,7 @@ class SaleController {
         total_commission: totalCommission || 0,
         recent_sales: recentSales || 0,
         recent_amount: recentAmount || 0,
-        by_status: salesByStatus,
-        by_payment_method: salesByPaymentMethod
+        by_status: salesByStatus
       };
     } catch (error) {
       console.error('Erro ao calcular estatísticas:', error);
@@ -603,8 +594,7 @@ class SaleController {
         total_commission: 0,
         recent_sales: 0,
         recent_amount: 0,
-        by_status: [],
-        by_payment_method: []
+        by_status: []
       };
     }
   }
@@ -699,7 +689,7 @@ class SaleController {
 
       const saleCustomers = await SaleCustomer.findAll({
         where: { sale_id: id },
-        include: [{ model: Customer, as: 'customer', attributes: ['id','first_name','last_name','email','phone','birthDate'] }]
+        include: [{ model: Customer, as: 'customer', attributes: ['id', 'first_name', 'last_name', 'email', 'phone', 'birthDate'] }]
       });
 
       res.json({ success: true, data: saleCustomers });
@@ -741,7 +731,7 @@ class SaleController {
 
       const saleCustomers = await SaleCustomer.findAll({
         where: { sale_id: id },
-        include: [{ model: Customer, as: 'customer', attributes: ['id','first_name','last_name','email','phone','birthDate'] }]
+        include: [{ model: Customer, as: 'customer', attributes: ['id', 'first_name', 'last_name', 'email', 'phone', 'birthDate'] }]
       });
 
       res.status(201).json({
@@ -759,6 +749,106 @@ class SaleController {
     }
   }
 
+  // Gerar voucher em PDF
+  static async voucher(req, res) {
+    try {
+      const { id } = req.params;
+      const user = req.user;
+
+      const sale = await Sale.findByPk(id, {
+        include: [
+          { model: Customer, as: 'customer', attributes: ['firstName', 'lastName'] },
+          { model: Company, as: 'company', attributes: ['name'] },
+          { model: Trip, as: 'trip', attributes: ['title'] },
+          {
+            model: SaleCustomer,
+            as: 'sale_customers',
+            include: [
+              { model: Customer, as: 'customer', attributes: ['firstName', 'lastName'] }
+            ]
+          }
+        ]
+      });
+
+      if (!sale || (user.role !== 'master' && sale.company_id !== user.company_id)) {
+        return res.status(404).json({ success: false, message: 'Venda não encontrada' });
+      }
+
+      const doc = new PDFDocument();
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="voucher-${sale.sale_number}.pdf"`);
+      doc.pipe(res);
+
+      doc.fontSize(18).text(`Voucher ${sale.sale_number}`, { align: 'center' });
+      doc.moveDown();
+      doc.fontSize(12);
+      if (sale.company) doc.text(`Empresa: ${sale.company.name}`);
+      if (sale.customer) doc.text(`Cliente: ${sale.customer.firstName} ${sale.customer.lastName}`);
+      if (sale.trip) doc.text(`Passeio: ${sale.trip.title}`);
+      if (sale.sale_date) doc.text(`Data: ${new Date(sale.sale_date).toLocaleDateString('pt-BR')}`);
+      doc.moveDown();
+      doc.fontSize(14).text('Clientes da venda:');
+      sale.sale_customers.forEach((sc, index) => {
+        doc.fontSize(12).text(`${index + 1}. ${sc.customer.firstName} ${sc.customer.lastName}`);
+      });
+
+      const setting = await GeneralSetting.findOne({ where: { company_id: sale.company_id } });
+      if (setting && setting.guidelines) {
+        doc.moveDown();
+        doc.fontSize(14).text('Diretrizes da Empresa:');
+        doc.fontSize(12).text(setting.guidelines);
+      }
+
+      doc.end();
+    } catch (error) {
+      console.error('Erro ao gerar voucher:', error);
+      res.status(500).json({ success: false, message: 'Erro interno do servidor', error: error.message });
+      }
+    }
+    // Remover cliente de uma venda
+    static async removeCustomer(req, res) {
+      try {
+        const { id, customer_id } = req.params;
+        const user = req.user;
+
+        const sale = await Sale.findByPk(id);
+        if (!sale || (user.role !== 'master' && sale.company_id !== user.company_id)) {
+          return res.status(404).json({
+            success: false,
+            message: 'Venda não encontrada'
+          });
+        }
+
+        const relation = await SaleCustomer.findOne({
+          where: { sale_id: id, customer_id }
+        });
+
+        if (!relation) {
+          return res.status(404).json({
+            success: false,
+            message: 'Cliente não vinculado a esta venda'
+          });
+        }
+
+        if (relation.is_responsible) {
+          return res.status(400).json({
+            success: false,
+            message: 'Não é possível remover o cliente responsável pela venda'
+          });
+        }
+
+        await relation.destroy();
+
+        res.json({ success: true, message: 'Cliente removido com sucesso' });
+      } catch (error) {
+        console.error('Erro ao remover cliente da venda:', error);
+        res.status(500).json({
+          success: false,
+          message: 'Erro interno do servidor',
+          error: error.message
+        });
+      }
+    }
 }
 
 module.exports = SaleController;

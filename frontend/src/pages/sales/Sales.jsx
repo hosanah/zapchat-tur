@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import AuthContext from '@/contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
-import api from '../../services/api';
+import api, { saleService } from '../../services/api';
 import AsyncSelect from "react-select/async";
 import SaleDetailsDrawer from './SaleDetailsDrawer';
 import {
@@ -45,11 +45,9 @@ const Sales = () => {
   const [showModal, setShowModal] = useState(false);
   const [modalMode, setModalMode] = useState('create');
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [autoPrint, setAutoPrint] = useState(false);
   const [selectedSale, setSelectedSale] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [paymentStatusFilter, setPaymentStatusFilter] = useState('');
   const [startDateFilter, setStartDateFilter] = useState('');
   const [endDateFilter, setEndDateFilter] = useState('');
   const [stats, setStats] = useState({});
@@ -96,10 +94,6 @@ const Sales = () => {
     tax_amount: 0,
     status: 'orcamento',
     priority: 'media',
-    payment_method: '',
-    payment_status: 'pendente',
-    payment_date: new Date().toISOString().split('T')[0],
-    due_date: new Date().toISOString().split('T')[0],
     installments: 1,
     sale_date: new Date().toISOString().split('T')[0],
     delivery_date: new Date().toISOString().split('T')[0],
@@ -117,30 +111,12 @@ const Sales = () => {
     { value: 'reembolsada', label: 'Reembolsada', color: 'bg-purple-100 text-purple-800' }
   ];
 
-  const paymentStatusOptions = [
-    { value: 'pendente', label: 'Pendente', color: 'bg-yellow-100 text-yellow-800' },
-    { value: 'parcial', label: 'Parcial', color: 'bg-orange-100 text-orange-800' },
-    { value: 'pago', label: 'Pago', color: 'bg-green-100 text-green-800' },
-    { value: 'atrasado', label: 'Atrasado', color: 'bg-red-100 text-red-800' },
-    { value: 'cancelado', label: 'Cancelado', color: 'bg-gray-100 text-gray-800' }
-  ];
 
   const priorityOptions = [
     { value: 'baixa', label: 'Baixa', color: 'bg-green-100 text-green-800' },
     { value: 'media', label: 'Média', color: 'bg-yellow-100 text-yellow-800' },
     { value: 'alta', label: 'Alta', color: 'bg-orange-100 text-orange-800' },
     { value: 'urgente', label: 'Urgente', color: 'bg-red-100 text-red-800' }
-  ];
-
-  const paymentMethodOptions = [
-    { value: 'dinheiro', label: 'Dinheiro' },
-    { value: 'cartao_credito', label: 'Cartão de Crédito' },
-    { value: 'cartao_debito', label: 'Cartão de Débito' },
-    { value: 'pix', label: 'PIX' },
-    { value: 'transferencia', label: 'Transferência' },
-    { value: 'boleto', label: 'Boleto' },
-    { value: 'parcelado', label: 'Parcelado' },
-    { value: 'outros', label: 'Outros' }
   ];
 
   useEffect(() => {
@@ -150,17 +126,8 @@ const Sales = () => {
     fetchSellers();
     fetchStats();
     fetchTrips();
-  }, [currentPage, searchTerm, statusFilter, paymentStatusFilter, startDateFilter, endDateFilter]);
+  }, [currentPage, searchTerm, statusFilter, startDateFilter, endDateFilter]);
 
-  useEffect(() => {
-    if (showDetailsModal && autoPrint) {
-      const timer = setTimeout(() => {
-        window.print();
-        setAutoPrint(false);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [showDetailsModal, autoPrint]);
 
   const fetchTrips = async () => {
     try {
@@ -213,7 +180,6 @@ const Sales = () => {
 
       if (searchTerm) params.append('search', searchTerm);
       if (statusFilter) params.append('status', statusFilter);
-      if (paymentStatusFilter) params.append('payment_status', paymentStatusFilter);
       if (startDateFilter) params.append('start_date', startDateFilter);
       if (endDateFilter) params.append('end_date', endDateFilter);
 
@@ -379,10 +345,6 @@ const Sales = () => {
         tax_amount: sale.tax_amount || 0,
         status: sale.status || 'orcamento',
         priority: sale.priority || 'media',
-        payment_method: sale.payment_method || '',
-        payment_status: sale.payment_status || 'pendente',
-        payment_date: sale.payment_date ? sale.payment_date.split('T')[0] : '',
-        due_date: sale.due_date ? sale.due_date.split('T')[0] : '',
         installments: sale.installments || 1,
         sale_date: sale.sale_date ? sale.sale_date.split('T')[0] : '',
         delivery_date: sale.delivery_date ? sale.delivery_date.split('T')[0] : '',
@@ -437,8 +399,21 @@ const Sales = () => {
   };
 
   const handlePrintVoucher = async (sale) => {
-    await openDetailsModal(sale);
-    setAutoPrint(true);
+    try {
+      const data = await saleService.downloadVoucher(sale.id);
+      const blob = new Blob([data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `voucher-${sale.sale_number}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Erro ao baixar voucher:', error);
+      showError('Não foi possível gerar o voucher');
+    }
   };
 
   const resetForm = () => {
@@ -455,10 +430,6 @@ const Sales = () => {
       tax_amount: 0,
       status: 'orcamento',
       priority: 'media',
-      payment_method: '',
-      payment_status: 'pendente',
-      payment_date: new Date().toISOString().split('T')[0],
-      due_date: new Date().toISOString().split('T')[0],
       installments: 1,
       sale_date: new Date().toISOString().split('T')[0],
       delivery_date: new Date().toISOString().split('T')[0],
@@ -617,20 +588,6 @@ const Sales = () => {
                 ))}
               </select>
             </div>
-              <div className="w-full sm:w-48">
-                <select
-                  value={paymentStatusFilter}
-                  onChange={(e) => setPaymentStatusFilter(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent"
-                >
-                  <option value="">Pagamento</option>
-                  {paymentStatusOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
               <div className="w-full sm:w-40">
                 <input
                   type="date"
@@ -651,7 +608,6 @@ const Sales = () => {
                 onClick={() => {
                   setSearchTerm('');
                   setStatusFilter('');
-                  setPaymentStatusFilter('');
                   setStartDateFilter('');
                   setEndDateFilter('');
                 }}
@@ -687,9 +643,6 @@ const Sales = () => {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Pagamento
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Data
@@ -762,9 +715,6 @@ const Sales = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {getStatusBadge(sale.status, statusOptions)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {getStatusBadge(sale.payment_status, paymentStatusOptions)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {formatDate(sale.sale_date)}
@@ -871,6 +821,7 @@ const Sales = () => {
         onOpenChange={setShowDetailsModal}
         sale={selectedSale}
         customers={saleCustomers}
+        refreshCustomers={() => selectedSale && fetchSaleCustomers(selectedSale.id)}
       />
 
       {/* Modal de Venda */}
@@ -1120,7 +1071,7 @@ const Sales = () => {
 
                     {/* Coluna 2 */}
                     <div className="space-y-6">
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Status
@@ -1155,7 +1106,7 @@ const Sales = () => {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Data da Venda
@@ -1194,7 +1145,7 @@ const Sales = () => {
                         />
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Desconto (R$)
@@ -1230,67 +1181,8 @@ const Sales = () => {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Método de Pagamento
-                          </label>
-                          <select
-                            value={formData.payment_method}
-                            onChange={(e) => setFormData({ ...formData, payment_method: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
-                          >
-                            <option value="">Selecione</option>
-                            {paymentMethodOptions.map((option) => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Status do Pagamento
-                          </label>
-                          <select
-                            value={formData.payment_status}
-                            onChange={(e) => setFormData({ ...formData, payment_status: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
-                          >
-                            {paymentStatusOptions.map((option) => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Data de Pagamento
-                          </label>
-                          <input
-                            type="date"
-                            value={formData.payment_date}
-                            onChange={(e) => setFormData({ ...formData, payment_date: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Data de Vencimento
-                          </label>
-                          <input
-                            type="date"
-                            value={formData.due_date}
-                            onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
-                          />
-                        </div>
-                      </div>
-                    </div>
+                      
+                  </div>
                   </div>
 
                   {/* Botões */}

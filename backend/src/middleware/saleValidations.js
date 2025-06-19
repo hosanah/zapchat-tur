@@ -83,10 +83,6 @@ const createSaleValidation = [
     .isIn(['baixa', 'media', 'alta', 'urgente'])
     .withMessage('Prioridade deve ser: baixa, media, alta ou urgente'),
 
-  body('payment_method')
-    .optional()
-    .isIn(['dinheiro', 'cartao_credito', 'cartao_debito', 'pix', 'transferencia', 'boleto', 'parcelado', 'outros'])
-    .withMessage('Método de pagamento inválido'),
 
   body('payment_status')
     .optional()
@@ -254,10 +250,6 @@ const updateSaleValidation = [
     .isIn(['baixa', 'media', 'alta', 'urgente'])
     .withMessage('Prioridade deve ser: baixa, media, alta ou urgente'),
 
-  body('payment_method')
-    .optional()
-    .isIn(['dinheiro', 'cartao_credito', 'cartao_debito', 'pix', 'transferencia', 'boleto', 'parcelado', 'outros'])
-    .withMessage('Método de pagamento inválido'),
 
   body('payment_status')
     .optional()
@@ -460,6 +452,16 @@ const listSaleCustomersValidation = [
     .withMessage('ID da venda deve ser um UUID válido'),
 ];
 
+// Validação para remover cliente da venda
+const removeSaleCustomerValidation = [
+  param('id')
+    .isUUID()
+    .withMessage('ID da venda deve ser um UUID válido'),
+  param('customer_id')
+    .isUUID()
+    .withMessage('ID do cliente deve ser um UUID válido'),
+];
+
 
 module.exports = {
   createSaleValidation,
@@ -470,6 +472,7 @@ module.exports = {
   getSalesByCustomerValidation,
   addSaleCustomerValidation,
   listSaleCustomersValidation,
+  removeSaleCustomerValidation,
 
 };
 

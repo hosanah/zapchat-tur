@@ -9,7 +9,6 @@ const { initializeDatabase } = require('./config/database');
 dotenv.config();
 
 const { sequelize } = require('./config/database');
-const { runMigrations } = require('./database/migrate');
 const errorHandler = require('./middleware/errorHandler');
 const notFound = require('./middleware/notFound');
 
@@ -25,6 +24,7 @@ const bookingRoutes = require('./routes/bookings');
 const saleRoutes = require('./routes/sales');
 const activityRoutes = require('./routes/activities');
 const dashboardRoutes = require('./routes/dashboard');
+const settingsRoutes = require('./routes/settings');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -76,6 +76,7 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/sales', saleRoutes);
 app.use('/api/activities', activityRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Middlewares de erro
 app.use(notFound);

@@ -17,6 +17,7 @@ import {
   Menu,
   X,
   Settings,
+  Key,
   LogOut,
   ChevronDown,
   Sun,
@@ -363,6 +364,16 @@ const ModernLayout = () => {
                     >
                       <UserCircle className="w-4 h-4 mr-3" />
                       Meu Perfil
+                    </button>
+                    <button
+                      onClick={() => {
+                        setUserMenuOpen(false);
+                        navigate('/change-password');
+                      }}
+                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      <Key className="w-4 h-4 mr-3" />
+                      Alterar Senha
                     </button>
                     <button
                       onClick={() => {

@@ -1,4 +1,5 @@
 import React from 'react';
+import { saleService } from '../../services/api';
 import {
   Drawer,
   DrawerContent,
@@ -24,12 +25,12 @@ import {
   Car, 
   UserCheck, 
   Clock, 
-  CheckCircle, 
-  X, 
+  CheckCircle,
   AlertCircle,
-  Printer
+  
 } from 'lucide-react';
 import './SaleDetailsDrawer.css';
+import SalePaymentsTable from './SalePaymentsTable';
 
 const formatCurrency = (value) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
@@ -70,22 +71,6 @@ const StatusBadge = ({ status }) => {
       <span className="text-xs font-medium">{config.label}</span>
     </div>
   );
-};
-
-// Payment Method Badge Component
-const PaymentMethodBadge = ({ method }) => {
-  const methodMap = {
-    dinheiro: 'Dinheiro',
-    cartao_credito: 'Cartão de Crédito',
-    cartao_debito: 'Cartão de Débito',
-    pix: 'PIX',
-    transferencia: 'Transferência',
-    boleto: 'Boleto',
-    parcelado: 'Parcelado',
-    outros: 'Outros'
-  };
-  
-  return <span>{methodMap[method] || method}</span>;
 };
 
 // Payment Status Badge Component
@@ -268,12 +253,26 @@ const SimplePieChart = ({ paid, total }) => {
   );
 };
 
-const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [] }) => {
+
+const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [], refreshCustomers }) => {
   const handlePrint = () => {
     window.print();
   };
 
   const otherCustomers = customers.filter((c) => !c.is_responsible);
+
+  const handleRemove = async (customerId) => {
+    if (!sale) return;
+    if (!window.confirm('Remover este cliente da venda?')) return;
+    try {
+      await saleService.removeCustomer(sale.id, customerId);
+      if (typeof refreshCustomers === 'function') {
+        refreshCustomers();
+      }
+    } catch (error) {
+      console.error('Erro ao remover cliente:', error);
+    }
+  };
 
   if (!sale) return null;
   
@@ -290,13 +289,6 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [] }) => {
             </div>
             <div className="flex items-center gap-2">
               <StatusBadge status={sale.status} />
-              <button 
-                onClick={handlePrint}
-                className="p-2 rounded-full bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
-                aria-label="Imprimir"
-              >
-                <Printer className="h-4 w-4" />
-              </button>
             </div>
           </div>
         </DrawerHeader>
@@ -331,12 +323,25 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [] }) => {
               )}
               <div className="space-y-3">
                   {customers.map((sc) => (
-                    <div key={sc.id} className="flex items-center gap-3 p-2 hover:bg-amber-50 rounded-lg transition-colors">
+                    <div
+                      key={sc.id}
+                      className="flex items-center gap-3 p-2 hover:bg-amber-50 rounded-lg transition-colors"
+                    >
                       <div>
                         <p className="font-medium">{sc.customer.first_name} {sc.customer.last_name}</p>
-                        {sc.customer.email && <p className="text-xs text-gray-500">{sc.customer.email}</p>}
-                        {sc.customer.phone && <p className="text-xs text-gray-500">{sc.customer.phone}</p>}
+                        {sc.customer.email && (
+                          <p className="text-xs text-gray-500">{sc.customer.email}</p>
+                        )}
+                        {sc.customer.phone && (
+                          <p className="text-xs text-gray-500">{sc.customer.phone}</p>
+                        )}
                       </div>
+                      <button
+                        className="ml-auto text-red-600 text-xs hover:underline"
+                        onClick={() => handleRemove(sc.customer_id || sc.customer.id)}
+                      >
+                        Remover
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -428,10 +433,7 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [] }) => {
                     valueClassName="text-lg font-bold text-green-600"
                   />
                   <Divider />
-                  <ValueItem 
-                    label="Método de Pagamento"
-                    value={<PaymentMethodBadge method={sale.payment_method} />}
-                  />
+                  <SalePaymentsTable saleId={sale.id} totalAmount={sale.total_amount} />
                   <ValueItem 
                     label="Status do Pagamento"
                     value={<PaymentStatusBadge status={sale.payment_status} />}
@@ -455,12 +457,6 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [] }) => {
                   label="Data da Venda"
                   icon={<FileText />}
                   status="completed"
-                />
-                <TimelineItem 
-                  date={sale.payment_date}
-                  label="Pagamento"
-                  icon={<CreditCard />}
-                  status={sale.payment_status === 'pago' ? 'completed' : 'pending'}
                 />
                 <TimelineItem 
                   date={sale.due_date}

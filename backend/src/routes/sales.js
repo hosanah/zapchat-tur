@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const SaleController = require('../controllers/SaleController');
+const SalePaymentController = require('../controllers/SalePaymentController');
 const { authenticate } = require('../middleware/auth');
 const { validationResult } = require('express-validator');
 const {
@@ -11,8 +12,10 @@ const {
   listSalesValidation,
   getSalesByCustomerValidation,
   addSaleCustomerValidation,
-  listSaleCustomersValidation
+  listSaleCustomersValidation,
+  removeSaleCustomerValidation
 } = require('../middleware/saleValidations');
+const paymentValidations = require('../middleware/paymentValidations');
 
 // Middleware para verificar erros de validação
 const checkValidationErrors = (req, res, next) => {
@@ -62,11 +65,40 @@ router.get('/:id/customers',
   SaleController.listCustomers
 );
 
+// GET /api/sales/:id/voucher - Gerar voucher em PDF
+router.get('/:id/voucher', SaleController.voucher);
+
+// Pagamentos da venda
+router.get('/:id/payments',
+  paymentValidations.list,
+  checkValidationErrors,
+  SalePaymentController.index
+);
+
+router.post('/:id/payments',
+  paymentValidations.create,
+  checkValidationErrors,
+  SalePaymentController.store
+);
+
+router.delete('/:id/payments/:payment_id',
+  paymentValidations.remove,
+  checkValidationErrors,
+  SalePaymentController.destroy
+);
+
 // POST /api/sales/:id/customers - Adicionar cliente à venda
 router.post('/:id/customers',
   addSaleCustomerValidation,
   checkValidationErrors,
   SaleController.addCustomer
+);
+
+// DELETE /api/sales/:id/customers/:customer_id - Remover cliente da venda
+router.delete('/:id/customers/:customer_id',
+  removeSaleCustomerValidation,
+  checkValidationErrors,
+  SaleController.removeCustomer
 );
 
 // POST /api/sales - Criar nova venda
