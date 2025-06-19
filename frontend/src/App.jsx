@@ -23,6 +23,7 @@ import UsersPage from './pages/users/Users';
 import Companies from './pages/companies/Companies';
 import Profile from './pages/profile/Profile';
 import ChangePassword from './pages/profile/ChangePassword';
+import Settings from './pages/settings/Settings';
 
 // Placeholder component for bookings
 
@@ -80,6 +81,7 @@ const AppContent = () => {
             <Route path="sales" element={<Sales />} />
             <Route path="bookings" element={<Bookings />} />
             <Route path="profile" element={<Profile />} />
+            <Route path="settings" element={<Settings />} />
             <Route path="change-password" element={<ChangePassword />} />
           </Route>
           
