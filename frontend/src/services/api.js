@@ -322,4 +322,10 @@ export const dashboardService = {
   getStats: () => api.get('/dashboard/stats'),
 };
 
+// Serviços de configurações gerais
+export const settingService = {
+  get: () => api.get('/settings'),
+  update: (data) => api.put('/settings', data),
+};
+
 export default api;
