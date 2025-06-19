@@ -24,7 +24,8 @@ const PaymentsTable = ({ saleId }) => {
     if (!saleId) return;
     try {
       const res = await saleService.getPayments(saleId);
-      setPayments(res.data?.data || res.data || []);
+      const list = res.data?.payments ?? res.payments ?? [];
+      setPayments(list);
     } catch (err) {
       console.error('Erro ao buscar pagamentos:', err);
     }
