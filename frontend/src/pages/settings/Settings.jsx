@@ -89,9 +89,7 @@ const Settings = () => {
             Salvar
           </button>
         </div>
-      </form>
-    </div>
-  );
-};
+      </form>)
+
 
 export default Settings;
