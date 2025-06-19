@@ -206,6 +206,17 @@ SaleCustomer.belongsTo(Customer, {
   as: 'customer'
 });
 
+// Pagamentos da venda
+Sale.hasMany(SalePayment, {
+  foreignKey: 'sale_id',
+  as: 'payments'
+});
+
+SalePayment.belongsTo(Sale, {
+  foreignKey: 'sale_id',
+  as: 'sale'
+});
+
 Customer.hasMany(SaleCustomer, {
   foreignKey: 'customer_id',
   as: 'sale_customers'
