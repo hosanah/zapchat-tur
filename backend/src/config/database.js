@@ -6,8 +6,12 @@ dotenv.config();
 
 let seedDatabase;
 try {
-  // Importação condicional do seeder (evita erro caso o arquivo não exista)
-  seedDatabase = require('../database/seeders').seedDatabase;
+  // Permite indicar qual seeder usar via variável DB_CREATE_DEVINFO
+  const seederFile =
+    process.env.DB_CREATE_DEVINFO && process.env.DB_CREATE_DEVINFO !== 'true'
+      ? process.env.DB_CREATE_DEVINFO
+      : 'seeders';
+  seedDatabase = require(path.join('..', 'database', seederFile)).seedDatabase;
 } catch (err) {
   seedDatabase = async () => {
     console.log('ℹ️ Seeder não encontrado ou não definido.');
@@ -77,7 +81,7 @@ async function initializeDatabase() {
 
     //await runMigrations();
 
-    if (process.env.DB_CREATE_DEVINFO === 'true') {
+    if (process.env.DB_CREATE_DEVINFO) {
       console.log('🌱 Executando seed de desenvolvimento...');
       await seedDatabase();
       console.log('✅ Seed de desenvolvimento executado com sucesso.');
