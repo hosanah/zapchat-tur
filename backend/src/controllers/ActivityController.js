@@ -31,14 +31,14 @@ class ActivityController {
         include: [
           {
             model: Trip,
-            as: 'Trip',
+            as: 'trip',
             where: { company_id: targetCompanyId },
             attributes: ['title'],
             required: true
           },
           {
             model: Customer,
-            as: 'Customer',
+            as: 'customer',
             attributes: ['firstName', 'lastName']
           }
         ],

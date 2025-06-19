@@ -56,14 +56,14 @@ class BookingController {
         include: [
           {
             model: Trip,
-            as: 'Trip',
+            as: 'trip',
             where: tripWhere,
             required: true,
             attributes: ['id', 'title', 'type', 'priceTrips', 'maxPassengers']
           },
           {
             model: Customer,
-            as: 'Customer',
+            as: 'customer',
             where: customerWhere,
             required: true,
             attributes: ['id', 'firstName', 'lastName', 'email', 'phone']
@@ -104,7 +104,7 @@ class BookingController {
         include: [
           {
             model: Trip,
-            as: 'Trip',
+            as: 'trip',
             include: [
               {
                 model: Company,
@@ -115,7 +115,7 @@ class BookingController {
           },
           {
             model: Customer,
-            as: 'Customer',
+            as: 'customer',
             attributes: ['id', 'firstName', 'lastName', 'email', 'phone']
           }
         ]
@@ -230,12 +230,12 @@ class BookingController {
         include: [
           {
             model: Trip,
-            as: 'Trip',
+            as: 'trip',
             attributes: ['id', 'title', 'type']
           },
           {
             model: Customer,
-            as: 'Customer',
+            as: 'customer',
             attributes: ['id', 'firstName', 'lastName', 'email']
           }
         ]
@@ -274,7 +274,7 @@ class BookingController {
         include: [
           {
             model: Trip,
-            as: 'Trip'
+            as: 'trip'
           }
         ]
       });
@@ -327,7 +327,7 @@ class BookingController {
         include: [
           {
             model: Trip,
-            as: 'Trip'
+            as: 'trip'
           }
         ]
       });
@@ -378,7 +378,7 @@ class BookingController {
         include: [
           {
             model: Trip,
-            as: 'Trip'
+            as: 'trip'
           }
         ]
       });
