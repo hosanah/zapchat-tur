@@ -138,12 +138,6 @@ const Sale = sequelize.define('Sale', {
     comment: 'Prioridade da venda'
   },
   
-  // Informações de pagamento
-  payment_method: {
-    type: DataTypes.ENUM('dinheiro', 'cartao_credito', 'cartao_debito', 'pix', 'transferencia', 'boleto', 'cheque', 'outro'),
-    allowNull: true,
-    comment: 'Método de pagamento utilizado'
-  },
   
   payment_status: {
     type: DataTypes.ENUM('pendente', 'parcial', 'pago', 'atrasado', 'cancelado'),

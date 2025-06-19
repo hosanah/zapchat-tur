@@ -73,22 +73,6 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-// Payment Method Badge Component
-const PaymentMethodBadge = ({ method }) => {
-  const methodMap = {
-    dinheiro: 'Dinheiro',
-    cartao_credito: 'Cartão de Crédito',
-    cartao_debito: 'Cartão de Débito',
-    pix: 'PIX',
-    transferencia: 'Transferência',
-    boleto: 'Boleto',
-    parcelado: 'Parcelado',
-    outros: 'Outros'
-  };
-  
-  return <span>{methodMap[method] || method}</span>;
-};
-
 // Payment Status Badge Component
 const PaymentStatusBadge = ({ status }) => {
   const statusConfig = {
@@ -449,10 +433,6 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [], refreshCu
                     valueClassName="text-lg font-bold text-green-600"
                   />
                   <Divider />
-                  <ValueItem 
-                    label="Método de Pagamento"
-                    value={<PaymentMethodBadge method={sale.payment_method} />}
-                  />
                   <ValueItem 
                     label="Status do Pagamento"
                     value={<PaymentStatusBadge status={sale.payment_status} />}

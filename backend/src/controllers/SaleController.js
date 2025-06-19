@@ -218,8 +218,9 @@ class SaleController {
   static async store(req, res) {
     try {
       const user = req.user;
+      const { payment_method, ...bodyData } = req.body;
       const saleData = {
-        ...req.body,
+        ...bodyData,
         company_id: user.company_id,
         created_by: user.id
       };
@@ -440,7 +441,8 @@ class SaleController {
         }
       }
 
-      await sale.update(req.body);
+      const { payment_method, ...updateData } = req.body;
+      await sale.update(updateData);
 
       // Buscar venda atualizada com relacionamentos
       const updatedSale = await Sale.findByPk(sale.id, {
@@ -557,17 +559,6 @@ class SaleController {
         raw: true
       });
 
-      // Vendas por método de pagamento
-      const salesByPaymentMethod = await Sale.findAll({
-        where: { ...where, payment_method: { [Op.not]: null } },
-        attributes: [
-          'payment_method',
-          [Sale.sequelize.fn('COUNT', Sale.sequelize.col('id')), 'count'],
-          [Sale.sequelize.fn('SUM', Sale.sequelize.col('total_amount')), 'total_amount']
-        ],
-        group: ['payment_method'],
-        raw: true
-      });
 
       // Vendas dos últimos 30 dias
       const thirtyDaysAgo = new Date();
@@ -593,8 +584,7 @@ class SaleController {
         total_commission: totalCommission || 0,
         recent_sales: recentSales || 0,
         recent_amount: recentAmount || 0,
-        by_status: salesByStatus,
-        by_payment_method: salesByPaymentMethod
+        by_status: salesByStatus
       };
     } catch (error) {
       console.error('Erro ao calcular estatísticas:', error);
@@ -604,8 +594,7 @@ class SaleController {
         total_commission: 0,
         recent_sales: 0,
         recent_amount: 0,
-        by_status: [],
-        by_payment_method: []
+        by_status: []
       };
     }
   }
