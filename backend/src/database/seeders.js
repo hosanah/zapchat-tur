@@ -1,4 +1,4 @@
-const { Company, User } = require('../models');
+const { Company, User, GeneralSetting } = require('../models');
 const bcrypt = require('bcryptjs');
 
 /**
@@ -38,6 +38,15 @@ async function seedDatabase() {
     });
 
     console.log('✅ Empresa exemplo criada:', exampleCompany.name);
+
+    // Criar configurações gerais padrão da empresa
+    await GeneralSetting.create({
+      company_id: exampleCompany.id,
+      logo: Buffer.from('placeholder'),
+      guidelines: ''
+    });
+
+    console.log('✅ Configurações gerais criadas para empresa:', exampleCompany.name);
 
     // Criar usuário master
     const masterUser = await User.create({
