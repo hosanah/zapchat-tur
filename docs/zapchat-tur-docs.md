@@ -112,3 +112,23 @@ As sprints seguintes adicionam camadas de funcionalidade de forma incremental, s
 
 O desenvolvimento do ZapChat Tur representa um projeto ambicioso que combina tecnologias modernas com práticas de desenvolvimento sólidas para criar uma solução robusta e escalável para o setor turístico. A arquitetura multi-tenant oferece flexibilidade única, permitindo que múltiplas empresas se beneficiem de uma plataforma comum mantendo a segurança e privacidade de seus dados.
 
+## API de Configurações Gerais
+
+### Atualizar Configurações
+
+`PUT /api/settings`
+
+Envia um formulário `multipart/form-data` contendo:
+
+- `logo` (arquivo de imagem, opcional, até 2MB)
+- `guidelines` (texto opcional)
+
+Exemplo de uso com `curl`:
+
+```bash
+curl -X PUT -H "Authorization: Bearer <token>" \
+  -F "logo=@/caminho/para/logo.png" \
+  -F "guidelines=Texto de orientações" \
+  http://localhost:3001/api/settings
+```
+

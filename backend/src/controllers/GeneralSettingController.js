@@ -14,12 +14,21 @@ class GeneralSettingController {
   static async update(req, res, next) {
     try {
       const companyId = req.user.company_id;
-      const { logo, guidelines } = req.body;
+      const { guidelines } = req.body;
+      const logoBuffer = req.file ? req.file.buffer : undefined;
+
       let setting = await GeneralSetting.findOne({ where: { company_id: companyId } });
       if (setting) {
-        await setting.update({ logo, guidelines });
+        await setting.update({
+          ...(logoBuffer !== undefined && { logo: logoBuffer }),
+          guidelines,
+        });
       } else {
-        setting = await GeneralSetting.create({ company_id: companyId, logo, guidelines });
+        setting = await GeneralSetting.create({
+          company_id: companyId,
+          logo: logoBuffer,
+          guidelines,
+        });
       }
       res.status(200).json({ success: true, data: { setting } });
     } catch (err) {
