@@ -10,24 +10,14 @@ const SalePayment = sequelize.define('SalePayment', {
   sale_id: {
     type: DataTypes.UUID,
     allowNull: false,
-    references: {
-      model: 'sales',
-      key: 'id'
-    },
+    references: { model: 'sales', key: 'id' },
     onUpdate: 'CASCADE',
     onDelete: 'CASCADE'
   },
   amount: {
-    type: DataTypes.DECIMAL(10,2),
-    allowNull: false,
-    validate: {
-      min: 0.01
-    }
-  },
-  payment_method: {
-    type: DataTypes.ENUM('dinheiro','cartao_credito','cartao_debito','pix','transferencia','boleto','cheque','outro'),
     type: DataTypes.DECIMAL(10, 2),
-    allowNull: false
+    allowNull: false,
+    validate: { min: 0.01 }
   },
   payment_method: {
     type: DataTypes.ENUM('dinheiro', 'cartao_credito', 'cartao_debito', 'pix', 'transferencia', 'boleto', 'cheque', 'outro'),
@@ -41,7 +31,8 @@ const SalePayment = sequelize.define('SalePayment', {
   notes: {
     type: DataTypes.TEXT,
     allowNull: true
-  },
+  }
+}, {
   tableName: 'sale_payments',
   indexes: [
     { fields: ['sale_id'] },

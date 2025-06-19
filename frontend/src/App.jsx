@@ -21,6 +21,8 @@ import Trips from './pages/trips/Trips';
 import Sales from './pages/sales/Sales';
 import UsersPage from './pages/users/Users';
 import Companies from './pages/companies/Companies';
+import Profile from './pages/profile/Profile';
+import ChangePassword from './pages/profile/ChangePassword';
 
 // Placeholder component for bookings
 
@@ -77,6 +79,8 @@ const AppContent = () => {
             <Route path="trips" element={<Trips />} />
             <Route path="sales" element={<Sales />} />
             <Route path="bookings" element={<Bookings />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="change-password" element={<ChangePassword />} />
           </Route>
           
           {/* Catch all route */}
