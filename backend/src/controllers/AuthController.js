@@ -195,7 +195,7 @@ class AuthController {
 
       // Buscar usuário
       const user = await User.findByPk(decoded.userId, {
-        include: ['Company']
+        include: ['company']
       });
 
       if (!user || !user.isActive) {
@@ -207,7 +207,7 @@ class AuthController {
       }
 
       // Verificar se empresa está ativa (para usuários não-master)
-      if (user.company_id && (!user.Company || !user.Company.isActive)) {
+      if (user.company_id && (!user.company || !user.company.isActive)) {
         return res.status(401).json({
           success: false,
           error: 'Empresa inativa',

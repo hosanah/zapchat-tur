@@ -109,6 +109,17 @@ class NotificationController {
       next(error);
     }
   }
+
+  static async getUnreadCount(req, res, next) {
+    try {
+      const count = await Notification.count({
+        where: { user_id: req.user.id, read: false }
+      });
+      res.status(200).json({ success: true, data: { count } });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = NotificationController;
