@@ -37,17 +37,11 @@ const SalePayment = sequelize.define('SalePayment', {
     type: DataTypes.DATEONLY,
     allowNull: false,
     defaultValue: DataTypes.NOW
-    allowNull: false
   },
   notes: {
     type: DataTypes.TEXT,
     allowNull: true
-  }
-},{
-  tableName: 'sale_payments',
-  indexes:[
-    { fields:['sale_id'] }
-}, {
+  },
   tableName: 'sale_payments',
   indexes: [
     { fields: ['sale_id'] },

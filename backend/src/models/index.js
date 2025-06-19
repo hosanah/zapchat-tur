@@ -206,12 +206,6 @@ SaleCustomer.belongsTo(Customer, {
   as: 'customer'
 });
 
-// Pagamentos da venda
-Sale.hasMany(SalePayment, {
-  foreignKey: 'sale_id',
-  as: 'payments'
-});
-
 SalePayment.belongsTo(Sale, {
   foreignKey: 'sale_id',
   as: 'sale'
@@ -238,10 +232,6 @@ Sale.hasMany(SalePayment, {
   as: 'payments'
 });
 
-SalePayment.belongsTo(Sale, {
-  foreignKey: 'sale_id',
-  as: 'sale'
-});
 
 
 module.exports = {
