@@ -80,6 +80,7 @@ const AppContent = () => {
             <Route path="trips" element={<Trips />} />
             <Route path="sales" element={<Sales />} />
             <Route path="bookings" element={<Bookings />} />
+            <Route path="settings" element={<Settings />} />
             <Route path="profile" element={<Profile />} />
             <Route path="settings" element={<Settings />} />
             <Route path="change-password" element={<ChangePassword />} />

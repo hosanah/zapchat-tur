@@ -310,14 +310,14 @@ export const bookingService = {
 export const settingsService = {
   get: () => api.get('/settings'),
   update: (data) => api.put('/settings', data),
-  create: (data) => api.post('/settings', data), // opcional
-  remove: (id) => api.delete(`/settings/${id}`), // opcional
+  create: (data) => api.post('/settings', data), 
+  remove: (id) => api.delete(`/settings/${id}`), 
 };
 
 // Serviços de atividades
 export const activityService = {
   getRecent: (params) => api.get('/activities/recent', { params }),
-};  
+};
 export const dashboardService = {
   getStats: () => api.get('/dashboard/stats'),
 };
