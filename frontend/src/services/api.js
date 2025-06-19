@@ -328,4 +328,11 @@ export const settingService = {
   update: (data) => api.put('/settings', data),
 };
 
+// Serviços de notificações
+export const notificationService = {
+  list: (params) => api.get('/notifications', { params }),
+  markAsRead: (id) => api.patch(`/notifications/${id}/read`),
+  unreadCount: () => api.get('/notifications/unread-count'),
+};
+
 export default api;

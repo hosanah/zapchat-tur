@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { notificationService } from '../../services/api';
 import {
   Home,
   Building2,
@@ -31,6 +32,7 @@ const ModernLayout = () => {
   });
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -58,6 +60,23 @@ const ModernLayout = () => {
   useEffect(() => {
     localStorage.setItem('sidebarOpen', sidebarOpen);
   }, [sidebarOpen]);
+
+  // Carregar contagem de notificações não lidas
+  useEffect(() => {
+    const loadCount = async () => {
+      try {
+        const res = await notificationService.unreadCount();
+        const count = res.data?.count ?? res.count ?? 0;
+        setUnreadCount(count);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    loadCount();
+    const handler = () => loadCount();
+    window.addEventListener('notifications:update', handler);
+    return () => window.removeEventListener('notifications:update', handler);
+  }, []);
 
   const menuItems = [
     { 
@@ -324,11 +343,16 @@ const ModernLayout = () => {
               </button>
 
               {/* Notifications */}
-              <button className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
+              <button
+                onClick={() => navigate('/notifications')}
+                className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              >
                 <Bell className="w-5 h-5" />
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                  2
-                </span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
               </button>
 
               {/* User Menu */}
