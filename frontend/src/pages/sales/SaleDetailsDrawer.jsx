@@ -73,6 +73,24 @@ const StatusBadge = ({ status }) => {
   );
 };
 
+// Payment Status Badge Component
+const PaymentStatusBadge = ({ status }) => {
+  const statusConfig = {
+    pendente: { color: 'bg-yellow-100 text-yellow-800 border-yellow-200', label: 'Pendente' },
+    parcial: { color: 'bg-orange-100 text-orange-800 border-orange-200', label: 'Parcial' },
+    pago: { color: 'bg-green-100 text-green-800 border-green-200', label: 'Pago' },
+    atrasado: { color: 'bg-red-100 text-red-800 border-red-200', label: 'Atrasado' },
+    cancelado: { color: 'bg-gray-100 text-gray-800 border-gray-200', label: 'Cancelado' }
+  };
+  
+  const config = statusConfig[status] || statusConfig.pendente;
+  
+  return (
+    <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border ${config.color}`}>
+      <span className="text-xs font-medium">{config.label}</span>
+    </div>
+  );
+};
 
 // Priority Badge Component
 const PriorityBadge = ({ priority }) => {
@@ -416,6 +434,10 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [], refreshCu
                   />
                   <Divider />
                   <SalePaymentsTable saleId={sale.id} totalAmount={sale.total_amount} />
+                  <ValueItem 
+                    label="Status do Pagamento"
+                    value={<PaymentStatusBadge status={sale.payment_status} />}
+                  />
                 </div>
               </div>
             </CardContent>

@@ -95,6 +95,8 @@ const Sales = () => {
     tax_amount: 0,
     status: 'orcamento',
     priority: 'media',
+    payment_status: 'pendente',
+    payment_date: new Date().toISOString().split('T')[0],
     due_date: new Date().toISOString().split('T')[0],
     installments: 1,
     sale_date: new Date().toISOString().split('T')[0],
@@ -355,6 +357,8 @@ const Sales = () => {
         tax_amount: sale.tax_amount || 0,
         status: sale.status || 'orcamento',
         priority: sale.priority || 'media',
+        payment_status: sale.payment_status || 'pendente',
+        payment_date: sale.payment_date ? sale.payment_date.split('T')[0] : '',
         due_date: sale.due_date ? sale.due_date.split('T')[0] : '',
         installments: sale.installments || 1,
         sale_date: sale.sale_date ? sale.sale_date.split('T')[0] : '',
@@ -441,6 +445,8 @@ const Sales = () => {
       tax_amount: 0,
       status: 'orcamento',
       priority: 'media',
+      payment_status: 'pendente',
+      payment_date: new Date().toISOString().split('T')[0],
       due_date: new Date().toISOString().split('T')[0],
       installments: 1,
       sale_date: new Date().toISOString().split('T')[0],
@@ -1104,7 +1110,7 @@ const Sales = () => {
 
                     {/* Coluna 2 */}
                     <div className="space-y-6">
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Status
@@ -1139,7 +1145,7 @@ const Sales = () => {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Data da Venda
@@ -1178,7 +1184,7 @@ const Sales = () => {
                         />
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Desconto (R$)
@@ -1215,6 +1221,37 @@ const Sales = () => {
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Status do Pagamento
+                          </label>
+                          <select
+                            value={formData.payment_status}
+                            onChange={(e) => setFormData({ ...formData, payment_status: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                          >
+                            {paymentStatusOptions.map((option) => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Data de Pagamento
+                          </label>
+                          <input
+                            type="date"
+                            value={formData.payment_date}
+                            onChange={(e) => setFormData({ ...formData, payment_date: e.target.value })}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                          />
+                        </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Data de Vencimento

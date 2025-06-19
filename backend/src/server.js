@@ -85,6 +85,7 @@ app.use(errorHandler);
 async function startServer() {
   try {
     await initializeDatabase();
+    await runMigrations();
 
     const server = app.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 Servidor rodando na porta ${PORT}`);
