@@ -109,7 +109,10 @@ const Trips = () => {
         response.details.forEach((detail) => {
           if (detail.msg) showError(detail.msg);
         });
-      } else {
+      } else if (response?.success === false && response.details) {
+        if (response.details) showError(detail.msg);
+      }         
+      else {
         const errorMessage = response?.message || 'Erro ao salvar passeio';
         showError(errorMessage);
       }

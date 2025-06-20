@@ -1,10 +1,10 @@
 -- Tabela de acessórios
 CREATE TABLE IF NOT EXISTS accessories (
-  id TEXT PRIMARY KEY,
+  id uuid PRIMARY KEY,
   name TEXT NOT NULL,
   value REAL NOT NULL DEFAULT 0,
   description TEXT,
-  company_id TEXT NOT NULL,
+  company_id uuid NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (company_id) REFERENCES companies(id) ON UPDATE CASCADE ON DELETE CASCADE
@@ -14,9 +14,9 @@ CREATE INDEX idx_accessories_name ON accessories(name);
 
 -- Tabela de relacionamento venda <-> acessório
 CREATE TABLE IF NOT EXISTS sale_accessories (
-  id TEXT PRIMARY KEY,
-  sale_id TEXT NOT NULL,
-  accessory_id TEXT NOT NULL,
+  id uuid PRIMARY KEY,
+  sale_id uuid NOT NULL,
+  accessory_id uuid NOT NULL,
   quantity INTEGER NOT NULL DEFAULT 1,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

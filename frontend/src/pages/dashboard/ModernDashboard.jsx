@@ -192,6 +192,7 @@ const ModernDashboard = () => {
 
   return (
     <div className="space-y-6">
+      
       {/* Welcome Section */}
       <div className="bg-gradient-to-r from-zapchat-primary to-zapchat-medium rounded-lg p-6 text-white">
         <h1 className="text-2xl font-bold mb-2">
@@ -201,6 +202,17 @@ const ModernDashboard = () => {
           Aqui está um resumo da sua plataforma e todas as atividades.
         </p>
       </div>
+
+      {/* Próximos Passeios */}
+        <div className="lg:col-span-3 bg-white rounded-lg shadow-card p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Próximos Passeios</h3>
+          <FullCalendar
+            plugins={[dayGridPlugin]}
+            initialView="dayGridMonth"
+            events={salesEvents}
+            height="auto"
+          />
+        </div>
 
       {/* Quick Actions */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -239,6 +251,8 @@ const ModernDashboard = () => {
           );
         })}
       </div>
+
+      
 
       {/* Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -307,16 +321,7 @@ const ModernDashboard = () => {
           </div>
         </div>
 
-        {/* Próximos Passeios */}
-        <div className="lg:col-span-3 bg-white rounded-lg shadow-card p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Próximos Passeios</h3>
-          <FullCalendar
-            plugins={[dayGridPlugin]}
-            initialView="dayGridMonth"
-            events={salesEvents}
-            height="auto"
-          />
-        </div>
+        
       </div>
     </div>
   );

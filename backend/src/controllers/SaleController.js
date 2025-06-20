@@ -414,20 +414,12 @@ class SaleController {
       if (req.body.trip_id && req.body.trip_id !== sale.trip_id) {
         const trip = await Trip.findOne({
           where: { id: req.body.trip_id, company_id: user.company_id },
-          include: [{ model: Vehicle, as: 'vehicle' }]
         });
 
         if (!trip) {
           return res.status(400).json({
             success: false,
             message: 'Passeio não encontrado ou não pertence à sua empresa'
-          });
-        }
-
-        if (!trip.vehicleId || !trip.driverId) {
-          return res.status(400).json({
-            success: false,
-            message: 'Passeio deve possuir veículo e motorista vinculados'
           });
         }
 

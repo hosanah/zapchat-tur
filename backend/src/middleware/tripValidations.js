@@ -45,7 +45,7 @@ const tripValidations = {
       .withMessage('Tipo inválido'),
     body('status')
       .optional()
-      .isIn(['planejado', 'confirmado', 'em_andamento', 'concluido', 'cancelado'])
+      .isIn(['ativo', 'inativo','cancelado'])
       .withMessage('Status inválido'),
     body('color')
       .optional()
