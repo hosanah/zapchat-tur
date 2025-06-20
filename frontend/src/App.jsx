@@ -20,6 +20,7 @@ import Customers from './pages/customers/Customers';
 import Trips from './pages/trips/Trips';
 import Sales from './pages/sales/Sales';
 import UsersPage from './pages/users/Users';
+import Accessories from './pages/accessories/Accessories';
 import Companies from './pages/companies/Companies';
 import Profile from './pages/profile/Profile';
 import ChangePassword from './pages/profile/ChangePassword';
@@ -80,6 +81,7 @@ const AppContent = () => {
             <Route path="customers" element={<Customers />} />
             <Route path="trips" element={<Trips />} />
             <Route path="sales" element={<Sales />} />
+            <Route path="acessorios" element={<Accessories />} />
             <Route path="notifications" element={<Notifications />} />
             <Route path="bookings" element={<Bookings />} />
             <Route path="settings" element={<Settings />} />

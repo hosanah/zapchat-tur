@@ -313,6 +313,15 @@ export const bookingService = {
   getRevenue: (params) => api.get('/bookings/revenue', { params }),
 };
 
+// Serviços de acessórios
+export const accessoryService = {
+  getAll: (params) => api.get('/accessories', { params }),
+  getById: (id) => api.get(`/accessories/${id}`),
+  create: (data) => api.post('/accessories', data),
+  update: (id, data) => api.put(`/accessories/${id}`, data),
+  delete: (id) => api.delete(`/accessories/${id}`),
+};
+
 // Serviços de configurações gerais
 export const settingsService = {
   get: () => api.get('/settings'),

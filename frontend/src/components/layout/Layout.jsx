@@ -9,6 +9,7 @@ import {
   UserCircle,
   MapPin,
   Calendar,
+  Package,
   BarChart3,
   Menu,
   X,
@@ -70,6 +71,12 @@ const Layout = () => {
       name: 'Clientes',
       href: '/customers',
       icon: UserCircle,
+      show: true,
+    },
+    {
+      name: 'Acessórios',
+      href: '/acessorios',
+      icon: Package,
       show: true,
     },
     {
