@@ -1,4 +1,4 @@
-const { Sale, Customer, Company, User, Trip, Vehicle, Booking, Driver, SaleCustomer, GeneralSetting } = require('../models');
+const { Sale, Customer, Company, User, Trip, Vehicle, Booking, Driver, SaleCustomer, SaleAccessory, Accessory, GeneralSetting } = require('../models');
 const { Op } = require('sequelize');
 const PDFDocument = require('pdfkit');
 
@@ -789,6 +789,11 @@ class SaleController {
             include: [
               { model: Customer, as: 'customer', attributes: ['firstName', 'lastName'] }
             ]
+          },
+          {
+            model: SaleAccessory,
+            as: 'sale_accessories',
+            include: [{ model: Accessory, as: 'accessory', attributes: ['name', 'value'] }]
           }
         ]
       });
@@ -814,6 +819,22 @@ class SaleController {
       sale.sale_customers.forEach((sc, index) => {
         doc.fontSize(12).text(`${index + 1}. ${sc.customer.firstName} ${sc.customer.lastName}`);
       });
+
+      if (sale.sale_accessories && sale.sale_accessories.length > 0) {
+        doc.moveDown();
+        doc.fontSize(14).text('Acessórios:');
+        sale.sale_accessories.forEach((sa, idx) => {
+          const total = (parseFloat(sa.accessory.value) * parseInt(sa.quantity)).toFixed(2).replace('.', ',');
+          doc.fontSize(12).text(`${idx + 1}. ${sa.accessory.name} x${sa.quantity} - R$ ${total}`);
+        });
+      }
+
+      doc.moveDown();
+      doc.fontSize(14).text('Valores:');
+      const accessoriesTotal = sale.sale_accessories ? sale.sale_accessories.reduce((s, sa) => s + parseFloat(sa.accessory.value) * parseInt(sa.quantity), 0) : 0;
+      doc.fontSize(12).text(`Subtotal: R$ ${parseFloat(sale.subtotal).toFixed(2).replace('.', ',')}`);
+      doc.fontSize(12).text(`Acessórios: R$ ${accessoriesTotal.toFixed(2).replace('.', ',')}`);
+      doc.fontSize(12).text(`Total: R$ ${parseFloat(sale.total_amount).toFixed(2).replace('.', ',')}`);
 
       const setting = await GeneralSetting.findOne({ where: { company_id: sale.company_id } });
       if (setting && setting.guidelines) {

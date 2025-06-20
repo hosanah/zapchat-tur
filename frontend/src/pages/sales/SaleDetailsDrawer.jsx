@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import './SaleDetailsDrawer.css';
 import SalePaymentsTable from './SalePaymentsTable';
+import SaleAccessoriesTable from './SaleAccessoriesTable';
 
 const formatCurrency = (value) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
@@ -261,6 +262,22 @@ const SimplePieChart = ({ paid, total }) => {
 
 
 const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [], refreshCustomers }) => {
+  const [saleData, setSaleData] = React.useState(sale);
+
+  React.useEffect(() => {
+    setSaleData(sale);
+  }, [sale]);
+
+  const refreshSale = async () => {
+    if (!sale) return;
+    try {
+      const res = await saleService.getById(sale.id);
+      setSaleData(res.data || res);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -271,7 +288,7 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [], refreshCu
     if (!sale) return;
     if (!window.confirm('Remover este cliente da venda?')) return;
     try {
-      await saleService.removeCustomer(sale.id, customerId);
+      await saleService.removeCustomer(saleData.id, customerId);
       if (typeof refreshCustomers === 'function') {
         refreshCustomers();
       }
@@ -294,7 +311,7 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [], refreshCu
               </DrawerTitle>
             </div>
             <div className="flex items-center gap-2">
-              <StatusBadge status={sale.status} />
+              <StatusBadge status={saleData.status} />
             </div>
           </div>
         </DrawerHeader>
@@ -313,11 +330,11 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [], refreshCu
                 label="Cliente Responsável"                
               />
               <div className="space-y-3">
-                  <div key={sale.customer.id} className="flex items-center gap-3 p-2 hover:bg-amber-50 rounded-lg transition-colors">
+                  <div key={saleData.customer.id} className="flex items-center gap-3 p-2 hover:bg-amber-50 rounded-lg transition-colors">
                       <div>
-                        <p className="font-medium">{sale.customer.firstName} {sale.customer.lastName}</p>
-                        {sale.customer.email && <p className="text-xs text-gray-500">{sale.customer.email}</p>}
-                        {sale.customer.phone && <p className="text-xs text-gray-500">{sale.customer.phone}</p>}
+                        <p className="font-medium">{saleData.customer.firstName} {saleData.customer.lastName}</p>
+                        {saleData.customer.email && <p className="text-xs text-gray-500">{saleData.customer.email}</p>}
+                        {saleData.customer.phone && <p className="text-xs text-gray-500">{saleData.customer.phone}</p>}
                       </div>
                     </div>
                 </div>
@@ -365,45 +382,45 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [], refreshCu
               <InfoItem
                 icon={<User className="w-4 h-4 text-blue-500" />}
                 label="Data da Venda"
-                value={formatDate(sale.sale_date)}
+                value={formatDate(saleData.sale_date)}
               />
               <InfoItem
                 icon={<User className="w-4 h-4 text-blue-500" />}
                 label="Data de Execução"
-                value={formatDate(sale.delivery_date)}
+                value={formatDate(saleData.delivery_date)}
               />
-              {sale.seller && (
+              {saleData.seller && (
                 <InfoItem 
                   icon={<UserCheck className="w-4 h-4 text-indigo-500" />}
                   label="Vendedor"
-                  value={`${sale.seller.first_name || ''} ${sale.seller.last_name || ''}`}
+                  value={`${saleData.seller.first_name || ''} ${saleData.seller.last_name || ''}`}
                 />
               )}
-              {sale.trip && (
+              {saleData.trip && (
                 <InfoItem 
                   icon={<MapPin className="w-4 h-4 text-amber-500" />}
                   label="Passeio"
-                  value={sale.trip.title}
+                  value={saleData.trip.title}
                 />
               )}
-              {sale.vehicle && (
+              {saleData.vehicle && (
                 <InfoItem 
                   icon={<Car className="w-4 h-4 text-emerald-500" />}
                   label="Veículo"
-                  value={`${sale.vehicle.plate} - ${sale.vehicle.model}`}
+                  value={`${saleData.vehicle.plate} - ${saleData.vehicle.model}`}
                 />
               )}
-              {sale.driver && (
+              {saleData.driver && (
                 <InfoItem 
                   icon={<User className="w-4 h-4 text-violet-500" />}
                   label="Motorista"
-                  value={`${sale.driver.first_name} ${sale.driver.last_name}`}
+                  value={`${saleData.driver.first_name} ${saleData.driver.last_name}`}
                 />
               )}
               <InfoItem 
                 icon={<AlertCircle className="w-4 h-4 text-blue-500" />}
                 label="Prioridade"
-                value={<PriorityBadge priority={sale.priority} />}
+                value={<PriorityBadge priority={saleData.priority} />}
               />
             </CardContent>
           </Card>
@@ -420,26 +437,28 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [], refreshCu
                 <div className="flex-1 space-y-3">
                   <ValueItem 
                     label="Subtotal"
-                    value={formatCurrency(sale.subtotal)}
+                    value={formatCurrency(saleData.subtotal)}
                   />
                   <ValueItem 
                     label="Desconto"
-                    value={formatCurrency(sale.discount_amount)}
-                    percentage={sale.discount_percentage}
+                    value={formatCurrency(saleData.discount_amount)}
+                    percentage={saleData.discount_percentage}
                     valueClassName="text-amber-600"
                   />
                   <ValueItem 
                     label="Impostos"
-                    value={formatCurrency(sale.tax_amount)}
+                    value={formatCurrency(saleData.tax_amount)}
                     valueClassName="text-gray-600"
                   />
-                  <ValueItem 
+                  <ValueItem
                     label="Total"
-                    value={formatCurrency(sale.total_amount)}
+                    value={formatCurrency(saleData.total_amount)}
                     valueClassName="text-lg font-bold text-green-600"
                   />
                   <Divider />
-                  <SalePaymentsTable saleId={sale.id} totalAmount={sale.total_amount} />
+                  <SaleAccessoriesTable saleId={saleData.id} onUpdated={refreshSale} />
+                  <Divider />
+                  <SalePaymentsTable saleId={saleData.id} totalAmount={saleData.total_amount} />
                 </div>
               </div>
             </CardContent>
@@ -455,24 +474,24 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [], refreshCu
             <CardContent className="p-4">
               <Timeline>
                 <TimelineItem 
-                  date={sale.sale_date}
+                  date={saleData.sale_date}
                   label="Data da Venda"
                   icon={<FileText />}
                   status="completed"
                 />
                 <TimelineItem 
-                  date={sale.delivery_date}
+                  date={saleData.delivery_date}
                   label="Execução"
                   icon={<CheckCircle />}
                   status="upcoming"
-                  daysLeft={calculateDaysLeft(sale.delivery_date)}
+                  daysLeft={calculateDaysLeft(saleData.delivery_date)}
                 />
               </Timeline>
             </CardContent>
           </Card>
 
           {/* Card de Observações */}
-          {sale.notes && (
+          {saleData.notes && (
             <Card className="overflow-hidden border-blue-100">
               <CardHeader className="bg-blue-50 border-b border-blue-100 py-3">
                 <CardTitle className="flex items-center gap-2 text-blue-700">
@@ -480,13 +499,13 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [], refreshCu
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-4">
-                <ExpandableText text={sale.notes} maxLength={100} />
+                <ExpandableText text={saleData.notes} maxLength={100} />
               </CardContent>
             </Card>
           )}
 
           {/* Card de Notas Internas */}
-          {sale.internal_notes && (
+          {saleData.internal_notes && (
             <Card className="overflow-hidden border-gray-100">
               <CardHeader className="bg-gray-50 border-b border-gray-100 py-3">
                 <CardTitle className="flex items-center gap-2 text-gray-700">
@@ -494,7 +513,7 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [], refreshCu
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-4">
-                <ExpandableText text={sale.internal_notes} maxLength={100} />
+                <ExpandableText text={saleData.internal_notes} maxLength={100} />
               </CardContent>
             </Card>
           )}
