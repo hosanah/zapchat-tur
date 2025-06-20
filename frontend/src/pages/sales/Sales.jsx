@@ -96,7 +96,7 @@ const Sales = () => {
     priority: 'media',
     installments: 1,
     sale_date: new Date().toISOString().split('T')[0],
-    delivery_date: new Date().toISOString().split('T')[0],
+    delivery_date: new Date().toISOString().slice(0,16),
     commission_percentage: 0,
     notes: '',
     internal_notes: ''
@@ -347,7 +347,7 @@ const Sales = () => {
         priority: sale.priority || 'media',
         installments: sale.installments || 1,
         sale_date: sale.sale_date ? sale.sale_date.split('T')[0] : '',
-        delivery_date: sale.delivery_date ? sale.delivery_date.split('T')[0] : '',
+        delivery_date: sale.delivery_date ? new Date(sale.delivery_date).toISOString().slice(0,16) : '',
         commission_percentage: sale.commission_percentage || 0,
         notes: sale.notes || '',
         internal_notes: sale.internal_notes || ''
@@ -432,7 +432,7 @@ const Sales = () => {
       priority: 'media',
       installments: 1,
       sale_date: new Date().toISOString().split('T')[0],
-      delivery_date: new Date().toISOString().split('T')[0],
+      delivery_date: new Date().toISOString().slice(0,16),
       commission_percentage: 0,
       notes: '',
       internal_notes: ''
@@ -457,10 +457,16 @@ const Sales = () => {
     }).format(value || 0);
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '-';
-    const date = new Date(dateString + 'T00:00:00');
-    return date.toLocaleDateString('pt-BR');
+  const formatDateTime = (value) => {
+    if (!value) return '-';
+    const date = new Date(value);
+    return date.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   const getStatusBadge = (status, options) => {
@@ -717,7 +723,7 @@ const Sales = () => {
                       {getStatusBadge(sale.status, statusOptions)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {formatDate(sale.sale_date)}
+                      {formatDateTime(sale.delivery_date || sale.sale_date)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end space-x-2">
@@ -1123,7 +1129,7 @@ const Sales = () => {
                             Data de Entrega
                           </label>
                           <input
-                            type="date"
+                            type="datetime-local"
                             value={formData.delivery_date}
                             onChange={(e) => setFormData({ ...formData, delivery_date: e.target.value })}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
