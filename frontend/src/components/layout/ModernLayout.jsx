@@ -12,6 +12,7 @@ import {
   MapPin,
   Calendar,
   CalendarCheck,
+  Package,
   DollarSign,
   Bell,
   Search,
@@ -148,18 +149,26 @@ const ModernLayout = () => {
       color: 'from-teal-500 to-teal-600',
       badge: '5'
     },
-    { 
-      id: 'customers', 
-      label: 'Clientes', 
-      icon: UserCircle, 
+    {
+      id: 'customers',
+      label: 'Clientes',
+      icon: UserCircle,
       path: '/customers',
       color: 'from-pink-500 to-pink-600',
       badge: '6'
     },
-    { 
-      id: 'trips', 
-      label: 'Passeios', 
-      icon: MapPin, 
+    {
+      id: 'accessories',
+      label: 'Acessórios',
+      icon: Package,
+      path: '/acessorios',
+      color: 'from-yellow-500 to-yellow-600',
+      badge: '8'
+    },
+    {
+      id: 'trips',
+      label: 'Passeios',
+      icon: MapPin,
       path: '/trips',
       color: 'from-emerald-500 to-emerald-600',
       badge: '7'
