@@ -35,6 +35,7 @@ const Trips = () => {
     priceTrips: '',
     type: 'turismo',
     status: 'ativo',
+    color: '#99CD85',
     company_id: '',
   });
 
@@ -80,6 +81,7 @@ const Trips = () => {
       priceTrips: '',
       type: 'turismo',
       status: 'ativo',
+      color: '#99CD85',
       company_id: '',
     });
   };
@@ -123,6 +125,7 @@ const Trips = () => {
       priceTrips: trip.priceTrips || '',
       type: trip.type || 'turismo',
       status: trip.status || 'ativo',
+      color: trip.color || '#99CD85',
       company_id: trip.company_id || '',
     });
     setShowModal(true);
@@ -242,7 +245,7 @@ const Trips = () => {
           </thead>
           <tbody>
             {trips.map((trip) => (
-              <tr key={trip.id} className="border-t">
+              <tr key={trip.id} className="border-t" style={{ borderLeft: `4px solid ${trip.color || '#99CD85'}` }}>
                 <td className="px-3 py-2">{trip.title}</td>
                 <td className="px-3 py-2 capitalize">{trip.type}</td>
                 <td className="px-3 py-2">
@@ -336,6 +339,14 @@ const Trips = () => {
                     <option key={status.value} value={status.value}>{status.label}</option>
                   ))}
                 </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Cor</label>
+                <input
+                  type="color"
+                  value={formData.color}
+                  onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                  className="w-16 h-10 border rounded-md p-0" />
               </div>
               {isMaster() && (
                 <div>

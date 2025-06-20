@@ -266,8 +266,15 @@ export const customerService = {
 export const tripService = {
   getAll: (params) => api.get('/trips', { params }),
   getById: (id) => api.get(`/trips/${id}`),
-  create: (data) => api.post('/trips', data),
-  update: (id, data) => api.put(`/trips/${id}`, data),
+  create: (data) => {
+    const payload = { color: '#99CD85', ...data };
+    return api.post('/trips', payload);
+  },
+  update: (id, data) => {
+    const payload = { ...data };
+    if (!payload.color) payload.color = '#99CD85';
+    return api.put(`/trips/${id}`, payload);
+  },
   delete: (id) => api.delete(`/trips/${id}`),
   updateStatus: (id, data) => api.patch(`/trips/${id}/status`, data),
 };
