@@ -52,6 +52,14 @@ const Trip = sequelize.define('Trip', {
       }
     }
   },
+  color: {
+    type: DataTypes.STRING(7),
+    allowNull: false,
+    defaultValue: '#99CD85',
+    validate: {
+      is: /^#([0-9A-Fa-f]{6})$/,
+    },
+  },
   company_id: {
     type: DataTypes.UUID,
     allowNull: false,

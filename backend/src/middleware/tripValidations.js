@@ -21,7 +21,10 @@ const tripValidations = {
     body('status')
       .optional()
       .isIn(['ativo', 'inativo','cancelado'])
-      .withMessage('Status inválido')
+      .withMessage('Status inválido'),
+    body('color')
+      .optional()
+      .isHexColor().withMessage('Cor deve ser um hexadecimal válido')
   ],
   update: [
     body('title')
@@ -43,7 +46,10 @@ const tripValidations = {
     body('status')
       .optional()
       .isIn(['planejado', 'confirmado', 'em_andamento', 'concluido', 'cancelado'])
-      .withMessage('Status inválido')
+      .withMessage('Status inválido'),
+    body('color')
+      .optional()
+      .isHexColor().withMessage('Cor deve ser um hexadecimal válido')
   ],
   updateStatus: [
     body('status')
