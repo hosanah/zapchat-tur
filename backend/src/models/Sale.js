@@ -335,12 +335,20 @@ const Sale = sequelize.define('Sale', {
   ],
   hooks: {
     beforeValidate: (sale) => {
-      // Calcular valor total
       const subtotal = parseFloat(sale.subtotal) || 0;
       const discountAmount = parseFloat(sale.discount_amount) || 0;
       const taxAmount = parseFloat(sale.tax_amount) || 0;
-      
-      sale.total_amount = subtotal - discountAmount + taxAmount;
+
+      let accessoriesTotal = 0;
+      if (Array.isArray(sale.accessories)) {
+        sale.accessories.forEach(acc => {
+          const quantity = parseInt(acc.quantity || 1);
+          const value = parseFloat(acc.value || (acc.Accessory && acc.Accessory.value) || 0);
+          accessoriesTotal += value * quantity;
+        });
+      }
+
+      sale.total_amount = subtotal - discountAmount + taxAmount + accessoriesTotal;
       
       // Calcular comissão
       if (sale.commission_percentage && sale.total_amount) {
@@ -360,8 +368,17 @@ const Sale = sequelize.define('Sale', {
       const subtotal = parseFloat(sale.subtotal) || 0;
       const discountAmount = parseFloat(sale.discount_amount) || 0;
       const taxAmount = parseFloat(sale.tax_amount) || 0;
-      
-      sale.total_amount = subtotal - discountAmount + taxAmount;
+
+      let accessoriesTotal = 0;
+      if (Array.isArray(sale.accessories)) {
+        sale.accessories.forEach(acc => {
+          const quantity = parseInt(acc.quantity || 1);
+          const value = parseFloat(acc.value || (acc.Accessory && acc.Accessory.value) || 0);
+          accessoriesTotal += value * quantity;
+        });
+      }
+
+      sale.total_amount = subtotal - discountAmount + taxAmount + accessoriesTotal;
       
       if (sale.commission_percentage && sale.total_amount) {
         sale.commission_amount = (sale.total_amount * sale.commission_percentage) / 100;
