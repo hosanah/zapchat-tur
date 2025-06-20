@@ -11,6 +11,8 @@ const Booking = require('./Booking');
 const Sale = require('./Sale');
 const SaleCustomer = require('./SaleCustomer');
 const SalePayment = require('./SalePayment');
+const Accessory = require('./Accessory');
+const SaleAccessory = require('./SaleAccessory');
 const GeneralSetting = require('./GeneralSetting');
 const Notification = require('./Notification');
 
@@ -41,12 +43,22 @@ Company.hasMany(Trip, {
   as: 'trips'
 });
 
+Company.hasMany(Accessory, {
+  foreignKey: 'company_id',
+  as: 'accessories'
+});
+
 Company.hasOne(GeneralSetting, {
   foreignKey: 'company_id',
   as: 'general_setting'
 });
 
 GeneralSetting.belongsTo(Company, {
+  foreignKey: 'company_id',
+  as: 'company'
+});
+
+Accessory.belongsTo(Company, {
   foreignKey: 'company_id',
   as: 'company'
 });
@@ -247,6 +259,40 @@ Vehicle.hasMany(Sale, {
   as: 'sales'
 });
 
+Sale.belongsToMany(Accessory, {
+  through: SaleAccessory,
+  foreignKey: 'sale_id',
+  otherKey: 'accessory_id',
+  as: 'accessories'
+});
+
+Accessory.belongsToMany(Sale, {
+  through: SaleAccessory,
+  foreignKey: 'accessory_id',
+  otherKey: 'sale_id',
+  as: 'sales'
+});
+
+Sale.hasMany(SaleAccessory, {
+  foreignKey: 'sale_id',
+  as: 'sale_accessories'
+});
+
+SaleAccessory.belongsTo(Sale, {
+  foreignKey: 'sale_id',
+  as: 'sale'
+});
+
+SaleAccessory.belongsTo(Accessory, {
+  foreignKey: 'accessory_id',
+  as: 'accessory'
+});
+
+Accessory.hasMany(SaleAccessory, {
+  foreignKey: 'accessory_id',
+  as: 'sale_accessories'
+});
+
 Sale.hasMany(SalePayment, {
   foreignKey: 'sale_id',
   as: 'payments'
@@ -266,6 +312,8 @@ module.exports = {
   Sale,
   SaleCustomer,
   SalePayment,
+  Accessory,
+  SaleAccessory,
   GeneralSetting,
   Notification
 };
