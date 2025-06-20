@@ -39,8 +39,14 @@ const formatCurrency = (value) =>
 
 const formatDate = (dateString) => {
     if (!dateString) return '-';
-    const date = new Date(dateString + 'T00:00:00');
-    return date.toLocaleDateString('pt-BR');
+    const date = new Date(dateString);
+    return date.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
 const calculateDaysLeft = (dateString) => {
@@ -364,8 +370,8 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [], refreshCu
               <InfoItem
                 icon={<User className="w-4 h-4 text-blue-500" />}
                 label="Data de Execução"
-                value={formatDate(sale.sale_date)}
-              />              
+                value={formatDate(sale.delivery_date)}
+              />
               {sale.seller && (
                 <InfoItem 
                   icon={<UserCheck className="w-4 h-4 text-indigo-500" />}

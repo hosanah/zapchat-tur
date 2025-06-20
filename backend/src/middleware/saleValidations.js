@@ -112,7 +112,9 @@ const createSaleValidation = [
   body('delivery_date')
     .optional()
     .isISO8601()
-    .withMessage('Data de entrega deve ser uma data válida'),
+    .withMessage('Data de entrega deve ser uma data e hora válidas')
+    .matches(/T\d{2}:\d{2}/)
+    .withMessage('Data de entrega deve incluir hora'),
 
   body('commission_percentage')
     .optional()
@@ -279,7 +281,9 @@ const updateSaleValidation = [
   body('delivery_date')
     .optional()
     .isISO8601()
-    .withMessage('Data de entrega deve ser uma data válida'),
+    .withMessage('Data de entrega deve ser uma data e hora válidas')
+    .matches(/T\d{2}:\d{2}/)
+    .withMessage('Data de entrega deve incluir hora'),
 
   body('commission_percentage')
     .optional()

@@ -117,13 +117,21 @@ class SaleController {
         distinct: true
       });
 
+      const salesData = sales.map((s) => {
+        const obj = s.toJSON();
+        if (obj.delivery_date) {
+          obj.delivery_date = new Date(obj.delivery_date).toISOString();
+        }
+        return obj;
+      });
+
       // Calcular estatísticas
       const stats = await SaleController.getSalesStats(user);
 
       res.json({
         success: true,
         data: {
-          sales,
+          sales: salesData,
           pagination: {
             current_page: parseInt(page),
             per_page: parseInt(limit),
@@ -200,9 +208,14 @@ class SaleController {
         });
       }
 
+      const saleData = sale.toJSON();
+      if (saleData.delivery_date) {
+        saleData.delivery_date = new Date(saleData.delivery_date).toISOString();
+      }
+
       res.json({
         success: true,
-        data: sale
+        data: saleData
       });
     } catch (error) {
       console.error('Erro ao buscar venda:', error);
@@ -338,10 +351,15 @@ class SaleController {
         ]
       });
 
+      const createdData = createdSale.toJSON();
+      if (createdData.delivery_date) {
+        createdData.delivery_date = new Date(createdData.delivery_date).toISOString();
+      }
+
       res.status(201).json({
         success: true,
         message: 'Venda criada com sucesso',
-        data: createdSale
+        data: createdData
       });
     } catch (error) {
       console.error('Erro ao criar venda:', error);
@@ -476,10 +494,15 @@ class SaleController {
         ]
       });
 
+      const updatedData = updatedSale.toJSON();
+      if (updatedData.delivery_date) {
+        updatedData.delivery_date = new Date(updatedData.delivery_date).toISOString();
+      }
+
       res.json({
         success: true,
         message: 'Venda atualizada com sucesso',
-        data: updatedSale
+        data: updatedData
       });
     } catch (error) {
       console.error('Erro ao atualizar venda:', error);

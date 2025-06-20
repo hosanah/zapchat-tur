@@ -167,9 +167,9 @@ const Sale = sequelize.define('Sale', {
   },
   
   delivery_date: {
-    type: DataTypes.DATEONLY,
+    type: DataTypes.DATE,
     allowNull: true,
-    comment: 'Data de entrega/realização do serviço'
+    comment: 'Data e hora de entrega/realização do serviço'
   },
   
   // Parcelamento
