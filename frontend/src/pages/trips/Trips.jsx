@@ -219,7 +219,7 @@ const Trips = () => {
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-600">Ativos</p>
               <p className="text-lg font-semibold text-gray-900">
-                {trips.filter(c => c.status === 'ACTIVE').length}
+                {trips.filter(c => c.status === 'ativo').length}
               </p>
             </div>
           </div>

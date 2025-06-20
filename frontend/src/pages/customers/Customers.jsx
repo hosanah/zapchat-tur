@@ -24,7 +24,7 @@ const Customers = () => {
     emergencyContact: '',
     emergencyPhone: '',
     observations: '',
-    status: 'Ativo'
+    status: 'ativo'
   });
 
   const statusOptions = [
@@ -139,7 +139,7 @@ const Customers = () => {
       emergencyContact: customer.emergencyContact || '',
       emergencyPhone: customer.emergencyPhone || '',
       observations: customer.observations || '',
-      status: customer.status || 'ACTIVE'
+      status: customer.status || 'ativo'
     });
     setShowModal(true);
   };
@@ -173,7 +173,7 @@ const Customers = () => {
       emergencyContact: '',
       emergencyPhone: '',
       observations: '',
-      status: 'ACTIVE'
+      status: 'ativo'
     });
   };
 
@@ -260,7 +260,7 @@ const Customers = () => {
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-600">Ativos</p>
               <p className="text-lg font-semibold text-gray-900">
-                {customers.filter(c => c.status === 'ACTIVE').length}
+                {customers.filter(c => c.status === 'ativo').length}
               </p>
             </div>
           </div>
