@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import AuthContext from '@/contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
-import api, { saleService } from '../../services/api';
+import api, { saleService, saleAccessoryService, accessoryService } from '../../services/api';
 import AsyncSelect from "react-select/async";
 import SaleDetailsDrawer from './SaleDetailsDrawer';
 import {
@@ -29,7 +29,8 @@ import {
   Car,
   UserCheck,
   UserPlus,
-  Printer
+  Printer,
+  PackagePlus
 } from 'lucide-react';
 
 const Sales = () => {
@@ -57,6 +58,10 @@ const Sales = () => {
   const [responsibleCustomer, setResponsibleCustomer] = useState('');
   const [saleCustomers, setSaleCustomers] = useState([]);
   const [showAddCustomerModal, setShowAddCustomerModal] = useState(false);
+  const [showAccessoriesModal, setShowAccessoriesModal] = useState(false);
+  const [saleAccessories, setSaleAccessories] = useState([]);
+  const [availableAccessories, setAvailableAccessories] = useState([]);
+  const [newAccessory, setNewAccessory] = useState({ accessory_id: '', quantity: 1 });
   const [newCustomer, setNewCustomer] = useState({
     firstName: '',
     lastName: '',
@@ -224,6 +229,24 @@ const Sales = () => {
     }
   };
 
+  const fetchSaleAccessories = async (saleId) => {
+    try {
+      const res = await saleAccessoryService.list(saleId);
+      setSaleAccessories(res.data?.data ?? res.data ?? res);
+    } catch (error) {
+      console.error('Erro ao buscar acessórios da venda:', error);
+    }
+  };
+
+  const fetchAvailableAccessories = async () => {
+    try {
+      const res = await accessoryService.getAll();
+      setAvailableAccessories(res.data?.accessories || res.accessories || []);
+    } catch (err) {
+      console.error('Erro ao buscar acessórios:', err);
+    }
+  };
+
   const fetchStats = async () => {
     try {
       const response = await api.get('/sales/stats');
@@ -313,6 +336,35 @@ const Sales = () => {
     }
   };
 
+  const handleAddAccessory = async (e) => {
+    e.preventDefault();
+    if (!selectedSale) return;
+    try {
+      await saleAccessoryService.add(selectedSale.id, newAccessory);
+      showSuccess('Acessório adicionado');
+      setNewAccessory({ accessory_id: '', quantity: 1 });
+      fetchSaleAccessories(selectedSale.id);
+      fetchSales();
+    } catch (error) {
+      console.error('Erro ao adicionar acessório:', error);
+      showError(error.response?.data?.message || 'Erro ao adicionar acessório');
+    }
+  };
+
+  const handleRemoveAccessory = async (id) => {
+    if (!selectedSale) return;
+    if (!window.confirm('Remover este acessório?')) return;
+    try {
+      await saleAccessoryService.remove(selectedSale.id, id);
+      showSuccess('Acessório removido');
+      fetchSaleAccessories(selectedSale.id);
+      fetchSales();
+    } catch (error) {
+      console.error('Erro ao remover acessório:', error);
+      showError(error.response?.data?.message || 'Erro ao remover acessório');
+    }
+  };
+
   const openModal = (mode, sale = null) => {
     setModalMode(mode);
     setSelectedSale(sale);
@@ -379,6 +431,14 @@ const Sales = () => {
       birthDate: ''
     });
     setShowAddCustomerModal(true);
+  };
+
+  const openAccessoriesModal = (sale) => {
+    setSelectedSale(sale);
+    setNewAccessory({ accessory_id: '', quantity: 1 });
+    fetchSaleAccessories(sale.id);
+    fetchAvailableAccessories();
+    setShowAccessoriesModal(true);
   };
 
   const fetchSaleDetails = async (id) => {
@@ -756,6 +816,13 @@ const Sales = () => {
                           <UserPlus className="h-5 w-5" />
                         </button>
                         <button
+                          onClick={() => openAccessoriesModal(sale)}
+                          className="text-indigo-600 hover:text-indigo-900"
+                          title="Acessórios"
+                        >
+                          <PackagePlus className="h-5 w-5" />
+                        </button>
+                        <button
                           onClick={() => handleDelete(sale.id)}
                           className="text-red-600 hover:text-red-900"
                           title="Excluir"
@@ -818,6 +885,96 @@ const Sales = () => {
               Próxima
             </button>
           </nav>
+        </div>
+      )}
+
+      {showAccessoriesModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen p-4 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="flex justify-between items-center pb-4 mb-4 border-b border-gray-200">
+                  <h3 className="text-lg leading-6 font-medium text-gray-900">Acessórios da Venda</h3>
+                  <button onClick={() => setShowAccessoriesModal(false)} className="text-gray-400 hover:text-gray-500">
+                    <X className="h-6 w-6" />
+                  </button>
+                </div>
+                <form onSubmit={handleAddAccessory} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Acessório</label>
+                    <select
+                      required
+                      value={newAccessory.accessory_id}
+                      onChange={(e) => setNewAccessory({ ...newAccessory, accessory_id: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                    >
+                      <option value="">Selecione</option>
+                      {availableAccessories.map((a) => (
+                        <option key={a.id} value={a.id}>
+                          {a.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Quantidade</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={newAccessory.quantity}
+                      onChange={(e) => setNewAccessory({ ...newAccessory, quantity: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                      required
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <button type="button" onClick={() => setShowAccessoriesModal(false)} className="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50">
+                      Cancelar
+                    </button>
+                    <button type="submit" className="px-4 py-2 bg-zapchat-primary border border-transparent rounded-md text-sm font-medium text-white hover:bg-zapchat-medium">
+                      Adicionar
+                    </button>
+                  </div>
+                </form>
+
+                <div className="mt-6">
+                  <table className="min-w-full divide-y divide-gray-200 text-sm">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-3 py-2 text-left">Nome</th>
+                        <th className="px-3 py-2 text-center">Qtd</th>
+                        <th className="px-3 py-2" />
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {saleAccessories.map((sa) => (
+                        <tr key={sa.id}>
+                          <td className="px-3 py-2">{sa.accessory.name}</td>
+                          <td className="px-3 py-2 text-center">{sa.quantity}</td>
+                          <td className="px-3 py-2 text-right">
+                            <button onClick={() => handleRemoveAccessory(sa.id)} className="text-red-600 hover:text-red-800 text-sm">
+                              Remover
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                      {saleAccessories.length === 0 && (
+                        <tr>
+                          <td colSpan="3" className="text-center py-4 text-gray-500">
+                            Nenhum acessório associado
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

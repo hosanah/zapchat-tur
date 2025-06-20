@@ -301,6 +301,12 @@ export const salePaymentService = {
   remove: (saleId, paymentId) => api.delete(`/sales/${saleId}/payments/${paymentId}`),
 };
 
+export const saleAccessoryService = {
+  list: (saleId) => api.get(`/sales/${saleId}/accessories`),
+  add: (saleId, data) => api.post(`/sales/${saleId}/accessories`, data),
+  remove: (saleId, id) => api.delete(`/sales/${saleId}/accessories/${id}`),
+};
+
 // Serviços de reservas
 export const bookingService = {
   getAll: (params) => api.get('/bookings', { params }),

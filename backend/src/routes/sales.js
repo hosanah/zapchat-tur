@@ -16,6 +16,8 @@ const {
   removeSaleCustomerValidation
 } = require('../middleware/saleValidations');
 const paymentValidations = require('../middleware/paymentValidations');
+const saleAccessoryValidations = require('../middleware/saleAccessoryValidations');
+const SaleAccessoryController = require('../controllers/SaleAccessoryController');
 
 // Middleware para verificar erros de validação
 const checkValidationErrors = (req, res, next) => {
@@ -85,6 +87,25 @@ router.delete('/:id/payments/:payment_id',
   paymentValidations.remove,
   checkValidationErrors,
   SalePaymentController.destroy
+);
+
+// Acessórios da venda
+router.get('/:id/accessories',
+  saleAccessoryValidations.list,
+  checkValidationErrors,
+  SaleAccessoryController.index
+);
+
+router.post('/:id/accessories',
+  saleAccessoryValidations.create,
+  checkValidationErrors,
+  SaleAccessoryController.store
+);
+
+router.delete('/:id/accessories/:sale_accessory_id',
+  saleAccessoryValidations.remove,
+  checkValidationErrors,
+  SaleAccessoryController.destroy
 );
 
 // POST /api/sales/:id/customers - Adicionar cliente à venda
