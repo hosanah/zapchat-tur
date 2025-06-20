@@ -86,6 +86,7 @@ const ModernDashboard = () => {
           id: s.id,
           title: s.trip ? s.trip.title : s.sale_number,
           start: s.sale_date,
+          color: s.trip?.color,
         }));
         setSalesEvents(events);
       } catch (err) {
