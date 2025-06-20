@@ -69,7 +69,7 @@ class SaleController {
           {
             model: Trip,
             as: 'trip',
-            attributes: ['id', 'title', 'type', 'maxPassengers']
+            attributes: ['id', 'title', 'type', 'maxPassengers', 'color']
           },
           {
             model: Driver,
