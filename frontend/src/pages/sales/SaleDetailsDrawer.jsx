@@ -311,7 +311,7 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [], refreshCu
               </DrawerTitle>
             </div>
             <div className="flex items-center gap-2">
-              <StatusBadge status={saleData.status} />
+              <StatusBadge status={saleData?.status} />
             </div>
           </div>
         </DrawerHeader>
