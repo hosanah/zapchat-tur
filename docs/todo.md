@@ -110,6 +110,7 @@
 - [ ] Testes de autenticação
 - [ ] Testes de autorização
 - [ ] Testes de isolamento multi-tenant
+- [ ] Validar armazenamento e exibição do horário do passeio nas vendas
 
 ### Testes Frontend
 - [ ] Testes de componentes

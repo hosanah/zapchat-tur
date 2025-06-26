@@ -1,5 +1,6 @@
 const { Sequelize } = require('sequelize');
 const path = require('path');
+const fs = require('fs');
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -68,6 +69,40 @@ const dbConfig = config[environment];
 // Instância Sequelize
 const sequelize = new Sequelize(dbConfig);
 
+// Executa arquivos SQL de migrations de forma sequencial
+async function runMigrations() {
+  const migrationsDir = path.join(__dirname, '../database/migrations');
+  if (!fs.existsSync(migrationsDir)) return;
+
+  await sequelize.query(`CREATE TABLE IF NOT EXISTS migrations (name TEXT PRIMARY KEY, executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)`);
+
+  const files = fs.readdirSync(migrationsDir)
+    .filter((f) => f.endsWith('.sql'))
+    .sort();
+
+  for (const file of files) {
+    const executed = await sequelize.query(
+      'SELECT name FROM migrations WHERE name = ? LIMIT 1',
+      { replacements: [file], type: Sequelize.QueryTypes.SELECT }
+    );
+
+    if (executed.length === 0) {
+      const sql = fs.readFileSync(path.join(migrationsDir, file), 'utf8');
+      const statements = sql
+        .split(';')
+        .map((s) => s.trim())
+        .filter(Boolean);
+      for (const stmt of statements) {
+        await sequelize.query(stmt);
+      }
+      await sequelize.query('INSERT INTO migrations (name) VALUES (?)', {
+        replacements: [file]
+      });
+      console.log(`✅ Migration executada: ${file}`);
+    }
+  }
+}
+
 // Inicialização completa do banco
 async function initializeDatabase() {
   try {
@@ -79,7 +114,7 @@ async function initializeDatabase() {
       console.log('🔁 Modelos sincronizados com `force: true`');
     }
 
-    //await runMigrations();
+    await runMigrations();
 
     if (process.env.DB_CREATE_DEVINFO) {
       console.log('🌱 Executando seed de desenvolvimento...');
