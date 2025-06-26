@@ -331,9 +331,12 @@ export const accessoryService = {
 // Serviços de configurações gerais
 export const settingsService = {
   get: () => api.get('/settings'),
-  update: (data) => api.put('/settings', data),
-  create: (data) => api.post('/settings', data), 
-  remove: (id) => api.delete(`/settings/${id}`), 
+  update: (data) =>
+    api.put('/settings', data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+  create: (data) => api.post('/settings', data),
+  remove: (id) => api.delete(`/settings/${id}`),
 };
 
 // Serviços de atividades

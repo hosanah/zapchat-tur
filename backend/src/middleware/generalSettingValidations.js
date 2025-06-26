@@ -12,10 +12,6 @@ const generalSettingValidations = {
       .withMessage('Guidelines deve ser um texto')
   ],
   update: [
-    body('logo')
-      .optional({ nullable: true })
-      .isBase64()
-      .withMessage('Logo deve estar em Base64'),
     body('guidelines')
       .optional({ nullable: true })
       .isString()
