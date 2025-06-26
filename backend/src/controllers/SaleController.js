@@ -811,7 +811,7 @@ class SaleController {
         doc.fontSize(10).fillColor('#999').text('Sem logomarca cadastrada');
       }
       doc.moveUp();
-      doc.fontSize(20).fillColor('#0066cc').text('🎫 Voucher de Viagem', { align: 'center' });
+      doc.fontSize(20).fillColor('#0066cc').text('Voucher de Viagem', { align: 'center' });
       doc.fontSize(12).fillColor('black').text(`Nº ${sale.sale_number} - ${new Date().toLocaleDateString('pt-BR')}`, { align: 'center' });
 
       doc.moveDown();
@@ -821,7 +821,7 @@ class SaleController {
       // Main customer
       if (sale.customer) {
         doc.moveDown();
-        doc.fontSize(14).fillColor('#0066cc').text('👤 Cliente Principal');
+        doc.fontSize(14).fillColor('#0066cc').text('Cliente Principal');
         doc.fontSize(12).fillColor('black').text(`${sale.customer.firstName} ${sale.customer.lastName}`);
         doc.text(`Email: ${sale.customer.email}`);
         doc.text(`Telefone: ${sale.customer.phone}`);
@@ -830,7 +830,7 @@ class SaleController {
       // Trip info
       if (sale.trip) {
         doc.moveDown();
-        doc.fontSize(14).fillColor('#0066cc').text('🚌 Viagem');
+        doc.fontSize(14).fillColor('#0066cc').text('Viagem');
         doc.fontSize(12).fillColor('black').text(`Passeio: ${sale.trip.title}`);
         if (sale.delivery_date) {
           doc.text(`Data/Hora: ${new Date(sale.delivery_date).toLocaleString('pt-BR')}`);
@@ -842,7 +842,7 @@ class SaleController {
       // Additional customers table
       if (sale.sale_customers.length > 1) {
         doc.moveDown();
-        doc.fontSize(14).fillColor('#0066cc').text('👥 Passageiros');
+        doc.fontSize(14).fillColor('#0066cc').text('Passageiros');
         sale.sale_customers.forEach((sc, index) => {
           if (!sc.is_responsible) {
             const c = sc.customer;
@@ -852,11 +852,13 @@ class SaleController {
       }
 
       // Accessories table
+      let accessoriesTotal = 0;
       if (sale.sale_accessories && sale.sale_accessories.length > 0) {
         doc.moveDown();
-        doc.fontSize(14).fillColor('#0066cc').text('🎒 Acessórios');
+        doc.fontSize(14).fillColor('#0066cc').text('Acessórios');
         sale.sale_accessories.forEach((sa, idx) => {
           const total = parseFloat(sa.accessory.value) * parseInt(sa.quantity);
+          accessoriesTotal += total;
           doc.fontSize(12).fillColor('black').text(`${idx + 1}. ${sa.accessory.name} x${sa.quantity} - ${sa.accessory.description || ''} (R$ ${total.toFixed(2)})`);
         });
       }
@@ -866,11 +868,12 @@ class SaleController {
       const balance = parseFloat(sale.total_amount) - totalPaid;
 
       doc.moveDown();
-      doc.fontSize(14).fillColor('#0066cc').text('💳 Pagamentos');
+      doc.fontSize(14).fillColor('#0066cc').text('Pagamentos');
       sale.payments.forEach((p, i) => {
         doc.fontSize(12).fillColor('black').text(`${i + 1}. ${p.payment_method} - ${new Date(p.payment_date).toLocaleDateString('pt-BR')} - R$ ${parseFloat(p.amount).toFixed(2)}`);
       });
       doc.fontSize(12).text(`Subtotal: R$ ${parseFloat(sale.subtotal).toFixed(2)}`);
+      doc.fontSize(12).text(`Total de Extras: R$ ${accessoriesTotal.toFixed(2)}`);
       doc.fontSize(12).text(`Total Pago: R$ ${totalPaid.toFixed(2)}`);
       doc.fontSize(12).text(`Total Venda: R$ ${parseFloat(sale.total_amount).toFixed(2)}`);
       doc.fontSize(12).text(`Saldo: R$ ${balance.toFixed(2)}`);
