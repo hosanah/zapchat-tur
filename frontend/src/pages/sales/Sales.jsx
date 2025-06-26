@@ -453,7 +453,11 @@ const Sales = () => {
 
   const openDetailsModal = async (sale) => {
     const details = await fetchSaleDetails(sale.id);
-    if (details) setSelectedSale(details);
+    if (!details) {
+      showError('Venda não encontrada');
+      return;
+    }
+    setSelectedSale(details);
     fetchSaleCustomers(sale.id);
     setShowDetailsModal(true);
   };
