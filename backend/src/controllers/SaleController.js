@@ -1,6 +1,19 @@
 const { Sale, Customer, Company, User, Trip, Vehicle, Booking, Driver, SaleCustomer, SaleAccessory, Accessory, GeneralSetting, SalePayment } = require('../models');
 const { Op } = require('sequelize');
 const PDFDocument = require('pdfkit');
+const https = require('https');
+
+const fetchImageBuffer = (url) => new Promise((resolve, reject) => {
+  https
+    .get(url, (res) => {
+      const chunks = [];
+      res
+        .on('data', (c) => chunks.push(c))
+        .on('end', () => resolve(Buffer.concat(chunks)))
+        .on('error', reject);
+    })
+    .on('error', reject);
+});
 
 class SaleController {
   // Listar vendas com filtros e paginação
@@ -828,6 +841,19 @@ class SaleController {
       res.setHeader('Content-Disposition', `attachment; filename="voucher-${sale.sale_number}.pdf"`);
       doc.pipe(res);
 
+      // Watermark image
+      try {
+        const wmUrl = process.env.VOUCHER_WATERMARK_URL ||
+          'https://drive.google.com/uc?export=download&id=1T5KEt7EziqaOCAyDkRl4k8CW9Qs3wKJL';
+        const buffer = await fetchImageBuffer(wmUrl);
+        const wmWidth = 300;
+        const x = (doc.page.width - wmWidth) / 2;
+        const y = (doc.page.height - wmWidth) / 2;
+        doc.opacity(0.1).image(buffer, x, y, { width: wmWidth }).opacity(1);
+      } catch (err) {
+        console.error('Erro ao carregar marca d\'agua:', err);
+      }
+
       // Header
       if (setting && setting.logo) {
         try { doc.image(setting.logo, { width: 100 }); } catch (e) { /* ignore */ }
@@ -867,10 +893,12 @@ class SaleController {
       if (sale.sale_customers.length > 1) {
         doc.moveDown();
         doc.fontSize(14).fillColor('#0066cc').text('Passageiros');
-        sale.sale_customers.forEach((sc, index) => {
+        let count = 1;
+        sale.sale_customers.forEach((sc) => {
           if (!sc.is_responsible) {
             const c = sc.customer;
-            doc.fontSize(12).fillColor('black').text(`${index}. ${c.firstName} ${c.lastName} - ${c.phone}`);
+            doc.fontSize(12).fillColor('black').text(`${count}. ${c.firstName} ${c.lastName} - ${c.phone}`);
+            count += 1;
           }
         });
       }
