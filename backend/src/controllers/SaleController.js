@@ -48,12 +48,12 @@ class SaleController {
       // Busca textual
       if (search) {
         where[Op.or] = [
-          { sale_number: { [Op.like]: `%${search}%` } },
-          { description: { [Op.like]: `%${search}%` } },
-          { notes: { [Op.like]: `%${search}%` } },
-          { '$customer.first_name$': { [Op.like]: `%${search}%` } },
-          { '$customer.last_name$': { [Op.like]: `%${search}%` } },
-          { '$customer.email$': { [Op.like]: `%${search}%` } }
+          { sale_number: { [Op.iLike]: `%${search}%` } },
+          { description: { [Op.iLike]: `%${search}%` } },
+          { notes: { [Op.iLike]: `%${search}%` } },
+          { '$customer.first_name$': { [Op.iLike]: `%${search}%` } },
+          { '$customer.last_name$': { [Op.iLike]: `%${search}%` } },
+          { '$customer.email$': { [Op.iLike]: `%${search}%` } }
         ];
       }
 

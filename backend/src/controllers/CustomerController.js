@@ -27,11 +27,11 @@ class CustomerController {
 
       if (search) {
         where[Op.or] = [
-          { firstName: { [Op.like]: `%${search}%` } },
-          { lastName: { [Op.like]: `%${search}%` } },
-          { email: { [Op.like]: `%${search}%` } },
-          { cpf: { [Op.like]: `%${search}%` } },
-          { phone: { [Op.like]: `%${search}%` } }
+          { firstName: { [Op.iLike]: `%${search}%` } },
+          { lastName: { [Op.iLike]: `%${search}%` } },
+          { email: { [Op.iLike]: `%${search}%` } },
+          { cpf: { [Op.iLike]: `%${search}%` } },
+          { phone: { [Op.iLike]: `%${search}%` } }
         ];
       }
 
