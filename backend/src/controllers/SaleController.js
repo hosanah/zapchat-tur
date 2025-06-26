@@ -723,7 +723,7 @@ class SaleController {
     try {
       const { id } = req.params;
       const user = req.user;
-      const { firstName, lastName, email, phone, birthDate } = req.body;
+      const { customer_id, firstName, lastName, email, phone, birthDate } = req.body;
 
       const sale = await Sale.findByPk(id);
       if (!sale || (user.role !== 'master' && sale.company_id !== user.company_id)) {
@@ -733,14 +733,38 @@ class SaleController {
         });
       }
 
-      const customer = await Customer.create({
-        firstName,
-        lastName,
-        email,
-        phone,
-        birthDate,
-        company_id: sale.company_id
+      let customer;
+
+      if (customer_id) {
+        customer = await Customer.findOne({
+          where: { id: customer_id, company_id: sale.company_id }
+        });
+        if (!customer) {
+          return res.status(400).json({
+            success: false,
+            message: 'Cliente não encontrado ou não pertence à empresa'
+          });
+        }
+      } else {
+        customer = await Customer.create({
+          firstName,
+          lastName,
+          email,
+          phone,
+          birthDate,
+          company_id: sale.company_id
+        });
+      }
+
+      const exists = await SaleCustomer.findOne({
+        where: { sale_id: id, customer_id: customer.id }
       });
+      if (exists) {
+        return res.status(400).json({
+          success: false,
+          message: 'Cliente já vinculado a esta venda'
+        });
+      }
 
       await SaleCustomer.create({ sale_id: id, customer_id: customer.id });
 

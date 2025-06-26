@@ -76,6 +76,8 @@ const Sales = () => {
     phone: '',
     birthDate: ''
   });
+  const [isNewAdditionalCustomer, setIsNewAdditionalCustomer] = useState(false);
+  const [existingAdditionalCustomer, setExistingAdditionalCustomer] = useState(null);
   const [useExistingCustomer, setUseExistingCustomer] = useState(true);
   const [newResponsibleCustomer, setNewResponsibleCustomer] = useState({
     firstName: '',
@@ -332,9 +334,15 @@ const Sales = () => {
     e.preventDefault();
     if (!selectedSale) return;
     try {
-      await api.post(`/sales/${selectedSale.id}/customers`, newCustomer);
+      if (isNewAdditionalCustomer) {
+        await api.post(`/sales/${selectedSale.id}/customers`, newCustomer);
+      } else {
+        if (!existingAdditionalCustomer) return;
+        await api.post(`/sales/${selectedSale.id}/customers`, { customer_id: existingAdditionalCustomer.value });
+      }
       showSuccess('Cliente adicionado com sucesso');
       setNewCustomer({ firstName: '', lastName: '', email: '', phone: '', birthDate: '' });
+      setExistingAdditionalCustomer(null);
       fetchSaleCustomers(selectedSale.id);
     } catch (error) {
       console.error('Erro ao adicionar cliente:', error);
@@ -437,6 +445,8 @@ const Sales = () => {
       phone: '',
       birthDate: ''
     });
+    setExistingAdditionalCustomer(null);
+    setIsNewAdditionalCustomer(false);
     setShowAddCustomerModal(true);
   };
 
@@ -576,7 +586,8 @@ const Sales = () => {
           <p className="text-gray-600 mt-1">Gerencie todas as vendas da empresa</p>
         </div>
         <button
-          onClick={() => openModal('create')}
+          onClick={() => openModal('create')
+                    }
           className="btn-primary flex items-center gap-2"
         >
           <Plus className="h-5 w-5" />
@@ -602,7 +613,8 @@ const Sales = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Valor Total</p>
-              <p className="text-2xl font-bold text-zapchat-darker">{formatCurrency(stats.total_amount)}</p>
+              <p className="text-2xl font-bold text-zapchat-darker">{formatCurrency(stats.total_amount)
+                    }</p>
             </div>
             <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
               <TrendingUp className="h-6 w-6 text-green-600" />
@@ -614,7 +626,8 @@ const Sales = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Comissões</p>
-              <p className="text-2xl font-bold text-zapchat-darker">{formatCurrency(stats.total_commission)}</p>
+              <p className="text-2xl font-bold text-zapchat-darker">{formatCurrency(stats.total_commission)
+                    }</p>
             </div>
             <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <CreditCard className="h-6 w-6 text-blue-600" />
@@ -626,7 +639,8 @@ const Sales = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Média por Venda</p>
-              <p className="text-2xl font-bold text-zapchat-darker">{formatCurrency(stats.average_sale)}</p>
+              <p className="text-2xl font-bold text-zapchat-darker">{formatCurrency(stats.average_sale)
+                    }</p>
             </div>
             <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
               <TrendingUp className="h-6 w-6 text-purple-600" />
@@ -645,7 +659,8 @@ const Sales = () => {
                 type="text"
                 placeholder="Buscar vendas..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => setSearchTerm(e.target.value)
+                    }
                 className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent"
               />
             </div>
@@ -654,7 +669,8 @@ const Sales = () => {
             <div className="w-full sm:w-48">
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={(e) => setStatusFilter(e.target.value)
+                    }
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent"
               >
                 <option value="">Status</option>
@@ -662,14 +678,16 @@ const Sales = () => {
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
-                ))}
+                ))
+                    }
               </select>
             </div>
               <div className="w-full sm:w-40">
                 <input
                   type="date"
                   value={startDateFilter}
-                  onChange={(e) => setStartDateFilter(e.target.value)}
+                  onChange={(e) => setStartDateFilter(e.target.value)
+                    }
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent"
                 />
               </div>
@@ -677,7 +695,8 @@ const Sales = () => {
                 <input
                   type="date"
                   value={endDateFilter}
-                  onChange={(e) => setEndDateFilter(e.target.value)}
+                  onChange={(e) => setEndDateFilter(e.target.value)
+                    }
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent"
                 />
               </div>
@@ -739,7 +758,8 @@ const Sales = () => {
                         {sale.sale_number}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {getStatusBadge(sale.priority, priorityOptions)}
+                        {getStatusBadge(sale.priority, priorityOptions)
+                    }
                       </div>
                     </div>
                     </td>
@@ -767,7 +787,8 @@ const Sales = () => {
                       </div>
                     ) : (
                       <span className="text-gray-400">-</span>
-                    )}
+                    )
+                    }
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {sale.users || sale.users ? (
@@ -778,63 +799,75 @@ const Sales = () => {
                       </div>
                     ) : (
                       <span className="text-gray-400">-</span>
-                    )}
+                    )
+                    }
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <div className="text-sm font-medium text-gray-900">
-                        {formatCurrency(sale.total_amount)}
+                        {formatCurrency(sale.total_amount)
+                    }
                       </div>
                     {sale.commission_amount > 0 && (
                       <div className="text-sm text-gray-500">
-                        Comissão: {formatCurrency(sale.commission_amount)}
+                        Comissão: {formatCurrency(sale.commission_amount)
+                    }
                       </div>
-                    )}
+                    )
+                    }
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {getStatusBadge(sale.status, statusOptions)}
+                      {getStatusBadge(sale.status, statusOptions)
+                    }
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {formatDateTime(sale.delivery_date || sale.sale_date)}
+                      {formatDateTime(sale.delivery_date || sale.sale_date)
+                    }
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end space-x-2">
                         <button
-                          onClick={() => openDetailsModal(sale)}
+                          onClick={() => openDetailsModal(sale)
+                    }
                           className="text-blue-600 hover:text-blue-900"
                           title="Visualizar"
                         >
                           <Eye className="h-5 w-5" />
                         </button>
                         <button
-                          onClick={() => handlePrintVoucher(sale)}
+                          onClick={() => handlePrintVoucher(sale)
+                    }
                           className="text-gray-600 hover:text-gray-900"
                           title="Imprimir Voucher"
                         >
                           <Printer className="h-5 w-5" />
                         </button>
                         <button
-                          onClick={() => openModal('edit', sale)}
+                          onClick={() => openModal('edit', sale)
+                    }
                           className="text-yellow-600 hover:text-yellow-900"
                           title="Editar"
                         >
                           <Edit className="h-5 w-5" />
                         </button>
                         <button
-                          onClick={() => openAddCustomerModal(sale)}
+                          onClick={() => openAddCustomerModal(sale)
+                    }
                           className="text-green-600 hover:text-green-900"
                           title="Adicionar Cliente"
                         >
                           <UserPlus className="h-5 w-5" />
                         </button>
                         <button
-                          onClick={() => openAccessoriesModal(sale)}
+                          onClick={() => openAccessoriesModal(sale)
+                    }
                           className="text-indigo-600 hover:text-indigo-900"
                           title="Acessórios"
                         >
                           <PackagePlus className="h-5 w-5" />
                         </button>
                         <button
-                          onClick={() => handleDelete(sale.id)}
+                          onClick={() => handleDelete(sale.id)
+                    }
                           className="text-red-600 hover:text-red-900"
                           title="Excluir"
                         >
@@ -850,7 +883,8 @@ const Sales = () => {
                     Nenhuma venda encontrada
                   </td>
                 </tr>
-              )}
+              )
+                    }
             </tbody>
           </table>
         </div>
@@ -861,7 +895,8 @@ const Sales = () => {
         <div className="flex justify-center mt-6">
           <nav className="flex items-center space-x-2">
             <button
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))
+                    }
               disabled={currentPage === 1}
               className={`px-3 py-1 rounded-md ${
                 currentPage === 1
@@ -874,7 +909,8 @@ const Sales = () => {
             {[...Array(totalPages)].map((_, i) => (
               <button
                 key={i}
-                onClick={() => setCurrentPage(i + 1)}
+                onClick={() => setCurrentPage(i + 1)
+                    }
                 className={`px-3 py-1 rounded-md ${
                   currentPage === i + 1
                     ? 'bg-zapchat-primary text-white'
@@ -883,9 +919,11 @@ const Sales = () => {
               >
                 {i + 1}
               </button>
-            ))}
+            ))
+                    }
             <button
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))
+                    }
               disabled={currentPage === totalPages}
               className={`px-3 py-1 rounded-md ${
                 currentPage === totalPages
@@ -897,7 +935,8 @@ const Sales = () => {
             </button>
           </nav>
         </div>
-      )}
+      )
+                    }
 
       {showAccessoriesModal && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -910,7 +949,8 @@ const Sales = () => {
               <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="flex justify-between items-center pb-4 mb-4 border-b border-gray-200">
                   <h3 className="text-lg leading-6 font-medium text-gray-900">Acessórios da Venda</h3>
-                  <button onClick={() => setShowAccessoriesModal(false)} className="text-gray-400 hover:text-gray-500">
+                  <button onClick={() => setShowAccessoriesModal(false)
+                    } className="text-gray-400 hover:text-gray-500">
                     <X className="h-6 w-6" />
                   </button>
                 </div>
@@ -920,7 +960,8 @@ const Sales = () => {
                     <select
                       required
                       value={newAccessory.accessory_id}
-                      onChange={(e) => setNewAccessory({ ...newAccessory, accessory_id: e.target.value })}
+                      onChange={(e) => setNewAccessory({ ...newAccessory, accessory_id: e.target.value })
+                    }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
                     >
                       <option value="">Selecione</option>
@@ -928,7 +969,8 @@ const Sales = () => {
                         <option key={a.id} value={a.id}>
                           {a.name}
                         </option>
-                      ))}
+                      ))
+                    }
                     </select>
                   </div>
                   <div>
@@ -937,13 +979,15 @@ const Sales = () => {
                       type="number"
                       min="1"
                       value={newAccessory.quantity}
-                      onChange={(e) => setNewAccessory({ ...newAccessory, quantity: e.target.value })}
+                      onChange={(e) => setNewAccessory({ ...newAccessory, quantity: e.target.value })
+                    }
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
                       required
                     />
                   </div>
                   <div className="flex justify-end gap-2">
-                    <button type="button" onClick={() => setShowAccessoriesModal(false)} className="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50">
+                    <button type="button" onClick={() => setShowAccessoriesModal(false)
+                    } className="px-4 py-2 border border-gray-300 rounded-md text-sm hover:bg-gray-50">
                       Cancelar
                     </button>
                     <button type="submit" className="px-4 py-2 bg-zapchat-primary border border-transparent rounded-md text-sm font-medium text-white hover:bg-zapchat-medium">
@@ -967,19 +1011,22 @@ const Sales = () => {
                           <td className="px-3 py-2">{sa.accessory.name}</td>
                           <td className="px-3 py-2 text-center">{sa.quantity}</td>
                           <td className="px-3 py-2 text-right">
-                            <button onClick={() => handleRemoveAccessory(sa.id)} className="text-red-600 hover:text-red-800 text-sm">
+                            <button onClick={() => handleRemoveAccessory(sa.id)
+                    } className="text-red-600 hover:text-red-800 text-sm">
                               Remover
                             </button>
                           </td>
                         </tr>
-                      ))}
+                      ))
+                    }
                       {saleAccessories.length === 0 && (
                         <tr>
                           <td colSpan="3" className="text-center py-4 text-gray-500">
                             Nenhum acessório associado
                           </td>
                         </tr>
-                      )}
+                      )
+                    }
                     </tbody>
                   </table>
                 </div>
@@ -987,7 +1034,8 @@ const Sales = () => {
             </div>
           </div>
         </div>
-      )}
+      )
+                    }
 
       {/* Modal de Detalhes da Venda */}
       <SaleDetailsDrawer
@@ -995,7 +1043,8 @@ const Sales = () => {
         onOpenChange={handleDetailsDrawerChange}
         sale={selectedSale}
         customers={saleCustomers}
-        refreshCustomers={() => selectedSale && fetchSaleCustomers(selectedSale.id)}
+        refreshCustomers={() => selectedSale && fetchSaleCustomers(selectedSale.id)
+                    }
       />
 
       {/* Modal de Venda */}
@@ -1014,7 +1063,8 @@ const Sales = () => {
                     {modalMode === 'edit' && 'Editar Venda'}
                   </h3>
                   <button
-                    onClick={() => setShowModal(false)}
+                    onClick={() => setShowModal(false)
+                    }
                     className="text-gray-400 hover:text-gray-500"
                   >
                     <X className="h-6 w-6" />
@@ -1035,7 +1085,8 @@ const Sales = () => {
                               <span className="text-sm text-zapchat-primary">Novo Cliente</span>
                               <button
                                 type="button"
-                                onClick={() => setIsNewMainCustomer(false)}
+                                onClick={() => setIsNewMainCustomer(false)
+                    }
                                 className="text-xs text-gray-500 hover:text-gray-700"
                               >
                                 Usar cliente existente
@@ -1134,7 +1185,8 @@ const Sales = () => {
                               <span className="text-sm text-zapchat-primary">Cliente Existente</span>
                               <button
                                 type="button"
-                                onClick={() => setIsNewMainCustomer(true)}
+                                onClick={() => setIsNewMainCustomer(true)
+                    }
                                 className="text-xs text-gray-500 hover:text-gray-700"
                               >
                                 Cadastrar novo cliente
@@ -1155,7 +1207,8 @@ const Sales = () => {
                               isClearable
                             />
                           </div>
-                        )}
+                        )
+                    }
                       </div>
 
                       <div>
@@ -1164,15 +1217,18 @@ const Sales = () => {
                         </label>
                         <select
                           value={formData.trip_id}
-                          onChange={(e) => setFormData({ ...formData, trip_id: e.target.value })}
+                          onChange={(e) => setFormData({ ...formData, trip_id: e.target.value })
+                    }
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
                         >
                           <option value="">Selecione um passeio</option>
                           {trips.map((trip) => (
                             <option key={trip.id} value={trip.id}>
-                              {trip.title} - {formatCurrency(trip.priceTrips)}
+                              {trip.title} - {formatCurrency(trip.priceTrips)
+                    }
                             </option>
-                          ))}
+                          ))
+                    }
                         </select>
                       </div>
 
@@ -1182,7 +1238,8 @@ const Sales = () => {
                         </label>
                         <select
                           value={formData.driver_id}
-                          onChange={(e) => setFormData({ ...formData, driver_id: e.target.value })}
+                          onChange={(e) => setFormData({ ...formData, driver_id: e.target.value })
+                    }
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
                         >
                           <option value="">Selecione um motorista</option>
@@ -1190,7 +1247,8 @@ const Sales = () => {
                             <option key={driver.id} value={driver.id}>
                               {driver.firstName} {driver.lastName} - CNH: {driver.licenseNumber}
                             </option>
-                          ))}
+                          ))
+                    }
                         </select>
                       </div>
 
@@ -1200,7 +1258,8 @@ const Sales = () => {
                         </label>
                         <select
                           value={formData.vehicle_id}
-                          onChange={(e) => setFormData({ ...formData, vehicle_id: e.target.value })}
+                          onChange={(e) => setFormData({ ...formData, vehicle_id: e.target.value })
+                    }
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
                         >
                           <option value="">Selecione um veículo</option>
@@ -1208,7 +1267,8 @@ const Sales = () => {
                             <option key={vehicle.id} value={vehicle.id}>
                               {vehicle.model} - {vehicle.plate}
                             </option>
-                          ))}
+                          ))
+                    }
                         </select>
                       </div>
 
@@ -1218,7 +1278,8 @@ const Sales = () => {
                         </label>
                         <select
                           value={formData.seller_id}
-                          onChange={(e) => setFormData({ ...formData, seller_id: e.target.value })}
+                          onChange={(e) => setFormData({ ...formData, seller_id: e.target.value })
+                    }
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
                         >
                           <option value="">Selecione um vendedor</option>
@@ -1226,7 +1287,8 @@ const Sales = () => {
                             <option key={seller.id} value={seller.id}>
                               {seller.firstName} {seller.lastName} - ({seller.role})
                             </option>
-                          ))}
+                          ))
+                    }
                         </select>
                       </div>
 
@@ -1236,7 +1298,8 @@ const Sales = () => {
                         </label>
                         <textarea
                           value={formData.description}
-                          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                          onChange={(e) => setFormData({ ...formData, description: e.target.value })
+                    }
                           rows="3"
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
                         ></textarea>
@@ -1252,14 +1315,16 @@ const Sales = () => {
                           </label>
                           <select
                             value={formData.status}
-                            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                            onChange={(e) => setFormData({ ...formData, status: e.target.value })
+                    }
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
                           >
                             {statusOptions.map((option) => (
                               <option key={option.value} value={option.value}>
                                 {option.label}
                               </option>
-                            ))}
+                            ))
+                    }
                           </select>
                         </div>
                         <div>
@@ -1268,14 +1333,16 @@ const Sales = () => {
                           </label>
                           <select
                             value={formData.priority}
-                            onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+                            onChange={(e) => setFormData({ ...formData, priority: e.target.value })
+                    }
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
                           >
                             {priorityOptions.map((option) => (
                               <option key={option.value} value={option.value}>
                                 {option.label}
                               </option>
-                            ))}
+                            ))
+                    }
                           </select>
                         </div>
                       </div>
@@ -1288,7 +1355,8 @@ const Sales = () => {
                           <input
                             type="date"
                             value={formData.sale_date}
-                            onChange={(e) => setFormData({ ...formData, sale_date: e.target.value })}
+                            onChange={(e) => setFormData({ ...formData, sale_date: e.target.value })
+                    }
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
                           />
                         </div>
@@ -1299,7 +1367,8 @@ const Sales = () => {
                           <input
                             type="datetime-local"
                             value={formData.delivery_date}
-                            onChange={(e) => setFormData({ ...formData, delivery_date: e.target.value })}
+                            onChange={(e) => setFormData({ ...formData, delivery_date: e.target.value })
+                    }
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
                           />
                         </div>
@@ -1313,7 +1382,8 @@ const Sales = () => {
                           type="number"
                           step="0.01"
                           value={formData.subtotal}
-                          onChange={(e) => setFormData({ ...formData, subtotal: e.target.value })}
+                          onChange={(e) => setFormData({ ...formData, subtotal: e.target.value })
+                    }
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
                           required
                         />
@@ -1328,7 +1398,8 @@ const Sales = () => {
                             type="number"
                             step="0.01"
                             value={formData.discount_amount}
-                            onChange={(e) => setFormData({ ...formData, discount_amount: e.target.value })}
+                            onChange={(e) => setFormData({ ...formData, discount_amount: e.target.value })
+                    }
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
                           />
                         </div>
@@ -1340,7 +1411,8 @@ const Sales = () => {
                             type="number"
                             step="0.01"
                             value={formData.tax_amount}
-                            onChange={(e) => setFormData({ ...formData, tax_amount: e.target.value })}
+                            onChange={(e) => setFormData({ ...formData, tax_amount: e.target.value })
+                    }
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
                           />
                         </div>
@@ -1350,7 +1422,8 @@ const Sales = () => {
                         <div className="flex justify-between items-center">
                           <span className="text-lg font-medium text-gray-700">Total:</span>
                           <span className="text-xl font-bold text-zapchat-primary">
-                            {formatCurrency(calculateTotal())}
+                            {formatCurrency(calculateTotal())
+                    }
                           </span>
                         </div>
                       </div>
@@ -1363,7 +1436,8 @@ const Sales = () => {
                   <div className="mt-8 flex justify-end space-x-3">
                     <button
                       type="button"
-                      onClick={() => setShowModal(false)}
+                      onClick={() => setShowModal(false)
+                    }
                       className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
                     >
                       Cancelar
@@ -1380,7 +1454,8 @@ const Sales = () => {
             </div>
           </div>
         </div>
-      )}
+      )
+                    }
 
       {/* Modal de Adicionar Cliente */}
       {showAddCustomerModal && (
@@ -1397,7 +1472,8 @@ const Sales = () => {
                     Adicionar Cliente à Venda
                   </h3>
                   <button
-                    onClick={() => setShowAddCustomerModal(false)}
+                    onClick={() => setShowAddCustomerModal(false)
+                    }
                     className="text-gray-400 hover:text-gray-500"
                   >
                     <X className="h-6 w-6" />
@@ -1406,98 +1482,129 @@ const Sales = () => {
 
                 <form onSubmit={handleAddCustomer}>
                   <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Nome
-                        </label>
-                        <input
-                          type="text"
-                          value={newCustomer.firstName}
-                          onChange={(e) =>
-                            setNewCustomer({
-                              ...newCustomer,
-                              firstName: e.target.value
-                            })
-                          }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Sobrenome
-                        </label>
-                        <input
-                          type="text"
-                          value={newCustomer.lastName}
-                          onChange={(e) =>
-                            setNewCustomer({
-                              ...newCustomer,
-                              lastName: e.target.value
-                            })
-                          }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
-                          required
-                        />
-                      </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-zapchat-primary">
+                        {isNewAdditionalCustomer ? 'Novo Cliente' : 'Cliente Existente'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setIsNewAdditionalCustomer(!isNewAdditionalCustomer)
+                    }
+                        className="text-xs text-gray-500 hover:text-gray-700"
+                      >
+                        {isNewAdditionalCustomer ? 'Usar cliente existente' : 'Cadastrar novo cliente'}
+                      </button>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Email
-                      </label>
-                      <input
-                        type="email"
-                        value={newCustomer.email}
-                        onChange={(e) =>
-                          setNewCustomer({
-                            ...newCustomer,
-                            email: e.target.value
-                          })
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                    {isNewAdditionalCustomer ? (
+                      <>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Nome
+                            </label>
+                            <input
+                              type="text"
+                              value={newCustomer.firstName}
+                              onChange={(e) =>
+                                setNewCustomer({
+                                  ...newCustomer,
+                                  firstName: e.target.value
+                                })
+                              }
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                              required
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Sobrenome
+                            </label>
+                            <input
+                              type="text"
+                              value={newCustomer.lastName}
+                              onChange={(e) =>
+                                setNewCustomer({
+                                  ...newCustomer,
+                                  lastName: e.target.value
+                                })
+                              }
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                              required
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Email
+                          </label>
+                          <input
+                            type="email"
+                            value={newCustomer.email}
+                            onChange={(e) =>
+                              setNewCustomer({
+                                ...newCustomer,
+                                email: e.target.value
+                              })
+                            }
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Telefone
+                            </label>
+                            <input
+                              type="text"
+                              value={newCustomer.phone}
+                              onChange={(e) =>
+                                setNewCustomer({
+                                  ...newCustomer,
+                                  phone: e.target.value
+                                })
+                              }
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Data de Nascimento
+                            </label>
+                            <input
+                              type="date"
+                              value={newCustomer.birthDate}
+                              onChange={(e) =>
+                                setNewCustomer({
+                                  ...newCustomer,
+                                  birthDate: e.target.value
+                                })
+                              }
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
+                            />
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <AsyncSelect
+                        cacheOptions
+                        defaultOptions
+                        loadOptions={loadCustomerOptions}
+                        value={existingAdditionalCustomer}
+                        onChange={setExistingAdditionalCustomer}
+                        placeholder="Selecione um cliente"
+                        className="react-select-container"
+                        classNamePrefix="react-select"
+                        isClearable
                       />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Telefone
-                        </label>
-                        <input
-                          type="text"
-                          value={newCustomer.phone}
-                          onChange={(e) =>
-                            setNewCustomer({
-                              ...newCustomer,
-                              phone: e.target.value
-                            })
-                          }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Data de Nascimento
-                        </label>
-                        <input
-                          type="date"
-                          value={newCustomer.birthDate}
-                          onChange={(e) =>
-                            setNewCustomer({
-                              ...newCustomer,
-                              birthDate: e.target.value
-                            })
-                          }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-zapchat-primary focus:border-zapchat-primary"
-                        />
-                      </div>
-                    </div>
+                    )
+                    }
                   </div>
 
                   <div className="mt-6 flex justify-end space-x-3">
                     <button
                       type="button"
-                      onClick={() => setShowAddCustomerModal(false)}
+                      onClick={() => setShowAddCustomerModal(false)
+                    }
                       className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
                     >
                       Cancelar
@@ -1514,7 +1621,8 @@ const Sales = () => {
             </div>
           </div>
         </div>
-      )}
+      )
+                    }
     </div>
   );
 };
