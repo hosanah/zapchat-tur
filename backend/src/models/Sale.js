@@ -340,10 +340,18 @@ const Sale = sequelize.define('Sale', {
       const taxAmount = parseFloat(sale.tax_amount) || 0;
 
       let accessoriesTotal = 0;
-      if (Array.isArray(sale.accessories)) {
+      // Preferir a associação "accessories". Caso esteja ausente,
+      // verificar "sale_accessories" carregada por outros controladores.
+      if (Array.isArray(sale.accessories) && sale.accessories.length) {
         sale.accessories.forEach(acc => {
           const quantity = parseInt(acc.quantity || 1);
           const value = parseFloat(acc.value || (acc.Accessory && acc.Accessory.value) || 0);
+          accessoriesTotal += value * quantity;
+        });
+      } else if (Array.isArray(sale.sale_accessories)) {
+        sale.sale_accessories.forEach(sa => {
+          const quantity = parseInt(sa.quantity || 1);
+          const value = parseFloat(sa.accessory?.value || 0);
           accessoriesTotal += value * quantity;
         });
       }
@@ -370,10 +378,18 @@ const Sale = sequelize.define('Sale', {
       const taxAmount = parseFloat(sale.tax_amount) || 0;
 
       let accessoriesTotal = 0;
-      if (Array.isArray(sale.accessories)) {
+      // Preferir a associação "accessories". Caso esteja ausente,
+      // verificar "sale_accessories" carregada por outros controladores.
+      if (Array.isArray(sale.accessories) && sale.accessories.length) {
         sale.accessories.forEach(acc => {
           const quantity = parseInt(acc.quantity || 1);
           const value = parseFloat(acc.value || (acc.Accessory && acc.Accessory.value) || 0);
+          accessoriesTotal += value * quantity;
+        });
+      } else if (Array.isArray(sale.sale_accessories)) {
+        sale.sale_accessories.forEach(sa => {
+          const quantity = parseInt(sa.quantity || 1);
+          const value = parseFloat(sa.accessory?.value || 0);
           accessoriesTotal += value * quantity;
         });
       }

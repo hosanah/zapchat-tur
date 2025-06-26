@@ -1,6 +1,10 @@
 const { Sale, Accessory, SaleAccessory } = require('../models');
 const { validationResult } = require('express-validator');
 
+// Helper utilizado pelos métodos abaixo para atualizar valores de uma venda
+// com base nos acessórios atualmente associados. Os hooks do modelo Sale
+// também realizam esse cálculo ao salvar, mas o controller mantém a lógica
+// explícita para clareza e para ações que não disparam hooks automaticamente.
 function recalcTotals(sale) {
   const subtotal = parseFloat(sale.subtotal) || 0;
   const discount = parseFloat(sale.discount_amount) || 0;
@@ -61,6 +65,8 @@ class SaleAccessoryController {
         return res.status(404).json({ success: false, message: 'Acessório não encontrado' });
       }
       const saleAccessory = await SaleAccessory.create({ sale_id: id, accessory_id, quantity });
+      // Recarrega a venda com a associação de acessórios para que o hook
+      // `beforeUpdate` do modelo possa recalcular `total_amount` corretamente.
       await sale.reload({ include: [{ model: SaleAccessory, as: 'sale_accessories', include: [{ model: Accessory, as: 'accessory' }] }] });
       recalcTotals(sale);
       await sale.save();
@@ -88,6 +94,8 @@ class SaleAccessoryController {
         return res.status(403).json({ success: false, message: 'Acesso negado' });
       }
       await saleAccessory.destroy();
+      // Após remover, recarrega a venda para que o hook `beforeUpdate`
+      // considere os acessórios restantes no cálculo do total.
       await sale.reload({ include: [{ model: SaleAccessory, as: 'sale_accessories', include: [{ model: Accessory, as: 'accessory' }] }] });
       recalcTotals(sale);
       await sale.save();
