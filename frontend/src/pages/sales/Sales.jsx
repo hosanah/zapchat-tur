@@ -47,6 +47,13 @@ const Sales = () => {
   const [modalMode, setModalMode] = useState('create');
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedSale, setSelectedSale] = useState(null);
+  const handleDetailsDrawerChange = (open) => {
+    setShowDetailsModal(open);
+    if (!open) {
+      fetchSales();
+      fetchStats();
+    }
+  };
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [startDateFilter, setStartDateFilter] = useState('');
@@ -985,7 +992,7 @@ const Sales = () => {
       {/* Modal de Detalhes da Venda */}
       <SaleDetailsDrawer
         open={showDetailsModal && !!selectedSale}
-        onOpenChange={setShowDetailsModal}
+        onOpenChange={handleDetailsDrawerChange}
         sale={selectedSale}
         customers={saleCustomers}
         refreshCustomers={() => selectedSale && fetchSaleCustomers(selectedSale.id)}
