@@ -1,14 +1,41 @@
 const { Accessory, Company } = require('../models');
 const { validationResult } = require('express-validator');
+const { Op } = require('sequelize');
 
 class AccessoryController {
   static async getAll(req, res, next) {
     try {
-      const accessories = await Accessory.findAll({
-        where: { company_id: req.user.company_id },
+      const { page = 1, limit = 10, search } = req.query;
+      const offset = (page - 1) * limit;
+
+      const where = { company_id: req.user.company_id };
+      if (search) {
+        where.name = { [Op.iLike]: `%${search}%` };
+      }
+
+      const { count, rows: accessories } = await Accessory.findAndCountAll({
+        where,
+        limit: parseInt(limit),
+        offset: parseInt(offset),
         order: [['name', 'ASC']]
       });
-      res.json({ success: true, data: { accessories } });
+
+      const totalPages = Math.ceil(count / limit);
+
+      res.json({
+        success: true,
+        data: {
+          accessories,
+          pagination: {
+            currentPage: parseInt(page),
+            totalPages,
+            totalItems: count,
+            itemsPerPage: parseInt(limit),
+            hasNextPage: page < totalPages,
+            hasPrevPage: page > 1
+          }
+        }
+      });
     } catch (error) { next(error); }
   }
 
