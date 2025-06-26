@@ -9,6 +9,9 @@ const Customers = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const { showSuccess, showError } = useToast();
   const [formData, setFormData] = useState({
     name: '',
@@ -35,13 +38,23 @@ const Customers = () => {
 
   useEffect(() => {
     fetchCustomers();
-  }, []);
+  }, [currentPage, searchTerm]);
 
   const fetchCustomers = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/customers');
-      setCustomers(response.data.customers || []);
+      const params = { page: currentPage, limit: 10 };
+      if (searchTerm) params.search = searchTerm;
+      const response = await api.get('/customers', { params });
+      const { customers: list = [], pagination } = response.data || {};
+      setCustomers(list);
+      if (pagination) {
+        setTotalPages(pagination.totalPages || 1);
+        setTotalItems(pagination.totalItems || list.length);
+      } else {
+        setTotalPages(1);
+        setTotalItems(list.length);
+      }
     } catch (error) {
       console.error('Erro ao carregar clientes:', error);
       showError('Erro ao carregar lista de clientes');
@@ -177,12 +190,7 @@ const Customers = () => {
     });
   };
 
-  const filteredCustomers = customers.filter(customer =>
-    customer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    customer.cpf?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredCustomers = customers;
 
   const getStatusColor = (status) => {
     const statusOption = statusOptions.find(option => option.value === status);
@@ -234,7 +242,10 @@ const Customers = () => {
           type="text"
           placeholder="Buscar por nome, email, telefone ou CPF..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1);
+          }}
           className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent"
         />
       </div>
@@ -248,7 +259,7 @@ const Customers = () => {
             </div>
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-600">Total</p>
-              <p className="text-lg font-semibold text-gray-900">{customers.length}</p>
+              <p className="text-lg font-semibold text-gray-900">{totalItems}</p>
             </div>
           </div>
         </div>
@@ -304,93 +315,88 @@ const Customers = () => {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zapchat-primary"></div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCustomers.map((customer) => (
-            <div key={customer.id} className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow">
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center">
-                    <div className="p-2 bg-zapchat-light rounded-lg">
-                      <User className="w-5 h-5 text-zapchat-dark" />
-                    </div>
-                    <div className="ml-3">
-                      <h4 className="text-lg font-semibold text-gray-900">{customer.firstName || ''} {customer.lastName || ''}</h4>
-                      {customer.cpf && (
-                        <p className="text-sm text-gray-600">CPF: {customer.cpf}</p>
-                      )}
-                    </div>
-                  </div>
-                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(customer.status)}`}>
-                    {statusOptions.find(s => s.value === customer.status)?.label}
-                  </span>
-                </div>
+        <div className="bg-white rounded-lg shadow p-6 overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead>
+              <tr>
+                <th className="px-3 py-2 text-left text-sm font-medium text-gray-500">Nome</th>
+                <th className="px-3 py-2 text-left text-sm font-medium text-gray-500">Email</th>
+                <th className="px-3 py-2 text-left text-sm font-medium text-gray-500">Telefone</th>
+                <th className="px-3 py-2 text-left text-sm font-medium text-gray-500">Cidade/UF</th>
+                <th className="px-3 py-2 text-left text-sm font-medium text-gray-500">Status</th>
+                <th className="px-3 py-2" />
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {filteredCustomers.map((customer) => (
+                <tr key={customer.id} className="hover:bg-gray-50">
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    {customer.firstName} {customer.lastName}
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap">{customer.email}</td>
+                  <td className="px-3 py-2 whitespace-nowrap">{customer.phone}</td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    {customer.city && customer.state ? `${customer.city}, ${customer.state}` : ''}
+                  </td>
+                  <td className="px-3 py-2">
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(customer.status)}`}>
+                      {statusOptions.find(s => s.value === customer.status)?.label}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap text-right text-sm">
+                    <button onClick={() => handleEdit(customer)} className="text-blue-600 hover:underline mr-3">
+                      <Edit className="w-4 h-4 inline" />
+                    </button>
+                    <button onClick={() => handleDelete(customer.id)} className="text-red-600 hover:underline">
+                      <Trash2 className="w-4 h-4 inline" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
-                <div className="space-y-2 mb-4">
-                  {customer.email && (
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Mail className="w-4 h-4 mr-2" />
-                      {customer.email}
-                    </div>
-                  )}
-                  {customer.phone && (
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Phone className="w-4 h-4 mr-2" />
-                      {customer.phone}
-                    </div>
-                  )}
-                  {customer.birthDate && (
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Calendar className="w-4 h-4 mr-2" />
-                      {calculateAge(customer.birthDate)} anos ({formatDate(customer.birthDate)})
-                    </div>
-                  )}
-                  {customer.city && customer.state && (
-                    <div className="flex items-center text-sm text-gray-600">
-                      <MapPin className="w-4 h-4 mr-2" />
-                      {customer.city}, {customer.state}
-                    </div>
-                  )}
-                  {customer.emergencyContact && (
-                    <div className="flex items-center text-sm text-gray-600">
-                      <User className="w-4 h-4 mr-2" />
-                      Emergência: {customer.emergencyContact}
-                    </div>
-                  )}
-                  {customer.emergencyPhone && (
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Phone className="w-4 h-4 mr-2" />
-                      {customer.emergencyPhone}
-                    </div>
-                  )}
-                </div>
-
-                {customer.observations && (
-                  <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-600">
-                      <strong>Observações:</strong> {customer.observations}
-                    </p>
-                  </div>
-                )}
-
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => handleEdit(customer)}
-                    className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                  >
-                    <Edit className="w-4 h-4 mr-1" />
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => handleDelete(customer.id)}
-                    className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50"
-                  >
-                    <Trash2 className="w-4 h-4 mr-1" />
-                    Excluir
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-6">
+          <nav className="flex items-center space-x-2">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 rounded-md ${
+                currentPage === 1
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              } border border-gray-300`}
+            >
+              Anterior
+            </button>
+            {[...Array(totalPages)].map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentPage(i + 1)}
+                className={`px-3 py-1 rounded-md ${
+                  currentPage === i + 1
+                    ? 'bg-zapchat-primary text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                } border border-gray-300`}
+              >
+                {i + 1}
+              </button>
+            ))}
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 rounded-md ${
+                currentPage === totalPages
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              } border border-gray-300`}
+            >
+              Próxima
+            </button>
+          </nav>
         </div>
       )}
 
