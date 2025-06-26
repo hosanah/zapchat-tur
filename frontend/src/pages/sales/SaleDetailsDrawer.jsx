@@ -321,23 +321,27 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [], refreshCu
           <Card className="overflow-hidden border-amber-100">
             <CardHeader className="bg-amber-50 border-b border-amber-100 py-3">
               <CardTitle className="flex items-center gap-2 text-amber-700">
-                <FileText className="w-5 h-5 text-amber-600" /> Informações dos Clientes ({customers.length + 1})
+                <FileText className="w-5 h-5 text-amber-600" /> Informações dos Clientes ({customers.length + (saleData.customer ? 1 : 0)})
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 grid grid-cols-1 gap-y-3">
               <InfoItem
                 icon={<User className="w-4 h-4 text-blue-500" />}
-                label="Cliente Responsável"                
+                label="Cliente Responsável"
               />
               <div className="space-y-3">
+                {saleData.customer ? (
                   <div key={saleData.customer.id} className="flex items-center gap-3 p-2 hover:bg-amber-50 rounded-lg transition-colors">
-                      <div>
-                        <p className="font-medium">{saleData.customer.firstName} {saleData.customer.lastName}</p>
-                        {saleData.customer.email && <p className="text-xs text-gray-500">{saleData.customer.email}</p>}
-                        {saleData.customer.phone && <p className="text-xs text-gray-500">{saleData.customer.phone}</p>}
-                      </div>
+                    <div>
+                      <p className="font-medium">{saleData.customer.firstName} {saleData.customer.lastName}</p>
+                      {saleData.customer.email && <p className="text-xs text-gray-500">{saleData.customer.email}</p>}
+                      {saleData.customer.phone && <p className="text-xs text-gray-500">{saleData.customer.phone}</p>}
                     </div>
-                </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500">Nenhum cliente responsável</p>
+                )}
+              </div>
               {otherCustomers.length > 0 && (
                 <InfoItem
                   icon={<Users className="w-4 h-4 text-amber-500" />}
@@ -345,13 +349,14 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [], refreshCu
                 />
               )}
               <div className="space-y-3">
-                  {customers.map((sc) => (
+                {customers.map((sc) => (
+                  sc.customer && (
                     <div
                       key={sc.id}
                       className="flex items-center gap-3 p-2 hover:bg-amber-50 rounded-lg transition-colors"
                     >
                       <div>
-                        <p className="font-medium">{sc.customer.first_name} {sc.customer.last_name}</p>
+                        <p className="font-medium">{sc.customer.first_name ?? sc.customer.firstName} {sc.customer.last_name ?? sc.customer.lastName}</p>
                         {sc.customer.email && (
                           <p className="text-xs text-gray-500">{sc.customer.email}</p>
                         )}
@@ -366,8 +371,9 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [], refreshCu
                         Remover
                       </button>
                     </div>
-                  ))}
-                </div>
+                  )
+                ))}
+              </div>
             </CardContent>
           </Card>
 
