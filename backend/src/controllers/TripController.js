@@ -30,9 +30,21 @@ class TripController {
         order: [['createdAt', 'DESC']],
       });
 
+      const totalPages = Math.ceil(count / limit);
+
       res.status(200).json({
         success: true,
-        data: { trips: rows, total: count },
+        data: {
+          trips: rows,
+          pagination: {
+            currentPage: parseInt(page),
+            totalPages,
+            totalItems: count,
+            itemsPerPage: parseInt(limit),
+            hasNextPage: page < totalPages,
+            hasPrevPage: page > 1
+          }
+        },
       });
     } catch (error) {
       next(error);

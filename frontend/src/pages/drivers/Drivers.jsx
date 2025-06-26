@@ -9,6 +9,9 @@ const Drivers = () => {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [editingDriver, setEditingDriver] = useState(null);
   const { showSuccess, showError } = useToast();
@@ -49,21 +52,32 @@ const Drivers = () => {
   useEffect(() => {
     fetchDrivers();
     fetchVehicles();
-  }, []);
+  }, [currentPage, searchTerm]);
 
   const fetchDrivers = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/drivers');
+      const params = { page: currentPage, limit: 10 };
+      if (searchTerm) params.search = searchTerm;
+      const response = await api.get('/drivers', { params });
+      const list = response.data.drivers || [];
       setDrivers(
-      (response.data.drivers || []).map(driver => ({
-        ...driver,
-        cnh: driver.licenseNumber, 
-        cnhCategory: driver.licenseCategory,
-        name: [driver.firstName, driver.lastName].filter(Boolean).join(' '),
-        cnhExpiry: driver.licenseExpiry
-      }))
-    );
+        list.map(driver => ({
+          ...driver,
+          cnh: driver.licenseNumber,
+          cnhCategory: driver.licenseCategory,
+          name: [driver.firstName, driver.lastName].filter(Boolean).join(' '),
+          cnhExpiry: driver.licenseExpiry,
+        }))
+      );
+      const pagination = response.data.pagination;
+      if (pagination) {
+        setTotalPages(pagination.totalPages || 1);
+        setTotalItems(pagination.totalItems || list.length);
+      } else {
+        setTotalPages(1);
+        setTotalItems(list.length);
+      }
     } catch (error) {
       console.error('Erro ao carregar motoristas:', error);
       showError('Erro ao carregar lista de motoristas');
@@ -193,11 +207,7 @@ const Drivers = () => {
     });
   };
 
-  const filteredDrivers = drivers.filter(driver =>
-    driver.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    driver.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    driver.cnh?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredDrivers = drivers;
 
   const getStatusColor = (status) => {
     const statusOption = statusOptions.find(option => option.value === status);
@@ -253,7 +263,10 @@ const Drivers = () => {
           type="text"
           placeholder="Buscar por nome, email ou CNH..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1);
+          }}
           className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent"
         />
       </div>
@@ -267,7 +280,7 @@ const Drivers = () => {
             </div>
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-600">Total</p>
-              <p className="text-lg font-semibold text-gray-900">{drivers.length}</p>
+              <p className="text-lg font-semibold text-gray-900">{totalItems}</p>
             </div>
           </div>
         </div>
@@ -318,85 +331,86 @@ const Drivers = () => {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zapchat-primary"></div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredDrivers.map((driver) => (
-            <div key={driver.id} className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow">
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center">
-                    <div className="p-2 bg-zapchat-light rounded-lg">
-                      <User className="w-5 h-5 text-zapchat-dark" />
-                    </div>
-                    <div className="ml-3">
-                      <h3 className="text-lg font-semibold text-gray-900">{driver.name}</h3>
-                      <p className="text-sm text-gray-600">CNH: {driver.cnh}</p>
-                    </div>
-                  </div>
-                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(driver.status)}`}>
-                    {statusOptions.find(s => s.value === driver.status)?.label}
-                  </span>
-                </div>
+        <div className="bg-white rounded-lg shadow p-6 overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead>
+              <tr>
+                <th className="px-3 py-2 text-left text-sm font-medium text-gray-500">Nome</th>
+                <th className="px-3 py-2 text-left text-sm font-medium text-gray-500">Email</th>
+                <th className="px-3 py-2 text-left text-sm font-medium text-gray-500">Telefone</th>
+                <th className="px-3 py-2 text-left text-sm font-medium text-gray-500">Cidade/UF</th>
+                <th className="px-3 py-2 text-left text-sm font-medium text-gray-500">Status</th>
+                <th className="px-3 py-2" />
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {filteredDrivers.map((driver) => (
+                <tr key={driver.id} className="hover:bg-gray-50">
+                  <td className="px-3 py-2 whitespace-nowrap">{driver.name}</td>
+                  <td className="px-3 py-2 whitespace-nowrap">{driver.email}</td>
+                  <td className="px-3 py-2 whitespace-nowrap">{driver.phone}</td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    {driver.city && driver.state ? `${driver.city}, ${driver.state}` : ''}
+                  </td>
+                  <td className="px-3 py-2">
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(driver.status)}`}> 
+                      {statusOptions.find(s => s.value === driver.status)?.label}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap text-right text-sm">
+                    <button onClick={() => handleEdit(driver)} className="text-blue-600 hover:underline mr-3">
+                      <Edit className="w-4 h-4 inline" />
+                    </button>
+                    <button onClick={() => handleDelete(driver.id)} className="text-red-600 hover:underline">
+                      <Trash2 className="w-4 h-4 inline" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
-                <div className="space-y-2 mb-4">
-                  {driver.email && (
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Mail className="w-4 h-4 mr-2" />
-                      {driver.email}
-                    </div>
-                  )}
-                  {driver.phone && (
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Phone className="w-4 h-4 mr-2" />
-                      {driver.phone}
-                    </div>
-                  )}
-                  <div className="flex items-center text-sm text-gray-600">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    Categoria: {driver.cnhCategory}
-                  </div>
-                  {driver.cnhExpiry && (
-                    <div className={`flex items-center text-sm ${isExpired(driver.cnhExpiry) ? 'text-red-600' :
-                      isExpiringSoon(driver.cnhExpiry) ? 'text-yellow-600' : 'text-gray-600'
-                      }`}>
-                      <Calendar className="w-4 h-4 mr-2" />
-                      Vence: {formatDate(driver.cnhExpiry)}
-                      {isExpired(driver.cnhExpiry) && ' (Vencida)'}
-                      {isExpiringSoon(driver.cnhExpiry) && !isExpired(driver.cnhExpiry) && ' (Vencendo)'}
-                    </div>
-                  )}
-                  {driver.Vehicle && (
-                    <div className="flex items-center text-sm text-gray-600">
-                      <Car className="w-4 h-4 mr-2" />
-                      Veículo: {driver.Vehicle.plate} - {driver.Vehicle.model}
-                    </div>
-                  )}
-                  {driver.city && driver.state && (
-                    <div className="flex items-center text-sm text-gray-600">
-                      <MapPin className="w-4 h-4 mr-2" />
-                      {driver.city}, {driver.state}
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => handleEdit(driver)}
-                    className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                  >
-                    <Edit className="w-4 h-4 mr-1" />
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => handleDelete(driver.id)}
-                    className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50"
-                  >
-                    <Trash2 className="w-4 h-4 mr-1" />
-                    Excluir
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-6">
+          <nav className="flex items-center space-x-2">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 rounded-md ${
+                currentPage === 1
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              } border border-gray-300`}
+            >
+              Anterior
+            </button>
+            {[...Array(totalPages)].map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentPage(i + 1)}
+                className={`px-3 py-1 rounded-md ${
+                  currentPage === i + 1
+                    ? 'bg-zapchat-primary text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                } border border-gray-300`}
+              >
+                {i + 1}
+              </button>
+            ))}
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 rounded-md ${
+                currentPage === totalPages
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              } border border-gray-300`}
+            >
+              Próxima
+            </button>
+          </nav>
         </div>
       )}
 

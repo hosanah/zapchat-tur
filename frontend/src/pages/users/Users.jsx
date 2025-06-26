@@ -12,6 +12,9 @@ const Users = () => {
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [roleFilter, setRoleFilter] = useState('all');
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
@@ -30,17 +33,27 @@ const Users = () => {
     if (isMaster()) {
       loadCompanies();
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentPage, searchTerm, roleFilter]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadUsers = async () => {
     try {
       setLoading(true);
       const params = {
+        page: currentPage,
+        limit: 10,
         search: searchTerm || undefined,
         role: roleFilter !== 'all' ? roleFilter : undefined
       };
       const response = await userService.getAll(params);
-      setUsers(response.data.users || []);
+      const { users: list = [], pagination } = response.data || {};
+      setUsers(list);
+      if (pagination) {
+        setTotalPages(pagination.totalPages || 1);
+        setTotalItems(pagination.totalItems || list.length);
+      } else {
+        setTotalPages(1);
+        setTotalItems(list.length);
+      }
     } catch (err) {
       console.error(err);
       showError('Erro ao carregar lista de usuários');
@@ -132,14 +145,7 @@ const Users = () => {
     }
   };
 
-  const filteredUsers = users.filter(u => {
-    const matchesSearch =
-      u.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === 'all' || u.role === roleFilter;
-    return matchesSearch && matchesRole;
-  });
+  const filteredUsers = users;
 
   return (
     <div className="p-6 space-y-6">
@@ -147,6 +153,7 @@ const Users = () => {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Usuários</h1>
           <p className="text-gray-600">Gerencie os usuários do sistema</p>
+          <p className="text-sm text-gray-600">Total de registros: {totalItems}</p>
         </div>
         <button
           onClick={() => { resetForm(); setEditingUser(null); setShowModal(true); }}
@@ -163,12 +170,18 @@ const Users = () => {
             type="text"
             placeholder="Buscar por nome ou email..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
             className="border border-gray-300 rounded-md px-3 py-2"
           />
           <select
             value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
+            onChange={(e) => {
+              setRoleFilter(e.target.value);
+              setCurrentPage(1);
+            }}
             className="border border-gray-300 rounded-md px-3 py-2"
           >
             <option value="all">Todos os papéis</option>
@@ -230,6 +243,48 @@ const Users = () => {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-6">
+          <nav className="flex items-center space-x-2">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 rounded-md ${
+                currentPage === 1
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              } border border-gray-300`}
+            >
+              Anterior
+            </button>
+            {[...Array(totalPages)].map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentPage(i + 1)}
+                className={`px-3 py-1 rounded-md ${
+                  currentPage === i + 1
+                    ? 'bg-zapchat-primary text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                } border border-gray-300`}
+              >
+                {i + 1}
+              </button>
+            ))}
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 rounded-md ${
+                currentPage === totalPages
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              } border border-gray-300`}
+            >
+              Próxima
+            </button>
+          </nav>
         </div>
       )}
 

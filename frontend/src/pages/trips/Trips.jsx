@@ -25,6 +25,9 @@ const Trips = () => {
   const [trips, setTrips] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState(null);
   const [statusFilter, setStatusFilter] = useState('');
@@ -42,11 +45,24 @@ const Trips = () => {
   const fetchTrips = async () => {
     try {
       setLoading(true);
-      const params = {};
+      const params = { page: currentPage, limit: 10 };
       if (statusFilter) params.status = statusFilter;
-      
+      if (searchTerm) params.search = searchTerm;
+
       const response = await tripService.getAll(params);
-      setTrips(response.data?.trips || response.trips || []);
+      const { trips: list = [], pagination } = response.data || {};
+      setTrips(list);
+      if (pagination) {
+        setTotalPages(pagination.totalPages || 1);
+        setTotalItems(pagination.totalItems || list.length);
+      } else if (response.data?.total) {
+        const total = response.data.total;
+        setTotalItems(total);
+        setTotalPages(Math.ceil(total / 10));
+      } else {
+        setTotalItems(list.length);
+        setTotalPages(1);
+      }
     } catch (err) {
       showError('Erro ao carregar passeios');
     } finally {
@@ -63,15 +79,12 @@ const Trips = () => {
     }
   };
 
-  const filteredCustomers = trips.filter(trip =>
-    trip.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    trip.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredCustomers = trips;
 
   useEffect(() => {
     fetchTrips();
     if (isMaster()) fetchCompanies();
-  }, [statusFilter]);
+  }, [statusFilter, currentPage, searchTerm]);
 
   const resetForm = () => {
     setFormData({
@@ -191,6 +204,7 @@ const Trips = () => {
           </button>
         </div>
       </div>
+      <p className="text-sm text-gray-600">Total de registros: {totalItems}</p>
 
       {/* Search */}
       <div className="relative">
@@ -199,7 +213,10 @@ const Trips = () => {
           type="text"
           placeholder="Buscar por nome, email, telefone ou CPF..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1);
+          }}
           className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-zapchat-primary focus:border-transparent"
         />
       </div>
@@ -213,7 +230,7 @@ const Trips = () => {
             </div>
             <div className="ml-3">
               <p className="text-sm font-medium text-gray-600">Total</p>
-              <p className="text-lg font-semibold text-gray-900">{trips.length}</p>
+              <p className="text-lg font-semibold text-gray-900">{totalItems}</p>
             </div>
           </div>
         </div>
@@ -277,6 +294,48 @@ const Trips = () => {
             ))}
           </tbody>
         </table>
+      )}
+
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-6">
+          <nav className="flex items-center space-x-2">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 rounded-md ${
+                currentPage === 1
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              } border border-gray-300`}
+            >
+              Anterior
+            </button>
+            {[...Array(totalPages)].map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentPage(i + 1)}
+                className={`px-3 py-1 rounded-md ${
+                  currentPage === i + 1
+                    ? 'bg-zapchat-primary text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                } border border-gray-300`}
+              >
+                {i + 1}
+              </button>
+            ))}
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 rounded-md ${
+                currentPage === totalPages
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              } border border-gray-300`}
+            >
+              Próxima
+            </button>
+          </nav>
+        </div>
       )}
 
       {showModal && (

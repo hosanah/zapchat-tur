@@ -9,6 +9,9 @@ const Accessories = () => {
   const { showSuccess, showError } = useToast();
   const [accessories, setAccessories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState(null);
   const [formData, setFormData] = useState(emptyForm);
@@ -16,9 +19,16 @@ const Accessories = () => {
   const loadAccessories = async () => {
     try {
       setLoading(true);
-      const res = await accessoryService.getAll();
-      const list = res.data?.accessories || res.accessories || res.data || [];
+      const res = await accessoryService.getAll({ page: currentPage, limit: 10 });
+      const { accessories: list = [], pagination } = res.data || {};
       setAccessories(list);
+      if (pagination) {
+        setTotalPages(pagination.totalPages || 1);
+        setTotalItems(pagination.totalItems || list.length);
+      } else {
+        setTotalPages(1);
+        setTotalItems(list.length);
+      }
     } catch (err) {
       console.error(err);
       showError('Erro ao carregar acessórios');
@@ -29,7 +39,7 @@ const Accessories = () => {
 
   useEffect(() => {
     loadAccessories();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentPage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const resetForm = () => setFormData(emptyForm);
 
@@ -97,6 +107,7 @@ const Accessories = () => {
           <Plus className="w-4 h-4 mr-2" /> Novo Acessório
         </button>
       </div>
+      <p className="text-sm text-gray-600">Total de registros: {totalItems}</p>
 
       {loading ? (
         <div className="flex justify-center items-center py-12">
@@ -138,8 +149,50 @@ const Accessories = () => {
                   </td>
                 </tr>
               )}
-            </tbody>
-          </table>
+          </tbody>
+        </table>
+      </div>
+    )}
+
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-6">
+          <nav className="flex items-center space-x-2">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 rounded-md ${
+                currentPage === 1
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              } border border-gray-300`}
+            >
+              Anterior
+            </button>
+            {[...Array(totalPages)].map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentPage(i + 1)}
+                className={`px-3 py-1 rounded-md ${
+                  currentPage === i + 1
+                    ? 'bg-zapchat-primary text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-50'
+                } border border-gray-300`}
+              >
+                {i + 1}
+              </button>
+            ))}
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 rounded-md ${
+                currentPage === totalPages
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              } border border-gray-300`}
+            >
+              Próxima
+            </button>
+          </nav>
         </div>
       )}
 
