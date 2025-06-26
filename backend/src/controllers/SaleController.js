@@ -1,4 +1,4 @@
-const { Sale, Customer, Company, User, Trip, Vehicle, Booking, Driver, SaleCustomer, SaleAccessory, Accessory, GeneralSetting } = require('../models');
+const { Sale, Customer, Company, User, Trip, Vehicle, Booking, Driver, SaleCustomer, SaleAccessory, Accessory, GeneralSetting, SalePayment } = require('../models');
 const { Op } = require('sequelize');
 const PDFDocument = require('pdfkit');
 
@@ -772,21 +772,22 @@ class SaleController {
 
       const sale = await Sale.findByPk(id, {
         include: [
-          { model: Customer, as: 'customer', attributes: ['firstName', 'lastName'] },
-          { model: Company, as: 'company', attributes: ['name'] },
+          { model: Customer, as: 'customer', attributes: ['firstName', 'lastName', 'email', 'phone'] },
+          { model: Company, as: 'company', attributes: ['name', 'cnpj'] },
           { model: Trip, as: 'trip', attributes: ['title'] },
           {
             model: SaleCustomer,
             as: 'sale_customers',
             include: [
-              { model: Customer, as: 'customer', attributes: ['firstName', 'lastName'] }
+              { model: Customer, as: 'customer', attributes: ['firstName', 'lastName', 'email', 'phone'] }
             ]
           },
           {
             model: SaleAccessory,
             as: 'sale_accessories',
-            include: [{ model: Accessory, as: 'accessory', attributes: ['name', 'value'] }]
-          }
+            include: [{ model: Accessory, as: 'accessory', attributes: ['name', 'value', 'description'] }]
+          },
+          { model: SalePayment, as: 'payments' }
         ]
       });
 
@@ -794,45 +795,89 @@ class SaleController {
         return res.status(404).json({ success: false, message: 'Venda não encontrada' });
       }
 
-      const doc = new PDFDocument();
+      const setting = await GeneralSetting.findOne({ where: { company_id: sale.company_id } });
+
+      const doc = new PDFDocument({ size: 'A4', margin: 50 });
+      doc.font('Helvetica');
+
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename="voucher-${sale.sale_number}.pdf"`);
       doc.pipe(res);
 
-      doc.fontSize(18).text(`Voucher ${sale.sale_number}`, { align: 'center' });
-      doc.moveDown();
-      doc.fontSize(12);
-      if (sale.company) doc.text(`Empresa: ${sale.company.name}`);
-      if (sale.customer) doc.text(`Cliente: ${sale.customer.firstName} ${sale.customer.lastName}`);
-      if (sale.trip) doc.text(`Passeio: ${sale.trip.title}`);
-      if (sale.sale_date) doc.text(`Data: ${new Date(sale.sale_date).toLocaleDateString('pt-BR')}`);
-      doc.moveDown();
-      doc.fontSize(14).text('Clientes da venda:');
-      sale.sale_customers.forEach((sc, index) => {
-        doc.fontSize(12).text(`${index + 1}. ${sc.customer.firstName} ${sc.customer.lastName}`);
-      });
+      // Header
+      if (setting && setting.logo) {
+        try { doc.image(setting.logo, { width: 100 }); } catch (e) { /* ignore */ }
+      } else {
+        doc.fontSize(10).fillColor('#999').text('Sem logomarca cadastrada');
+      }
+      doc.moveUp();
+      doc.fontSize(20).fillColor('#0066cc').text('🎫 Voucher de Viagem', { align: 'center' });
+      doc.fontSize(12).fillColor('black').text(`Nº ${sale.sale_number} - ${new Date().toLocaleDateString('pt-BR')}`, { align: 'center' });
 
-      if (sale.sale_accessories && sale.sale_accessories.length > 0) {
+      doc.moveDown();
+      doc.fontSize(12).text(`${sale.company.name}`);
+      if (sale.company.cnpj) doc.text(`CNPJ: ${sale.company.cnpj}`);
+
+      // Main customer
+      if (sale.customer) {
         doc.moveDown();
-        doc.fontSize(14).text('Acessórios:');
-        sale.sale_accessories.forEach((sa, idx) => {
-          const total = (parseFloat(sa.accessory.value) * parseInt(sa.quantity)).toFixed(2).replace('.', ',');
-          doc.fontSize(12).text(`${idx + 1}. ${sa.accessory.name} x${sa.quantity} - R$ ${total}`);
+        doc.fontSize(14).fillColor('#0066cc').text('👤 Cliente Principal');
+        doc.fontSize(12).fillColor('black').text(`${sale.customer.firstName} ${sale.customer.lastName}`);
+        doc.text(`Email: ${sale.customer.email}`);
+        doc.text(`Telefone: ${sale.customer.phone}`);
+      }
+
+      // Trip info
+      if (sale.trip) {
+        doc.moveDown();
+        doc.fontSize(14).fillColor('#0066cc').text('🚌 Viagem');
+        doc.fontSize(12).fillColor('black').text(`Passeio: ${sale.trip.title}`);
+        if (sale.delivery_date) {
+          doc.text(`Data/Hora: ${new Date(sale.delivery_date).toLocaleString('pt-BR')}`);
+        } else if (sale.sale_date) {
+          doc.text(`Data/Hora: ${new Date(sale.sale_date).toLocaleDateString('pt-BR')}`);
+        }
+      }
+
+      // Additional customers table
+      if (sale.sale_customers.length > 1) {
+        doc.moveDown();
+        doc.fontSize(14).fillColor('#0066cc').text('👥 Passageiros');
+        sale.sale_customers.forEach((sc, index) => {
+          if (!sc.is_responsible) {
+            const c = sc.customer;
+            doc.fontSize(12).fillColor('black').text(`${index}. ${c.firstName} ${c.lastName} - ${c.phone}`);
+          }
         });
       }
 
-      doc.moveDown();
-      doc.fontSize(14).text('Valores:');
-      const accessoriesTotal = sale.sale_accessories ? sale.sale_accessories.reduce((s, sa) => s + parseFloat(sa.accessory.value) * parseInt(sa.quantity), 0) : 0;
-      doc.fontSize(12).text(`Subtotal: R$ ${parseFloat(sale.subtotal).toFixed(2).replace('.', ',')}`);
-      doc.fontSize(12).text(`Acessórios: R$ ${accessoriesTotal.toFixed(2).replace('.', ',')}`);
-      doc.fontSize(12).text(`Total: R$ ${parseFloat(sale.total_amount).toFixed(2).replace('.', ',')}`);
+      // Accessories table
+      if (sale.sale_accessories && sale.sale_accessories.length > 0) {
+        doc.moveDown();
+        doc.fontSize(14).fillColor('#0066cc').text('🎒 Acessórios');
+        sale.sale_accessories.forEach((sa, idx) => {
+          const total = parseFloat(sa.accessory.value) * parseInt(sa.quantity);
+          doc.fontSize(12).fillColor('black').text(`${idx + 1}. ${sa.accessory.name} x${sa.quantity} - ${sa.accessory.description || ''} (R$ ${total.toFixed(2)})`);
+        });
+      }
 
-      const setting = await GeneralSetting.findOne({ where: { company_id: sale.company_id } });
+      // Payments list
+      const totalPaid = sale.payments.reduce((s, p) => s + parseFloat(p.amount), 0);
+      const balance = parseFloat(sale.total_amount) - totalPaid;
+
+      doc.moveDown();
+      doc.fontSize(14).fillColor('#0066cc').text('💳 Pagamentos');
+      sale.payments.forEach((p, i) => {
+        doc.fontSize(12).fillColor('black').text(`${i + 1}. ${p.payment_method} - ${new Date(p.payment_date).toLocaleDateString('pt-BR')} - R$ ${parseFloat(p.amount).toFixed(2)}`);
+      });
+      doc.fontSize(12).text(`Subtotal: R$ ${parseFloat(sale.subtotal).toFixed(2)}`);
+      doc.fontSize(12).text(`Total Pago: R$ ${totalPaid.toFixed(2)}`);
+      doc.fontSize(12).text(`Total Venda: R$ ${parseFloat(sale.total_amount).toFixed(2)}`);
+      doc.fontSize(12).text(`Saldo: R$ ${balance.toFixed(2)}`);
+
       if (setting && setting.guidelines) {
         doc.moveDown();
-        doc.fontSize(14).text('Diretrizes da Empresa:');
-        doc.fontSize(12).text(setting.guidelines);
+        doc.fontSize(10).fillColor('#555').text(setting.guidelines, { align: 'center' });
       }
 
       doc.end();
