@@ -19,6 +19,7 @@ const Settings = () => {
   const { showSuccess, showError } = useToast();
   const [guidelines, setGuidelines] = useState('');
   const [logoPreview, setLogoPreview] = useState('');
+  const [logoFile, setLogoFile] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -52,6 +53,7 @@ const Settings = () => {
       showError('Envie apenas arquivos de imagem');
       return;
     }
+    setLogoFile(file);
     const reader = new FileReader();
     reader.onloadend = () => setLogoPreview(reader.result);
     reader.readAsDataURL(file);
@@ -60,7 +62,12 @@ const Settings = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await settingsService.update({ logo: logoPreview || null, guidelines });
+      const formData = new FormData();
+      if (logoFile) {
+        formData.append('logo', logoFile);
+      }
+      formData.append('guidelines', guidelines);
+      await settingsService.update(formData);
       showSuccess('Configurações salvas');
     } catch (err) {
       console.error(err);
