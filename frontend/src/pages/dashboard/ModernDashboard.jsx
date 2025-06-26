@@ -74,8 +74,10 @@ const ModernDashboard = () => {
     const loadSales = async () => {
       try {
         const start = new Date();
+        start.setDate(1);
         const end = new Date();
         end.setMonth(end.getMonth() + 1);
+        end.setDate(0);
         const params = {
           start_date: start.toISOString().slice(0, 10),
           end_date: end.toISOString().slice(0, 10),
