@@ -272,7 +272,7 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [], refreshCu
     if (!sale) return;
     try {
       const res = await saleService.getById(sale.id);
-      setSaleData(res.data || res);
+      setSaleData(res.data?.data || res.data);
     } catch (err) {
       console.error(err);
     }
