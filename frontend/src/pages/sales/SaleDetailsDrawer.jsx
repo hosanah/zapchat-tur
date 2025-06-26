@@ -297,7 +297,7 @@ const SaleDetailsDrawer = ({ open, onOpenChange, sale, customers = [], refreshCu
     }
   };
 
-  if (!sale) return null;
+  if (!sale || !saleData) return null;
   
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction="right">
