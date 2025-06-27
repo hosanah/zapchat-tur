@@ -297,3 +297,13 @@ input:focus, textarea:focus, select:focus {
   @apply bg-white text-black dark:bg-black dark:text-white;
 }
 
+/* Garantir legibilidade do texto em alto contraste */
+.high-contrast,
+.high-contrast * {
+  color: #000 !important;
+}
+.dark.high-contrast,
+.dark.high-contrast * {
+  color: #fff !important;
+}
+
