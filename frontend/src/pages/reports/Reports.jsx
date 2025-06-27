@@ -30,6 +30,8 @@ const Reports = () => {
   const [trips, setTrips] = useState([]);
   const [vendors, setVendors] = useState([]);
 
+  const ALL_VALUE = 'all';
+
   useEffect(() => {
     loadSalesReport();
     loadDailyTrips();
@@ -41,7 +43,10 @@ const Reports = () => {
 
   const loadSalesReport = async () => {
     try {
-      const res = await reportService.getSalesReport(salesFilters);
+      const params = { ...salesFilters };
+      if (params.trip_id === ALL_VALUE) params.trip_id = '';
+      if (params.vendor_id === ALL_VALUE) params.vendor_id = '';
+      const res = await reportService.getSalesReport(params);
       const data = res.data?.sales || res.data?.data || res.sales || [];
       setSalesReport(data);
     } catch (err) {
@@ -153,7 +158,7 @@ const Reports = () => {
                 <SelectValue placeholder="Passeio" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value={ALL_VALUE}>Todos</SelectItem>
                 {trips.map((t) => (
                   <SelectItem key={t.id} value={String(t.id)}>
                     {t.title}
@@ -169,7 +174,7 @@ const Reports = () => {
                 <SelectValue placeholder="Vendedor" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value={ALL_VALUE}>Todos</SelectItem>
                 {vendors.map((v) => (
                   <SelectItem key={v.id} value={String(v.id)}>
                     {v.firstName} {v.lastName}
