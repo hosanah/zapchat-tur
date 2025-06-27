@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { reportService } from '../../services/api';
+import { reportService, tripService, userService } from '../../services/api';
 import { useToast } from '../../contexts/ToastContext';
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/components/ui/select';
 
 const Reports = () => {
   const { showError } = useToast();
@@ -20,11 +27,16 @@ const Reports = () => {
 
   const [financialReport, setFinancialReport] = useState([]);
 
+  const [trips, setTrips] = useState([]);
+  const [vendors, setVendors] = useState([]);
+
   useEffect(() => {
     loadSalesReport();
     loadDailyTrips();
     loadProductivityReport();
     loadFinancialReport();
+    loadTrips();
+    loadVendors();
   }, []);
 
   const loadSalesReport = async () => {
@@ -73,8 +85,31 @@ const Reports = () => {
     }
   };
 
-  const handleSalesFilterChange = (e) => {
-    const { name, value } = e.target;
+  const loadTrips = async () => {
+    try {
+      const res = await tripService.getAll();
+      const data =
+        res.data?.trips || res.data?.data?.trips || res.trips || [];
+      setTrips(data);
+    } catch (err) {
+      console.error(err);
+      showError('Erro ao carregar passeios');
+    }
+  };
+
+  const loadVendors = async () => {
+    try {
+      const res = await userService.getAll();
+      const data =
+        res.data?.users || res.data?.data?.users || res.users || [];
+      setVendors(data);
+    } catch (err) {
+      console.error(err);
+      showError('Erro ao carregar vendedores');
+    }
+  };
+
+  const handleSalesFilterChange = (name, value) => {
     setSalesFilters((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -96,32 +131,52 @@ const Reports = () => {
               type="date"
               name="start_date"
               value={salesFilters.start_date}
-              onChange={handleSalesFilterChange}
+              onChange={(e) =>
+                handleSalesFilterChange('start_date', e.target.value)
+              }
               className="border px-2 py-1 rounded"
             />
             <input
               type="date"
               name="end_date"
               value={salesFilters.end_date}
-              onChange={handleSalesFilterChange}
+              onChange={(e) =>
+                handleSalesFilterChange('end_date', e.target.value)
+              }
               className="border px-2 py-1 rounded"
             />
-            <input
-              type="text"
-              placeholder="Passeio ID"
-              name="trip_id"
+            <Select
               value={salesFilters.trip_id}
-              onChange={handleSalesFilterChange}
-              className="border px-2 py-1 rounded"
-            />
-            <input
-              type="text"
-              placeholder="Vendedor ID"
-              name="vendor_id"
+              onValueChange={(v) => handleSalesFilterChange('trip_id', v)}
+            >
+              <SelectTrigger className="border px-2 py-1 rounded w-[150px]">
+                <SelectValue placeholder="Passeio" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Todos</SelectItem>
+                {trips.map((t) => (
+                  <SelectItem key={t.id} value={String(t.id)}>
+                    {t.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
               value={salesFilters.vendor_id}
-              onChange={handleSalesFilterChange}
-              className="border px-2 py-1 rounded"
-            />
+              onValueChange={(v) => handleSalesFilterChange('vendor_id', v)}
+            >
+              <SelectTrigger className="border px-2 py-1 rounded w-[150px]">
+                <SelectValue placeholder="Vendedor" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Todos</SelectItem>
+                {vendors.map((v) => (
+                  <SelectItem key={v.id} value={String(v.id)}>
+                    {v.firstName} {v.lastName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <button
               onClick={loadSalesReport}
               className="bg-zapchat-medium text-white px-3 py-1 rounded"
