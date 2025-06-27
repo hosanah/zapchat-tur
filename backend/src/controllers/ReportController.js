@@ -82,7 +82,7 @@ class ReportController {
     }
   }
 
-  static async financialReport(req, res, next) {
+  static async financialByPaymentMethod(req, res, next) {
     try {
       const { start_date, end_date } = req.query;
       const saleWhere = ReportController.buildCompanyFilter(req.user);

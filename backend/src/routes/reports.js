@@ -8,6 +8,7 @@ router.use(authenticate);
 router.get('/sales', ReportController.salesReport);
 router.get('/daily-trips', ReportController.dailyTrips);
 router.get('/seller-productivity', ReportController.sellerProductivity);
-router.get('/financial', ReportController.financialReport);
+router.get('/financial', ReportController.financialByPaymentMethod);
+router.get('/financial-payment-method', ReportController.financialByPaymentMethod);
 
 module.exports = router;
