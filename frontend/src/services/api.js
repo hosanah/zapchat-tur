@@ -360,4 +360,13 @@ export const notificationService = {
   unreadCount: () => api.get('/notifications/unread-count'),
 };
 
+// Serviços de relatórios
+export const reportService = {
+  sales: (params) => api.get('/reports/sales', { params }),
+  dailyTrips: (params) => api.get('/reports/daily-trips', { params }),
+  sellerProductivity: (params) =>
+    api.get('/reports/seller-productivity', { params }),
+  financial: (params) => api.get('/reports/financial', { params }),
+};
+
 export default api;
