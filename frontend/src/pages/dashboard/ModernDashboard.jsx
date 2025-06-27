@@ -189,10 +189,14 @@ const ModernDashboard = () => {
 
   const renderEventContent = (eventInfo) => {
     const { customerName, saleNumber } = eventInfo.event.extendedProps;
+    const bg = eventInfo.event.backgroundColor || eventInfo.event.color;
+    const text = eventInfo.event.textColor;
     return (
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="px-1">
+          <div
+            className="px-1 rounded-sm"
+            style={{ backgroundColor: bg, color: text }}
             {eventInfo.timeText && <b>{eventInfo.timeText} </b>}
             {eventInfo.event.title}
           </div>
