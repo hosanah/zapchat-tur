@@ -197,7 +197,6 @@ const ModernDashboard = () => {
           <div
             className="px-1 rounded-sm"
             style={{ backgroundColor: bg, color: text }}
-          >
             {eventInfo.timeText && <b>{eventInfo.timeText} </b>}
             {eventInfo.event.title}
           </div>
