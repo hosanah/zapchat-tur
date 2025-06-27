@@ -6,6 +6,11 @@ import { useNavigate } from 'react-router-dom';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '../../components/ui/tooltip';
+import {
   Building2,
   Users,
   Car,
@@ -84,12 +89,21 @@ const ModernDashboard = () => {
           limit: 50,
         };
         const res = await saleService.list(params);
-        const events = res.data.sales.map((s) => ({
-          id: s.id,
-          title: s.trip ? s.trip.title : s.sale_number,
-          start: s.sale_date,
-          color: s.trip?.color,
-        }));
+        const events = res.data.sales
+          .filter((s) => s.delivery_date)
+          .map((s) => ({
+            id: s.id,
+            title: s.trip ? s.trip.title : s.sale_number,
+            start: s.delivery_date,
+            color: s.trip?.color,
+            extendedProps: {
+              customerName: `${s.customer?.first_name || ''} ${
+                s.customer?.last_name || ''
+              }`.trim(),
+              saleNumber: s.sale_number,
+            },
+          }))
+          .sort((a, b) => new Date(a.start) - new Date(b.start));
         setSalesEvents(events);
       } catch (err) {
         console.error(err);
@@ -173,6 +187,29 @@ const ModernDashboard = () => {
     customer: 'text-zapchat-medium',
   };
 
+  const renderEventContent = (eventInfo) => {
+    const { customerName, saleNumber } = eventInfo.event.extendedProps;
+    const bg = eventInfo.event.backgroundColor || eventInfo.event.color;
+    const text = eventInfo.event.textColor;
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div
+            className="px-1 rounded-sm"
+            style={{ backgroundColor: bg, color: text }}
+          >
+            {eventInfo.timeText && <b>{eventInfo.timeText} </b>}
+            {eventInfo.event.title}
+          </div>
+        </TooltipTrigger>
+        <TooltipContent side="top">
+          <p className="text-sm font-medium">{customerName}</p>
+          <p className="text-sm">Venda: {saleNumber}</p>
+        </TooltipContent>
+      </Tooltip>
+    );
+  };
+
   const formatRelativeTime = (dateString) => {
     if (!dateString) return '';
     const diff = Date.now() - new Date(dateString).getTime();
@@ -212,6 +249,8 @@ const ModernDashboard = () => {
             plugins={[dayGridPlugin]}
             initialView="dayGridMonth"
             events={salesEvents}
+            eventContent={renderEventContent}
+            eventTimeFormat={{ hour: '2-digit', minute: '2-digit', hour12: false }}
             height="auto"
           />
         </div>
