@@ -114,7 +114,7 @@ async function initializeDatabase() {
       console.log('🔁 Modelos sincronizados com `force: true`');
     }
 
-    await runMigrations();
+    //await runMigrations();
 
     if (process.env.DB_CREATE_DEVINFO) {
       console.log('🌱 Executando seed de desenvolvimento...');
