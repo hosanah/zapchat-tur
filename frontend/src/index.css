@@ -285,6 +285,10 @@ input:focus, textarea:focus, select:focus {
   @apply bg-white text-black dark:bg-black dark:text-white;
 }
 
+.high-contrast {
+  filter: grayscale(1) contrast(1.2);
+}
+
 .high-contrast .contrast-border {
   @apply border-black dark:border-white;
 }

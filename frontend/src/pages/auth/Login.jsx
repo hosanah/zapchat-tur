@@ -10,6 +10,7 @@ const Login = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const highContrast = localStorage.getItem('highContrast') === 'true';
 
   const { login, error, clearError } = useAuth();
   const navigate = useNavigate();
@@ -40,7 +41,9 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#CFE0BC] to-[#99CD85] py-12 px-4 sm:px-6 lg:px-8">
+    <div
+      className={`min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 ${highContrast ? 'contrast-bg' : 'bg-gradient-to-br from-[#CFE0BC] to-[#99CD85]'}`}
+    >
       <div className="max-w-md w-full space-y-8">
         <div className="bg-white rounded-lg shadow-xl p-8">
           <div className="text-center">
