@@ -195,8 +195,9 @@ const ModernDashboard = () => {
       <Tooltip>
         <TooltipTrigger asChild>
           <div
-            className="px-1 rounded-sm"
+            className="px-1 rounded-sm truncate"
             style={{ backgroundColor: bg, color: text }}
+          >
             {eventInfo.timeText && <b>{eventInfo.timeText} </b>}
             {eventInfo.event.title}
           </div>
