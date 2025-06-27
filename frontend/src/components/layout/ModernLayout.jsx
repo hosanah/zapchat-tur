@@ -14,6 +14,7 @@ import {
   CalendarCheck,
   Package,
   DollarSign,
+  BarChart3,
   Bell,
   Search,
   Menu,
@@ -173,13 +174,21 @@ const ModernLayout = () => {
       color: 'from-emerald-500 to-emerald-600',
       badge: '7'
     },    
-    { 
+    {
       id: 'bookings',
-      label: 'Reservas', 
-      icon: Calendar, 
+      label: 'Reservas',
+      icon: Calendar,
       path: '/bookings',
       color: 'from-red-500 to-red-600',
       badge: '10'
+    },
+    {
+      id: 'reports',
+      label: 'Relatórios',
+      icon: BarChart3,
+      path: '/reports',
+      color: 'from-sky-500 to-sky-600',
+      badge: '11'
     }
   ];
 
