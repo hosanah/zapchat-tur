@@ -45,6 +45,11 @@ const ModernDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [recentActivities, setRecentActivities] = useState([]);
   const [salesEvents, setSalesEvents] = useState([]);
+  const [calendarRange, setCalendarRange] = useState({ start: null, end: null });
+
+  const handleDatesSet = (info) => {
+    setCalendarRange({ start: info.start, end: info.end });
+  };
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -78,14 +83,10 @@ const ModernDashboard = () => {
   useEffect(() => {
     const loadSales = async () => {
       try {
-        const start = new Date();
-        start.setDate(1);
-        const end = new Date();
-        end.setMonth(end.getMonth() + 1);
-        end.setDate(0);
+        if (!calendarRange.start || !calendarRange.end) return;
         const params = {
-          start_date: start.toISOString().slice(0, 10),
-          end_date: end.toISOString().slice(0, 10),
+          start_date: calendarRange.start.toISOString().slice(0, 10),
+          end_date: calendarRange.end.toISOString().slice(0, 10),
           limit: 50,
         };
         const res = await saleService.list(params);
@@ -110,7 +111,7 @@ const ModernDashboard = () => {
       }
     };
     loadSales();
-  }, []);
+  }, [calendarRange]);
 
   const quickActions = [
     {
@@ -248,6 +249,7 @@ const ModernDashboard = () => {
           <FullCalendar
             plugins={[dayGridPlugin]}
             initialView="dayGridMonth"
+            datesSet={handleDatesSet}
             events={salesEvents}
             eventContent={renderEventContent}
             eventTimeFormat={{ hour: '2-digit', minute: '2-digit', hour12: false }}
