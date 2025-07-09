@@ -30,7 +30,7 @@ class SaleController {
         start_date,
         end_date,
         search,
-        sort_by = 'sale_date',
+        sort_by = 'delivery_date',
         sort_order = 'DESC'
       } = req.query;
 
@@ -51,9 +51,9 @@ class SaleController {
       if (customer_id) where.customer_id = customer_id;
       if (trip_id) where.trip_id = trip_id;
 
-      // Filtro por período
+      // Filtro por período baseado na data de entrega
       if (start_date && end_date) {
-        where.sale_date = {
+        where.delivery_date = {
           [Op.between]: [new Date(start_date), new Date(end_date)]
         };
       }
