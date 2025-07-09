@@ -389,7 +389,7 @@ const listSalesValidation = [
 
   query('sort_by')
     .optional()
-    .isIn(['sale_date', 'total_amount', 'status', 'payment_status', 'created_at', 'updated_at'])
+    .isIn(['sale_date', 'delivery_date', 'total_amount', 'status', 'payment_status', 'created_at', 'updated_at'])
     .withMessage('Campo de ordenação inválido'),
 
   query('sort_order')
