@@ -3,16 +3,17 @@
 # ================================
 FROM node:18-alpine AS base
 
-# Instalar dependências do sistema necessárias para compilar libs nativas
+# Instalar dependências do sistema para compilar libs nativas
 RUN apk add --no-cache python3 make g++
 
 # Diretório de trabalho
 WORKDIR /app
 
-# Copiar arquivos de configuração do Angular
-COPY frontend/package*.json ./
+# Copiar arquivos de configuração do Angular (dentro de frontend/)
+COPY frontend/package*.json ./frontend/
 
-# Instalar dependências
+# Instalar dependências dentro da pasta correta
+WORKDIR /app/frontend
 RUN npm install --force
 
 # ================================
@@ -21,7 +22,9 @@ RUN npm install --force
 FROM base AS build
 
 # Copiar todo o código do frontend
-COPY frontend/ ./
+COPY frontend/ /app/frontend/
+
+WORKDIR /app/frontend
 
 # Rodar build do Angular
 RUN npx ng build --configuration production
@@ -32,7 +35,7 @@ RUN npx ng build --configuration production
 FROM nginx:alpine AS production
 
 # Copiar build para o Nginx
-COPY --from=build /app/dist /usr/share/nginx/html
+COPY --from=build /app/frontend/dist/frontend /usr/share/nginx/html
 
 # Configuração SPA Angular no Nginx
 RUN echo 'server { \
